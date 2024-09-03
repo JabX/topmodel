@@ -91,6 +91,11 @@
       "description": "Localisation des enums du modèle, relative au répertoire de génération.",
       "default": "javagen:{app}/enums/{module}"
     },
+    "enumConverterPath": {
+      "type": "string",
+      "description": "Localisation des converters des enums du modèle, relative au répertoire de génération.",
+      "default": "javagen:{app}/converters/{module}"
+    },
     "apiPath": {
       "type": "string",
       "description": "Localisation du l'API générée (client ou serveur), relative au répertoire de génération. Par défaut, 'javagen:{app}/api/{module}'.",
@@ -183,6 +188,11 @@
     "enumShortcutMode": {
       "type": "boolean",
       "description": "Option pour générer des getters et setters vers l'enum des références plutôt que sur la table",
+      "default": "false"
+    },
+    "enumsAsEnum": {
+      "type": "boolean",
+      "description": "Option pour remplacer les classes de listes de références par des enums",
       "default": "false"
     },
     "associationAdders": {

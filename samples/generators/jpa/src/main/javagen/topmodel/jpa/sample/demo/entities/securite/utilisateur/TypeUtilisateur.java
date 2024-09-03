@@ -4,18 +4,9 @@
 
 package topmodel.jpa.sample.demo.entities.securite.utilisateur;
 
-import org.hibernate.annotations.Cache;
-import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.hibernate.annotations.Immutable;
+import java.util.NoSuchElementException;
 
 import jakarta.annotation.Generated;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 
 import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
 
@@ -23,56 +14,54 @@ import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
  * Type d'utilisateur.
  */
 @Generated("TopModel : https://github.com/klee-contrib/topmodel")
-@Entity
-@Table(name = "TYPE_UTILISATEUR")
-@Immutable
-@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
-public class TypeUtilisateur {
-
-	@Transient
-	public static final TypeUtilisateur ADMIN = new TypeUtilisateur(TypeUtilisateurCode.ADMIN);
-	@Transient
-	public static final TypeUtilisateur CLIENT = new TypeUtilisateur(TypeUtilisateurCode.CLIENT);
-	@Transient
-	public static final TypeUtilisateur GEST = new TypeUtilisateur(TypeUtilisateurCode.GEST);
+public enum TypeUtilisateur {
+	Admin(TypeUtilisateurCode.ADMIN),
+	Client(TypeUtilisateurCode.CLIENT),
+	Gestionnaire(TypeUtilisateurCode.GEST);
 
 	/**
 	 * Code du type d'utilisateur.
 	 */
-	@Id
-	@Column(name = "TUT_CODE", nullable = false, length = 10, columnDefinition = "varchar")
-	@Enumerated(EnumType.STRING)
 	private TypeUtilisateurCode code;
 
 	/**
 	 * Libellé du type d'utilisateur.
 	 */
-	@Column(name = "TUT_LIBELLE", nullable = false, length = 100, columnDefinition = "varchar")
 	private String libelle;
-
-	/**
-	 * No arg constructor.
-	 */
-	public TypeUtilisateur() {
-		// No arg constructor
-	}
 
 	/**
 	 * Enum constructor.
 	 * @param code Code dont on veut obtenir l'instance.
 	 */
-	public TypeUtilisateur(TypeUtilisateurCode code) {
+	private TypeUtilisateur(TypeUtilisateurCode code) {
 		this.code = code;
 		switch(code) {
-		case ADMIN :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Admin";
-			break;
-		case CLIENT :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Client";
-			break;
-		case GEST :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Gestionnaire";
-			break;
+			case ADMIN :
+				this.libelle = "securite.utilisateur.typeUtilisateur.values.Admin";
+				break;
+			case CLIENT :
+				this.libelle = "securite.utilisateur.typeUtilisateur.values.Client";
+				break;
+			case GEST :
+				this.libelle = "securite.utilisateur.typeUtilisateur.values.Gestionnaire";
+				break;
+			}
+	}
+
+	public static TypeUtilisateur from(String code) {
+		return from(TypeUtilisateurCode.valueOf(code));
+	}
+
+	public static TypeUtilisateur from(TypeUtilisateurCode code) {
+		switch(code) {
+			case ADMIN:
+				return Admin;
+			case CLIENT:
+				return Client;
+			case GEST:
+				return Gestionnaire;
+			default:
+				throw new NoSuchElementException(code + " value unrecognized");
 		}
 	}
 

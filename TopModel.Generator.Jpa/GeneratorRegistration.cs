@@ -15,6 +15,7 @@ public class GeneratorRegistration : IGeneratorRegistration<JpaConfig>
         TrimSlashes(config, c => c.DtosPath);
         TrimSlashes(config, c => c.EnumsPath);
         TrimSlashes(config, c => c.ApiPath);
+        TrimSlashes(config, c => c.EnumConverterPath);
         TrimSlashes(config, c => c.ResourcesPath);
 
         config.Language ??= "java";
@@ -23,6 +24,11 @@ public class GeneratorRegistration : IGeneratorRegistration<JpaConfig>
         services.AddGenerator<JpaModelInterfaceGenerator, JpaConfig>(config, number);
         services.AddGenerator<JpaMapperGenerator, JpaConfig>(config, number);
         services.AddGenerator<JpaEnumGenerator, JpaConfig>(config, number);
+        if (config.EnumsAsEnum)
+        {
+            services.AddGenerator<JpaConverterGenerator, JpaConfig>(config, number);
+        }
+
         if (config.DaosPath != null)
         {
             services.AddGenerator<JpaDaoGenerator, JpaConfig>(config, number);

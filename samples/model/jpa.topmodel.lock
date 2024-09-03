@@ -2,14 +2,17 @@
 # ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 #
 
-version: 2.1.2
+version: 2.1.3
 custom:
-  ../../../TopModel.Generator.Jpa: b7b41bad6aa1f4963dda4549de26efcd
+  ../../../TopModel.Generator.Jpa: ce3b99073a3e0586992244c25da38664
 generatedFiles:
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/profil/ProfilClient.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/utilisateur/UtilisateurClient.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/server/securite/profil/ProfilController.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/server/securite/utilisateur/UtilisateurController.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/converters/securite/profil/DroitConverter.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/converters/securite/profil/TypeDroitConverter.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/converters/securite/utilisateur/TypeUtilisateurConverter.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/daos/securite/profil/AbstractProfilDAO.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/daos/securite/utilisateur/AbstractUtilisateurDAO.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/profil/ProfilItem.java

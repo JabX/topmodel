@@ -13,6 +13,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -24,8 +25,8 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 
+import topmodel.jpa.sample.demo.converters.securite.utilisateur.TypeUtilisateurConverter;
 import topmodel.jpa.sample.demo.entities.securite.profil.Profil;
-import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
 
 /**
  * Utilisateur de l'application.
@@ -91,9 +92,9 @@ public class Utilisateur {
 	/**
 	 * Type d'utilisateur.
 	 */
-	@ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = TypeUtilisateur.class)
-	@JoinColumn(name = "TUT_CODE", referencedColumnName = "TUT_CODE")
-	private TypeUtilisateur typeUtilisateur = new TypeUtilisateur(TypeUtilisateurCode.GEST);
+	@Column(name = "TUT_CODE", nullable = false, length = 10, columnDefinition = "varchar")
+	@Convert(converter = TypeUtilisateurConverter.class)
+	private TypeUtilisateur typeUtilisateur = TypeUtilisateurCode.GEST;
 
 	/**
 	 * Date de création de l'utilisateur.

@@ -15,19 +15,17 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import jakarta.annotation.Generated;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
+import topmodel.jpa.sample.demo.converters.securite.profil.List<Droit>Converter;
 import topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur;
 
 /**
@@ -56,9 +54,8 @@ public class Profil {
 	/**
 	 * Liste des droits du profil.
 	 */
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "PROFIL_DROIT", joinColumns = @JoinColumn(name = "PRO_ID"), inverseJoinColumns = @JoinColumn(name = "DRO_CODE"))
-	@OrderBy("code ASC")
+	@Column(name = "DRO_CODE", precision = 10, columnDefinition = "varchar")
+	@Convert(converter = List<Droit>Converter.class)
 	private List<Droit> droits;
 
 	/**

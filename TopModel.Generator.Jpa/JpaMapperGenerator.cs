@@ -178,7 +178,15 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                     }
                     else
                     {
-                        getter = $"new {apTarget.Association.NamePascal}({sourceName}.{propertySource.NameByClassPascal.WithPrefix(getterPrefix)}())";
+                        if (!Config.EnumsAsEnum)
+                        {
+                            getter = $"new {apTarget.Association.NamePascal}({sourceName}.{propertySource.NameByClassPascal.WithPrefix(getterPrefix)}())";
+                        }
+                        else
+                        {
+                            getter = $"{apTarget.Association.NamePascal}.from({sourceName}.{propertySource.NameByClassPascal.WithPrefix(getterPrefix)}())";
+                        }
+
                         fw.AddImport(apTarget.Association.GetImport(Config, tag));
                         checkSourceNull = true;
                     }

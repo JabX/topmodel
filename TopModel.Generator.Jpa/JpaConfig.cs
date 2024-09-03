@@ -25,6 +25,11 @@ public class JpaConfig : GeneratorConfigBase
     public string? DaosPath { get; set; }
 
     /// <summary>
+    /// Localisation des DAOs, relative au répertoire de génération.
+    /// </summary>
+    public string? EnumConverterPath { get; set; } = "javagen:{app}/converters/{module}";
+
+    /// <summary>
     /// Localisation des classses non persistées du modèle, relative au répertoire de génération. Par défaut, 'javagen/{app}/dtos/{module}'.
     /// </summary>
     public string DtosPath { get; set; } = "javagen:{app}/dtos/{module}";
@@ -58,6 +63,11 @@ public class JpaConfig : GeneratorConfigBase
     /// Option pour générer des getters et setters vers l'enum des références plutôt que sur la table
     /// </summary>
     public bool EnumShortcutMode { get; set; }
+
+    /// <summary>
+    /// Option pour remplacer les classes de listes de références par des enums
+    /// </summary>
+    public bool EnumsAsEnum { get; set; }
 
     /// <summary>
     /// Nom du schéma sur lequel les entités sont sauvegardées
@@ -170,7 +180,8 @@ public class JpaConfig : GeneratorConfigBase
         nameof(DtosPath),
         nameof(ApiPath),
         nameof(EnumsPath),
-        nameof(DataFlowsPath)
+        nameof(DataFlowsPath),
+        nameof(EnumConverterPath)
     ];
 
     public override bool CanClassUseEnums(Class classe, IEnumerable<Class>? availableClasses = null, IProperty? prop = null)

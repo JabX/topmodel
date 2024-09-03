@@ -75,7 +75,7 @@ public class SecuriteUtilisateurMappers {
 		target.setAdresse(source.getAdresse());
 		target.setActif(source.getActif());
 		if (source.getTypeUtilisateurCode() != null) {
-			target.setTypeUtilisateur(new TypeUtilisateur(source.getTypeUtilisateurCode()));
+			target.setTypeUtilisateur(TypeUtilisateur.from(source.getTypeUtilisateurCode()));
 		}
 
 		return target;

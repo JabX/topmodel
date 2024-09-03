@@ -80,15 +80,16 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
 
         var implements = Config.GetClassImplements(classe).ToList();
 
-        if (!classe.IsPersistent)
+        if (!classe.IsPersistent && !(Config.EnumsAsEnum && Config.CanClassUseEnums(classe, AvailableClasses)))
         {
             implements.Add("Serializable");
             fw.AddImport("java.io.Serializable");
         }
 
-        fw.WriteClassDeclaration(classe.NamePascal, null, extends, implements);
+        var classType = Config.EnumsAsEnum && Config.CanClassUseEnums(classe, AvailableClasses) ? "enum" : "class";
+        fw.WriteClassDeclaration(classe.NamePascal, null, extends, implements, classType);
 
-        if (!classe.IsPersistent)
+        if (!classe.IsPersistent && !(Config.EnumsAsEnum && Config.CanClassUseEnums(classe, AvailableClasses)))
         {
             fw.WriteLine("	/** Serial ID */");
             fw.WriteLine(1, "private static final long serialVersionUID = 1L;");
@@ -96,19 +97,32 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
 
         if (Config.CanClassUseEnums(classe, Classes))
         {
-            fw.WriteLine();
-            var codeProperty = classe.EnumKey!;
-            var javaOrJakarta = Config.PersistenceMode.ToString().ToLower();
-            foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
+            if (!Config.EnumsAsEnum)
             {
-                var code = refValue.Value[codeProperty];
-                if (classe.IsPersistent)
+                fw.WriteLine();
+                var codeProperty = classe.EnumKey!;
+                var javaOrJakarta = Config.PersistenceMode.ToString().ToLower();
+                foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
                 {
-                    fw.AddImport($"{javaOrJakarta}.persistence.Transient");
-                    fw.WriteLine(1, "@Transient");
-                }
+                    var code = refValue.Value[codeProperty];
+                    if (classe.IsPersistent)
+                    {
+                        fw.AddImport($"{javaOrJakarta}.persistence.Transient");
+                        fw.WriteLine(1, "@Transient");
+                    }
 
-                fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({Config.GetEnumName(codeProperty, classe)}.{code});");
+                    fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({Config.GetEnumName(codeProperty, classe)}.{code});");
+                }
+            }
+            else if (Config.EnumsAsEnum)
+            {
+                var codeProperty = classe.EnumKey!;
+                var refValues = classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal).ToList();
+                foreach (var refValue in refValues)
+                {
+                    var code = refValue.Value[codeProperty];
+                    fw.WriteLine(1, $@"{refValue.Name}({Config.GetEnumName(codeProperty, classe)}.{code}){(refValues.IndexOf(refValue) == refValues.Count - 1 ? ";" : ",")}");
+                }
             }
         }
 
@@ -118,11 +132,11 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
             JpaModelPropertyGenerator.WriteCompositePrimaryKeyClass(fw, classe, tag);
         }
 
-        if (Config.CanClassUseEnums(classe, Classes)
-            || Config.MappersInClass && classe.FromMappers.Any(c => c.ClassParams.All(p => AvailableClasses.Contains(p.Class)))
+        if (Config.CanClassUseEnums(classe, Classes) && !Config.EnumsAsEnum
+            || Config.MappersInClass && classe.FromMappers.Exists(c => c.ClassParams.All(p => AvailableClasses.Contains(p.Class)))
             || classe.Extends != null
-            || AvailableClasses.Any(c => c.Extends == classe)
-            || classe.Decorators.Any(d => Config.GetImplementation(d.Decorator)?.Extends is not null))
+            || AvailableClasses.Exists(c => c.Extends == classe)
+            || classe.Decorators.Exists(d => Config.GetImplementation(d.Decorator)?.Extends is not null))
         {
             JpaModelConstructorGenerator.WriteNoArgConstructor(fw, classe);
         }
@@ -137,8 +151,17 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
             JpaModelConstructorGenerator.WriteEnumConstructor(fw, classe, AvailableClasses, tag, _modelConfig);
         }
 
+        if (Config.CanClassUseEnums(classe, Classes))
+        {
+            WriteEnumFrom(fw, classe);
+        }
+
         WriteGetters(fw, classe, tag);
-        WriteSetters(fw, classe, tag);
+        if (!(Config.EnumsAsEnum && Config.CanClassUseEnums(classe, AvailableClasses)))
+        {
+            WriteSetters(fw, classe, tag);
+        }
+
         if (!Config.UseJdbc)
         {
             WriteAdders(fw, classe, tag);
@@ -205,7 +228,7 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
             fw.WriteLine("@Generated(\"TopModel : https://github.com/klee-contrib/topmodel\")");
         }
 
-        if (classe.IsPersistent)
+        if (classe.IsPersistent && !(Config.EnumsAsEnum && Config.CanClassUseEnums(classe, AvailableClasses)))
         {
             if (Config.UseJdbc)
             {
@@ -290,8 +313,35 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
 
         foreach (var a in Config.GetDecoratorAnnotations(classe, tag))
         {
-            fw.WriteLine($"{(a.StartsWith("@") ? string.Empty : "@")}{a}");
+            fw.WriteLine($"{(a.StartsWith('@') ? string.Empty : '@')}{a}");
         }
+    }
+
+    private void WriteEnumFrom(JavaWriter fw, Class classe)
+    {
+        var codeProperty = classe.EnumKey!;
+        fw.WriteLine();
+        fw.WriteLine(1, $"public static {classe.NamePascal} from(String {classe.EnumKey!.NameCamel}) {{");
+        fw.WriteLine(2, $"return from({Config.GetType(codeProperty)}.valueOf({classe.EnumKey!.NameCamel}));");
+        fw.WriteLine(1, $"}}");
+
+        fw.WriteLine();
+        fw.WriteLine(1, $"public static {classe.NamePascal} from({Config.GetType(codeProperty)} {classe.EnumKey!.NameCamel}) {{");
+        fw.WriteLine(2, $@"switch({classe.EnumKey!.NameCamel}) {{");
+        foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
+        {
+            var code = refValue.Value[codeProperty];
+            fw.WriteLine(3, $@"case {code}:");
+            fw.WriteLine(4, $@"return {refValue.Name};");
+        }
+
+        fw.WriteLine(3, $@"default:");
+        fw.AddImport("java.util.NoSuchElementException");
+        fw.WriteLine(4, $@"throw new NoSuchElementException({classe.EnumKey!.NameCamel} + "" value unrecognized"");");
+
+        fw.WriteLine(2, "}");
+
+        fw.WriteLine(1, $"}}");
     }
 
     private void WriteEnumShortcuts(JavaWriter fw, Class classe, string tag)
@@ -490,13 +540,13 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
 
     private void WriteToMappers(JavaWriter fw, Class classe, string tag)
     {
-        var toMappers = classe.ToMappers.Where(p => AvailableClasses.Contains(p.Class)).Select(m => (classe, m))
-        .OrderBy(m => m.m.Name)
+        var toMappers = classe.ToMappers.Where(p => AvailableClasses.Contains(p.Class)).Select(mapper => (classe, mapper))
+        .OrderBy(m => m.mapper.Name)
         .ToList();
 
         foreach (var toMapper in toMappers)
         {
-            var (clazz, mapper) = toMapper;
+            var mapper = toMapper.mapper;
 
             fw.WriteLine();
             fw.WriteDocStart(1, $"Mappe '{classe}' vers '{mapper.Class.NamePascal}'");

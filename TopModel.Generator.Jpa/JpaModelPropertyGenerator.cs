@@ -154,7 +154,7 @@ public class JpaModelPropertyGenerator
             case CompositionProperty cp:
                 WriteCompositionProperty(fw, cp, tag);
                 break;
-            case AssociationProperty { Association.IsPersistent: true } ap:
+            case AssociationProperty { Association.IsPersistent: true } ap when !(_config.EnumsAsEnum && _config.CanClassUseEnums(ap.Association, _classes)):
                 WriteAssociationProperty(fw, classe, ap, tag);
                 break;
             case AliasProperty alp:
@@ -212,7 +212,7 @@ public class JpaModelPropertyGenerator
 
     private bool ShouldWriteColumnAnnotation(Class classe, IProperty property)
     {
-        return (classe.IsPersistent || _config.UseJdbc) && (property.Domain is null || !_config.GetImplementation(property.Domain)!.Annotations
+        return !(_config.EnumsAsEnum && _config.CanClassUseEnums(classe, _classes)) && (classe.IsPersistent || _config.UseJdbc) && (property.Domain is null || !_config.GetImplementation(property.Domain)!.Annotations
                 .Where(i =>
                         classe.IsPersistent && (Target.Persisted & i.Target) > 0
                     || !classe.IsPersistent && (Target.Dto & i.Target) > 0)
@@ -228,9 +228,9 @@ public class JpaModelPropertyGenerator
 
         fw.WriteDocEnd(1);
         var javaOrJakarta = _config.PersistenceMode.ToString().ToLower();
-        var shouldWriteAssociation = classe.IsPersistent && property.Property is AssociationProperty;
+        var shouldWriteAssociation = classe.IsPersistent && property.Property is AssociationProperty ap && !(_config.EnumsAsEnum && _config.CanClassUseEnums(ap.Class, _classes));
 
-        if (property.PrimaryKey && classe.IsPersistent)
+        if (ShouldWriteIdAnnotation(classe, property))
         {
             WriteIdAnnotation(fw, classe, property);
         }
@@ -259,7 +259,7 @@ public class JpaModelPropertyGenerator
             WriteValidationAnnotations(fw, javaOrJakarta);
         }
 
-        if (_config.CanClassUseEnums(property.Property.Class) && property.Property.PrimaryKey && classe.IsPersistent && !_config.UseJdbc)
+        if (_config.CanClassUseEnums(property.Property.Class) && !_config.EnumsAsEnum && property.Property.PrimaryKey && classe.IsPersistent && !_config.UseJdbc)
         {
             WriteEnumAnnotation(fw, javaOrJakarta);
         }
@@ -271,7 +271,7 @@ public class JpaModelPropertyGenerator
 
         var defaultValue = _config.GetValue(property, _classes);
         var suffix = defaultValue != "null" ? $" = {defaultValue}" : string.Empty;
-        var isAssociationNotPersistent = property.Property is AssociationProperty ap && !ap.Association.IsPersistent;
+        var isAssociationNotPersistent = property.Property is AssociationProperty asp && !asp.Association.IsPersistent;
         var useClassForAssociation = classe.IsPersistent && !isAssociationNotPersistent && !_config.UseJdbc;
         fw.WriteLine(1, $"private {_config.GetType(property, useClassForAssociation: useClassForAssociation)} {(isAssociationNotPersistent && !shouldWriteAssociation ? property.NameCamel : property.NameByClassCamel)}{suffix};");
     }
@@ -304,7 +304,7 @@ public class JpaModelPropertyGenerator
             fw.AddImport($"{javaOrJakarta}.persistence.FetchType");
             fw.AddImport($"{javaOrJakarta}.persistence.{property.Type}");
 
-            if (!property.PrimaryKey || classe.PrimaryKey.Count() <= 1)
+            if ((!property.PrimaryKey || classe.PrimaryKey.Count() <= 1) && !(_config.EnumsAsEnum && _config.CanClassUseEnums(property.Class, _classes)))
             {
                 WriteAssociationAnnotations(fw, classe, property, 1);
             }
@@ -329,7 +329,7 @@ public class JpaModelPropertyGenerator
                 }
             }
 
-            if (property.PrimaryKey)
+            if (property.PrimaryKey && !(_config.EnumsAsEnum && _config.CanClassUseEnums(property.Class, _classes)))
             {
                 fw.AddImport($"{javaOrJakarta}.persistence.Id");
                 fw.WriteLine(1, "@Id");
@@ -446,7 +446,7 @@ public class JpaModelPropertyGenerator
         var javaOrJakarta = _config.PersistenceMode.ToString().ToLower();
 
         fw.WriteDocEnd(1);
-        if (property.PrimaryKey && classe.IsPersistent)
+        if (ShouldWriteIdAnnotation(classe, property))
         {
             WriteIdAnnotation(fw, classe, property);
         }
@@ -456,12 +456,17 @@ public class JpaModelPropertyGenerator
             WriteColumnAnnotation(fw, property, 1);
         }
 
+        if (property is AssociationProperty ap && _config.EnumsAsEnum && _config.CanClassUseEnums(ap.Association, _classes))
+        {
+            WriteConvertEnumAnnotation(fw, ap, tag);
+        }
+
         if (property.Required && !property.PrimaryKey && (!classe.IsPersistent || _config.UseJdbc))
         {
             WriteValidationAnnotations(fw, javaOrJakarta);
         }
 
-        if (_config.CanClassUseEnums(classe) && property.PrimaryKey && !_config.UseJdbc)
+        if (_config.CanClassUseEnums(classe) && property.PrimaryKey && !_config.UseJdbc && !_config.EnumsAsEnum)
         {
             WriteEnumAnnotation(fw, javaOrJakarta);
         }
@@ -473,9 +478,26 @@ public class JpaModelPropertyGenerator
 
         var defaultValue = _config.GetValue(property, _classes);
         var suffix = defaultValue != "null" ? $" = {defaultValue}" : string.Empty;
-        var isAssociationNotPersistent = property is AssociationProperty ap && !ap.Association.IsPersistent;
+        var isAssociationNotPersistent = property is AssociationProperty asp && !asp.Association.IsPersistent;
         var useClassForAssociation = classe.IsPersistent && !isAssociationNotPersistent && !_config.UseJdbc;
         fw.WriteLine(1, $"private {_config.GetType(property, useClassForAssociation: useClassForAssociation)} {(isAssociationNotPersistent ? property.NameCamel : property.NameByClassCamel)}{suffix};");
+    }
+
+    private void WriteConvertEnumAnnotation(JavaWriter fw, AssociationProperty property, string tag)
+    {
+        var javaOrJakarta = _config.PersistenceMode.ToString().ToLower();
+        fw.AddImport($"{javaOrJakarta}.persistence.Convert");
+        var packageName = _config.ResolveVariables(
+       _config.EnumConverterPath!,
+       tag,
+       module: property.Association.Namespace.Module).ToPackageName();
+        fw.AddImport($"{packageName}.{_config.GetType(property, useClassForAssociation: true)}Converter");
+        fw.WriteLine(1, $"@Convert(converter = {_config.GetType(property, useClassForAssociation: true)}Converter.class)");
+    }
+
+    private bool ShouldWriteIdAnnotation(Class classe, IProperty property)
+    {
+        return property.PrimaryKey && classe.IsPersistent && !(_config.EnumsAsEnum && _config.CanClassUseEnums(property.Class, _classes));
     }
 
     private void WriteIdAnnotation(JavaWriter fw, Class classe, IProperty property)
