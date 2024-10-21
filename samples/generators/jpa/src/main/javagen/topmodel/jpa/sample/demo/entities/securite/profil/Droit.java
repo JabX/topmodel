@@ -75,24 +75,8 @@ public class Droit {
 	 */
 	public Droit(DroitCode code) {
 		this.code = code;
-		switch(code) {
-		case CREATE :
-			this.libelle = "securite.profil.droit.values.Create";
-			this.typeDroit = TypeDroit.WRITE;
-			break;
-		case DELETE :
-			this.libelle = "securite.profil.droit.values.Delete";
-			this.typeDroit = TypeDroit.ADMIN;
-			break;
-		case READ :
-			this.libelle = "securite.profil.droit.values.Read";
-			this.typeDroit = TypeDroit.READ;
-			break;
-		case UPDATE :
-			this.libelle = "securite.profil.droit.values.Update";
-			this.typeDroit = TypeDroit.WRITE;
-			break;
-		}
+		this.libelle = code.getLibelle();
+		this.typeDroit = code.getTypeDroit() != null ? new TypeDroit(code.getTypeDroit()) : null;
 	}
 
 	/**
@@ -130,9 +114,9 @@ public class Droit {
         LIBELLE(String.class), //
         TYPE_DROIT(TypeDroit.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 

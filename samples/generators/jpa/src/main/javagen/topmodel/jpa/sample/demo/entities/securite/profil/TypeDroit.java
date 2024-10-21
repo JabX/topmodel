@@ -63,17 +63,7 @@ public class TypeDroit {
 	 */
 	public TypeDroit(TypeDroitCode code) {
 		this.code = code;
-		switch(code) {
-		case ADMIN :
-			this.libelle = "securite.profil.typeDroit.values.Admin";
-			break;
-		case READ :
-			this.libelle = "securite.profil.typeDroit.values.Read";
-			break;
-		case WRITE :
-			this.libelle = "securite.profil.typeDroit.values.Write";
-			break;
-		}
+		this.libelle = code.getLibelle();
 	}
 
 	/**
@@ -101,9 +91,9 @@ public class TypeDroit {
         CODE(TypeDroitCode.class), //
         LIBELLE(String.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 

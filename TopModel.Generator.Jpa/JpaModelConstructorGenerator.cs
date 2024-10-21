@@ -1,5 +1,6 @@
 ﻿using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 
@@ -31,40 +32,34 @@ public class JpaModelConstructorGenerator
         fw.WriteLine(2, $@"this.{classe.EnumKey!.NameCamel} = {classe.EnumKey!.NameCamel};");
         if (classe.GetProperties(availableClasses).Count > 1)
         {
-            fw.WriteLine(2, $@"switch({classe.EnumKey!.NameCamel}) {{");
-            foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
+            foreach (var prop in classe.GetProperties(availableClasses).Where(p => p != codeProperty))
             {
-                var code = refValue.Value[codeProperty];
-                fw.WriteLine(2, $@"case {code} :");
-                foreach (var prop in classe.GetProperties(availableClasses).Where(p => p != codeProperty))
+                string val;
+                var getterPrefix = _config.GetType(prop!) == "boolean" ? "is" : "get";
+                if (prop is AssociationProperty ap && codeProperty.PrimaryKey && ap.Association.Values.Any(r => r.Value.ContainsKey(ap.Property)))
                 {
-                    var isString = _config.GetType(prop) == "String";
-                    var value = refValue.Value.ContainsKey(prop) ? refValue.Value[prop] : "null";
-                    if (prop is AssociationProperty ap && codeProperty.PrimaryKey && ap.Association.Values.Any(r => r.Value.ContainsKey(ap.Property) && r.Value[ap.Property] == value))
-                    {
-                        value = ap.Association.NamePascal + "." + value;
-                        isString = false;
-                        fw.AddImport(ap.Association.GetImport(_config, tag));
-                    }
-                    else if (_config.CanClassUseEnums(classe, prop: prop))
-                    {
-                        value = _config.GetType(prop) + "." + value;
-                    }
-
-                    if (_config.TranslateReferences == true && classe.DefaultProperty == prop && !_config.CanClassUseEnums(classe, prop: prop))
-                    {
-                        value = refValue.ResourceKey;
-                    }
-
-                    var quote = isString ? "\"" : string.Empty;
-                    var val = quote + value + quote;
-                    fw.WriteLine(3, $@"this.{prop.NameByClassCamel} = {val};");
+                    var javaType = _config.GetType(prop, useClassForAssociation: classe.IsPersistent && !_config.UseJdbc && prop is AssociationProperty asp && asp.Association.IsPersistent);
+                    javaType = javaType.Split("<")[0];
+                    val = $@"{classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}() != null ? new {javaType}({classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}()) : null";
+                }
+                else if (_config.CanClassUseEnums(classe, prop: prop))
+                {
+                    var javaType = _config.GetType(prop, useClassForAssociation: classe.IsPersistent && !_config.UseJdbc && prop is AssociationProperty asp && asp.Association.IsPersistent);
+                    javaType = javaType.Split("<")[0];
+                    val = $@"{classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}() != null ? new {javaType}({classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}()) : null";
+                }
+                else if (_config.TranslateReferences == true && classe.DefaultProperty == prop && !_config.CanClassUseEnums(classe, prop: prop))
+                {
+                    val = $@"{classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}()";
+                }
+                else
+                {
+                    val = $@"{classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}()";
                 }
 
-                fw.WriteLine(3, $@"break;");
-            }
+                fw.WriteLine(2, $@"this.{prop.NameByClassCamel} = {val};");
 
-            fw.WriteLine(2, $@"}}");
+            }
         }
 
         fw.WriteLine(1, $"}}");

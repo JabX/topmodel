@@ -86,9 +86,9 @@ public class ProfilWrite implements Serializable {
         LIBELLE(String.class), //
         DROITS(List.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 

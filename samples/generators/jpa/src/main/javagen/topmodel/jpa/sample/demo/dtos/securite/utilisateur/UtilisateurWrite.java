@@ -237,9 +237,9 @@ public class UtilisateurWrite implements Serializable {
         PROFIL_ID(Integer.class), //
         TYPE_UTILISATEUR_CODE(TypeUtilisateurCode.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 

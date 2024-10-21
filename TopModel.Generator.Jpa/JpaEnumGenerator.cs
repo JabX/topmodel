@@ -2,6 +2,7 @@
 using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 
@@ -80,22 +81,95 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         var i = 0;
 
         var refs = GetAllValues(classe)
-            .OrderBy(x => x.Name, StringComparer.Ordinal)
             .ToList();
 
-        foreach (var value in refs)
+        var properties = classe.Properties.Where(p => p != codeProperty);
+        foreach (var refValue in refs)
         {
             i++;
             var isLast = i == refs.Count();
             if (classe.DefaultProperty != null)
             {
-                fw.WriteDocStart(1, $"{value.Value[classe.DefaultProperty]}");
+                fw.WriteDocStart(1, $"{refValue.Value[classe.DefaultProperty]}");
                 fw.WriteDocEnd(1);
             }
 
-            fw.WriteLine(1, $"{value.Value[property]}{(isLast ? string.Empty : ",")}");
+            List<string> enumAsString = new List<string> { };
+            enumAsString.Add($"{refValue.Value[property]}(");
+            foreach (var prop in properties)
+            {
+                var isString = Config.GetType(prop) == "String";
+                var isInt = Config.GetType(prop) == "int";
+                var isBoolean = Config.GetType(prop) == "Boolean";
+                var value = refValue.Value.ContainsKey(prop) ? refValue.Value[prop] : "null";
+
+                if (prop is AssociationProperty ap && codeProperty.PrimaryKey && ap.Association.Values.Any(r => r.Value.ContainsKey(ap.Property) && r.Value[ap.Property] == value))
+                {
+                    value = ap.Association.NamePascal + ap.Association.EnumKey + "." + value;
+                    isString = false;
+                }
+                else if (Config.CanClassUseEnums(classe, prop: prop))
+                {
+                    value = Config.GetType(prop) + "." + value;
+                }
+
+                if (Config.TranslateReferences == true && classe.DefaultProperty == prop && !Config.CanClassUseEnums(classe, prop: prop))
+                {
+                    value = refValue.ResourceKey;
+                }
+
+                var quote = isString ? "\"" : string.Empty;
+                var val = quote + value + quote;
+                enumAsString.Add($@"{val}{(prop == properties.Last() ? string.Empty : ", ")}");
+            }
+
+            enumAsString.Add($"){(isLast ? ";" : ",")} ");
+            fw.WriteLine(1, enumAsString.Aggregate(string.Empty, (acc, curr) => acc + curr));
+        }
+
+        foreach (var prop in properties)
+        {
+            fw.WriteLine();
+            fw.WriteDocStart(1, $@"{prop.NameByClassPascal}");
+            fw.WriteDocEnd(1);
+            fw.WriteLine(1, $@"private final {Config.GetType(prop)} {prop.NameByClassCamel};");
+        }
+
+        WriteConstructor(property, classe, fw, properties);
+
+        foreach (var prop in properties)
+        {
+            fw.WriteLine();
+            fw.WriteDocStart(1, "Getter");
+            fw.WriteDocEnd(1);
+            fw.WriteLine(1, $@"public {Config.GetType(prop)} get{prop.NameByClassCamel.ToFirstUpper()}(){{");
+            fw.WriteLine(2, $@"return this.{prop.NameByClassCamel};");
+            fw.WriteLine(1, $@"}}");
         }
 
         fw.WriteLine("}");
+    }
+
+    private void WriteConstructor(IProperty property, Class classe, JavaWriter fw, IEnumerable<IProperty> properties)
+    {
+        // Constructeur
+        fw.WriteDocStart(1, "Enum constructor");
+        fw.WriteDocEnd(1);
+        List<string> constructorAsString = new List<string>();
+        constructorAsString.Add($@"{Config.GetEnumName(property, classe)}(");
+
+        constructorAsString.Add(properties.Select((prop, index) =>
+           $@"final {Config.GetType(prop)} {prop.NameByClassCamel} {(prop == properties.Last() ? string.Empty : ",")}")
+           .Aggregate(string.Empty, (acc, curr) => acc + curr));
+
+        constructorAsString.Add("){");
+        fw.WriteLine(1, constructorAsString.Aggregate(string.Empty, (acc, curr) => acc + curr));
+        foreach (var prop in properties)
+        {
+            // Constructeur set
+            fw.WriteLine(2, $@" this.{prop.NameByClassCamel} = {prop.NameByClassCamel};");
+        }
+
+        fw.WriteLine(1, "}");
     }
 }
