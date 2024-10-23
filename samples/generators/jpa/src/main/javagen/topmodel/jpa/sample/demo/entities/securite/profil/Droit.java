@@ -76,7 +76,7 @@ public class Droit {
 	public Droit(DroitCode code) {
 		this.code = code;
 		this.libelle = code.getLibelle();
-		this.typeDroit = code.getTypeDroit() != null ? new TypeDroit(code.getTypeDroit()) : null;
+		this.typeDroit = code.getTypeDroitCode() != null ? new TypeDroit(code.getTypeDroitCode()) : null;
 	}
 
 	/**

@@ -33,13 +33,13 @@ public enum DroitCode {
 	/**
 	 * TypeDroit.
 	 */
-	private final TypeDroitCode typeDroit;
+	private final TypeDroitCode typeDroitCode;
 	/**
 	 * Enum constructor.
 	 */
-	DroitCode(final String libelle ,final TypeDroitCode typeDroit ){
+	DroitCode(final String libelle ,final TypeDroitCode typeDroitCode ){
 		 this.libelle = libelle;
-		 this.typeDroit = typeDroit;
+		 this.typeDroitCode = typeDroitCode;
 	}
 
 	/**
@@ -52,7 +52,7 @@ public enum DroitCode {
 	/**
 	 * Getter.
 	 */
-	public TypeDroitCode getTypeDroit(){
-		return this.typeDroit;
+	public TypeDroitCode getTypeDroitCode(){
+		return this.typeDroitCode;
 	}
 }

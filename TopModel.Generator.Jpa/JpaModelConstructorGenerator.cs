@@ -40,7 +40,8 @@ public class JpaModelConstructorGenerator
                 {
                     var javaType = _config.GetType(prop, useClassForAssociation: classe.IsPersistent && !_config.UseJdbc && prop is AssociationProperty asp && asp.Association.IsPersistent);
                     javaType = javaType.Split("<")[0];
-                    val = $@"{classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}() != null ? new {javaType}({classe.EnumKey!.NameCamel}.{prop.NameByClassCamel.WithPrefix(getterPrefix)}()) : null";
+                    var fieldName = $"{ap.Association.NameCamel}{ap.Association.EnumKey}";
+                    val = $@"{classe.EnumKey!.NameCamel}.{fieldName.WithPrefix(getterPrefix)}() != null ? new {javaType}({classe.EnumKey!.NameCamel}.{fieldName.WithPrefix(getterPrefix)}()) : null";
                 }
                 else if (_config.CanClassUseEnums(classe, prop: prop))
                 {

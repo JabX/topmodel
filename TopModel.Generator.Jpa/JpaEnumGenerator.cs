@@ -133,7 +133,13 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
             fw.WriteLine();
             fw.WriteDocStart(1, $@"{prop.NameByClassPascal}");
             fw.WriteDocEnd(1);
-            fw.WriteLine(1, $@"private final {Config.GetType(prop)} {prop.NameByClassCamel};");
+            var fieldName = prop.NameByClassCamel;
+            if (prop is AssociationProperty ap)
+            {
+                fieldName = $"{ap.Association.NameCamel}{ap.Association.EnumKey}";
+            }
+
+            fw.WriteLine(1, $@"private final {Config.GetType(prop)} {fieldName};");
         }
 
         WriteConstructor(property, classe, fw, properties);
@@ -143,8 +149,14 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
             fw.WriteLine();
             fw.WriteDocStart(1, "Getter");
             fw.WriteDocEnd(1);
-            fw.WriteLine(1, $@"public {Config.GetType(prop)} get{prop.NameByClassCamel.ToFirstUpper()}(){{");
-            fw.WriteLine(2, $@"return this.{prop.NameByClassCamel};");
+            var fieldName = prop.NameByClassCamel;
+            if (prop is AssociationProperty ap)
+            {
+                fieldName = $"{ap.Association.NameCamel}{ap.Association.EnumKey}";
+            }
+
+            fw.WriteLine(1, $@"public {Config.GetType(prop)} get{fieldName.ToFirstUpper()}(){{");
+            fw.WriteLine(2, $@"return this.{fieldName};");
             fw.WriteLine(1, $@"}}");
         }
 
@@ -160,15 +172,28 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         constructorAsString.Add($@"{Config.GetEnumName(property, classe)}(");
 
         constructorAsString.Add(properties.Select((prop, index) =>
-           $@"final {Config.GetType(prop)} {prop.NameByClassCamel} {(prop == properties.Last() ? string.Empty : ",")}")
-           .Aggregate(string.Empty, (acc, curr) => acc + curr));
+            {
+                var fieldName = prop.NameByClassCamel;
+                if (prop is AssociationProperty ap)
+                {
+                    fieldName = $"{ap.Association.NameCamel}{ap.Association.EnumKey}";
+                }
+
+                return $@"final {Config.GetType(prop)} {fieldName} {(prop == properties.Last() ? string.Empty : ",")}";
+            }).Aggregate(string.Empty, (acc, curr) => acc + curr));
 
         constructorAsString.Add("){");
         fw.WriteLine(1, constructorAsString.Aggregate(string.Empty, (acc, curr) => acc + curr));
         foreach (var prop in properties)
         {
+            var fieldName = prop.NameByClassCamel;
+            if (prop is AssociationProperty ap)
+            {
+                fieldName = $"{ap.Association.NameCamel}{ap.Association.EnumKey}";
+            }
+
             // Constructeur set
-            fw.WriteLine(2, $@" this.{prop.NameByClassCamel} = {prop.NameByClassCamel};");
+            fw.WriteLine(2, $@" this.{fieldName} = {fieldName};");
         }
 
         fw.WriteLine(1, "}");
