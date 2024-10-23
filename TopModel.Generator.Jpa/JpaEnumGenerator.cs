@@ -105,6 +105,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
 
                 if (prop is AssociationProperty ap && codeProperty.PrimaryKey && ap.Association.Values.Any(r => r.Value.ContainsKey(ap.Property) && r.Value[ap.Property] == value))
                 {
+                    fw.AddImport($"{Config.GetEnumPackageName(ap.Association.EnumKey.Class, tag)}.{ap.Association.NamePascal + ap.Association.EnumKey}");
                     value = ap.Association.NamePascal + ap.Association.EnumKey + "." + value;
                     isString = false;
                 }
