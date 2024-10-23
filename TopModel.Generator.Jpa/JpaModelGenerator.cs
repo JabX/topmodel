@@ -406,9 +406,9 @@ public class JpaModelGenerator : ClassGeneratorBase<JpaConfig>
 
         fw.WriteLine();
 
-        fw.WriteLine(2, "private Class<?> type;");
+        fw.WriteLine(2, "private final Class<?> type;");
         fw.WriteLine();
-        fw.WriteLine(2, "private Fields(Class<?> type) {");
+        fw.WriteLine(2, "Fields(Class<?> type) {");
         fw.WriteLine(3, "this.type = type;");
         fw.WriteLine(2, "}");
 

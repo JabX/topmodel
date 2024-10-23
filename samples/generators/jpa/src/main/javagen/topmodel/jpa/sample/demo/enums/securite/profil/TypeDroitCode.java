@@ -9,15 +9,33 @@ package topmodel.jpa.sample.demo.enums.securite.profil;
  */
 public enum TypeDroitCode {
 	/**
-	 * Administration.
-	 */
-	ADMIN,
-	/**
 	 * Lecture.
 	 */
-	READ,
+	READ("securite.profil.typeDroit.values.Read"), 
 	/**
 	 * Ecriture.
 	 */
-	WRITE
+	WRITE("securite.profil.typeDroit.values.Write"), 
+	/**
+	 * Administration.
+	 */
+	ADMIN("securite.profil.typeDroit.values.Admin"); 
+
+	/**
+	 * Libelle.
+	 */
+	private final String libelle;
+	/**
+	 * Enum constructor.
+	 */
+	TypeDroitCode(final String libelle ){
+		 this.libelle = libelle;
+	}
+
+	/**
+	 * Getter.
+	 */
+	public String getLibelle(){
+		return this.libelle;
+	}
 }

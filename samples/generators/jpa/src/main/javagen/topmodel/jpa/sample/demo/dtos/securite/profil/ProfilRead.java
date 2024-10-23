@@ -192,9 +192,9 @@ public class ProfilRead implements Serializable {
         DATE_MODIFICATION(LocalDateTime.class), //
         UTILISATEURS(List.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 

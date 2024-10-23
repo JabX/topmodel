@@ -11,13 +11,31 @@ public enum TypeUtilisateurCode {
 	/**
 	 * Administrateur.
 	 */
-	ADMIN,
-	/**
-	 * Client.
-	 */
-	CLIENT,
+	ADMIN("securite.utilisateur.typeUtilisateur.values.Admin"), 
 	/**
 	 * Gestionnaire.
 	 */
-	GEST
+	GEST("securite.utilisateur.typeUtilisateur.values.Gestionnaire"), 
+	/**
+	 * Client.
+	 */
+	CLIENT("securite.utilisateur.typeUtilisateur.values.Client"); 
+
+	/**
+	 * Libelle.
+	 */
+	private final String libelle;
+	/**
+	 * Enum constructor.
+	 */
+	TypeUtilisateurCode(final String libelle ){
+		 this.libelle = libelle;
+	}
+
+	/**
+	 * Getter.
+	 */
+	public String getLibelle(){
+		return this.libelle;
+	}
 }

@@ -312,9 +312,9 @@ public class Utilisateur {
         DATE_CREATION(LocalDateTime.class), //
         DATE_MODIFICATION(LocalDateTime.class);
 
-		private Class<?> type;
+		private final Class<?> type;
 
-		private Fields(Class<?> type) {
+		Fields(Class<?> type) {
 			this.type = type;
 		}
 
