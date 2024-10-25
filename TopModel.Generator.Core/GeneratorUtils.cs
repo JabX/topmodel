@@ -27,14 +27,14 @@ public static class GeneratorUtils
         });
     }
 
-    public static IList<IProperty> GetProperties(this Class classe, IEnumerable<Class> availableClasses)
+    public static IList<IProperty> GetProperties(this Class classe, IEnumerable<Class> availableClasses, bool referencesHaveReverse = false, bool reverseOnlyInSameRootModule = true)
     {
-        if (classe.Reference)
+        if (classe.Reference && !referencesHaveReverse)
         {
             return classe.Properties;
         }
 
-        return classe.Properties.Concat(classe.GetReverseProperties(availableClasses).Select(p => new ReverseAssociationProperty()
+        return classe.Properties.Concat(classe.GetReverseProperties(availableClasses, referencesHaveReverse, reverseOnlyInSameRootModule).Select(p => new ReverseAssociationProperty()
         {
             Association = p.Class,
             Type = p.Type == AssociationType.OneToMany ? AssociationType.ManyToOne
@@ -48,9 +48,9 @@ public static class GeneratorUtils
         })).ToList();
     }
 
-    public static List<AssociationProperty> GetReverseProperties(this Class classe, IEnumerable<Class> availableClasses)
+    public static List<AssociationProperty> GetReverseProperties(this Class classe, IEnumerable<Class> availableClasses, bool referencesHaveReverse = false, bool onlyInSameRootModule = true)
     {
-        if (classe.Reference)
+        if (classe.Reference && !referencesHaveReverse)
         {
             return new List<AssociationProperty>();
         }
@@ -63,7 +63,7 @@ public static class GeneratorUtils
             .Where(p => p.Class.IsPersistent)
             .Where(p => p.Association.PrimaryKey.Count() == 1 || p.Type == AssociationType.ManyToOne)
             .Where(p => p.Association == classe
-                && (p.Type == AssociationType.OneToMany || p.Class.Namespace.RootModule == classe.Namespace.RootModule))
+                && (p.Type == AssociationType.OneToMany || p.Class.Namespace.RootModule == classe.Namespace.RootModule || !onlyInSameRootModule))
             .ToList();
     }
 }
