@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 
@@ -32,7 +33,10 @@ public class JpaEnumEntityGenerator : JpaEntityGenerator
 
     protected override bool FilterClass(Class classe)
     {
-        return !classe.Abstract && Config.CanClassUseEnums(classe, Classes) && classe.IsPersistent;
+        return !classe.Abstract
+        && Config.CanClassUseEnums(classe, Classes)
+        && classe.IsPersistent
+        && !Config.EnumsAsEnums;
     }
 
     protected override void HandleClass(string fileName, Class classe, string tag)
@@ -57,17 +61,15 @@ public class JpaEnumEntityGenerator : JpaEntityGenerator
         var codeProperty = classe.EnumKey!;
         foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
         {
-            var code = refValue.Value[codeProperty];
-            if (classe.IsPersistent)
-            {
-                fw.AddImport($"{JavaxOrJakarta}.persistence.Transient");
-                fw.WriteLine(1, "@Transient");
-            }
+            var code = refValue.Name.ToConstantCase();
+            fw.AddImport($"{JavaxOrJakarta}.persistence.Transient");
+            fw.WriteLine(1, "@Transient");
 
-            fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({Config.GetEnumName(codeProperty, classe)}.{code});");
+            fw.AddImport($"{Config.GetEnumValuePackageName(classe, tag)}.{classe.NamePascal}{Config.EnumValueSuffix}");
+            fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({classe.NamePascal}{Config.EnumValueSuffix}.{code});");
         }
 
-        JpaModelPropertyGenerator.WriteProperties(fw, classe, tag);
+        JpaModelPropertyGenerator.WriteProperties(fw, classe, tag, classe.Properties);
         WriteConstructors(classe, tag, fw);
 
         WriteGetters(fw, classe, tag);
@@ -88,7 +90,16 @@ public class JpaEnumEntityGenerator : JpaEntityGenerator
     protected override void WriteConstructors(Class classe, string tag, JavaWriter fw)
     {
         ConstructorGenerator.WriteNoArgConstructor(fw, classe);
-        ConstructorGenerator.WriteEnumConstructor(fw, classe, Classes, tag);
+        ConstructorGenerator.WriteEnumCodeFinder(fw, classe, tag);
+        ConstructorGenerator.WriteEnumValueConstructor(fw, classe, Classes, tag);
+    }
+
+    protected override void WriteGetters(JavaWriter fw, Class classe, string tag)
+    {
+        foreach (var property in classe.Properties)
+        {
+            JpaModelPropertyGenerator.WriteGetter(fw, tag, property);
+        }
     }
 
     protected override void WriteSetters(JavaWriter fw, Class classe, string tag)

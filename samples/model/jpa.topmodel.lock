@@ -4,7 +4,7 @@
 
 version: 2.3.5
 custom:
-  ../../../TopModel.Generator.Jpa: 11abe1baef01154b7cd55cc234b18171
+  ../../../TopModel.Generator.Jpa: c75b415ec6a725fa6430e7f26b9efa42
 generatedFiles:
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/profil/ProfilClient.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/utilisateur/UtilisateurClient.java
@@ -26,7 +26,10 @@ generatedFiles:
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/entities/securite/utilisateur/TypeUtilisateur.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/entities/securite/utilisateur/Utilisateur.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/DroitCode.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/DroitEnum.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/TypeDroitCode.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/TypeDroitEnum.java
   - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/utilisateur/TypeUtilisateurCode.java
+  - ../generators/jpa/src/main/javagen/topmodel/jpa/sample/demo/enums/securite/utilisateur/TypeUtilisateurEnum.java
   - ../generators/jpa/src/main/resources/i18n/model/common.properties
   - ../generators/jpa/src/main/resources/i18n/model/securite.properties

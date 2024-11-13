@@ -15,15 +15,17 @@ public class JavaMethodParameter
         Imports.Add(import);
     }
 
-    public string Declaration => $@"{string.Join(' ', Annotations)}{(Annotations.Count() > 0 ? ' ' : string.Empty)}{Type} {Name}";
+    public string Declaration => $@"{(Final ? "final " : string.Empty)}{string.Join(' ', Annotations)}{(Annotations.Count() > 0 ? ' ' : string.Empty)}{Type} {Name}";
 
     public List<string> Imports { get; } = new();
 
     public List<JavaAnnotation> Annotations { get; } = new();
 
-    private string Name { get; }
+    public bool Final { get; set; } = false;
 
-    private string Type { get; }
+    public string Name { get; }
+
+    private string Type { get; set; }
 
     public JavaMethodParameter AddAnnotation(JavaAnnotation annotation)
     {

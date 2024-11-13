@@ -107,7 +107,7 @@ public class JdbcEntityGenerator : JavaClassGeneratorBase
 
         if (Config.CanClassUseEnums(classe, Classes))
         {
-            ConstructorGenerator.WriteEnumConstructor(fw, classe, Classes, tag);
+            ConstructorGenerator.WriteEnumCodeFinder(fw, classe, tag);
         }
 
         WriteGetters(fw, classe, tag);

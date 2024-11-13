@@ -57,8 +57,14 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             .Select(c => c.GetImport(Config, c.Tags.Contains(tag) ? tag : c.Tags.Intersect(Config.Tags).First()))
             .Distinct()
             .ToArray();
-
+        var associationImports = fromMappers.SelectMany(m => m.Mapper.ClassParams.Select(p => p.Class).Concat([m.Classe]))
+            .Concat(toMappers.SelectMany(m => new[] { m.Classe, m.Mapper.Class }))
+            .SelectMany(c => c.Properties.OfType<AssociationProperty>())
+            .Where(ap => Config.CanClassUseEnums(ap.Association) && Config.EnumsAsEnums)
+            .Select(ap => $"{Config.GetEnumValuePackageName(ap.Association, Config.GetBestClassTag(ap.Association, tag))}.{ap.Association.NamePascal}{Config.EnumValueSuffix}")
+            .ToArray();
         fw.AddImports(imports);
+        fw.AddImports(associationImports);
         fw.WriteLine();
         if (Config.GeneratedHint)
         {
@@ -179,12 +185,12 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                 {
                     if (apTarget.Type.IsToMany())
                     {
-                        getter = $@"{sourceName}.{getterName}().stream().map({apTarget.Association.NamePascal}::new).collect(Collectors.toList())";
+                        getter = $@"{sourceName}.{getterName}().stream().map({apTarget.Association.NamePascal}::from).collect(Collectors.toList())";
                         fw.AddImport("java.util.stream.Collectors");
                     }
                     else
                     {
-                        getter = $"new {apTarget.Association.NamePascal}({sourceName}.{getterName}())";
+                        getter = $"{apTarget.Association.NamePascal}.from({sourceName}.{getterName}())";
                         fw.AddImport(apTarget.Association.GetImport(Config, tag));
                         checkSourceNull = true;
                     }
@@ -241,6 +247,12 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
     private void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
     {
+        if (Config.CanClassUseEnums(classe, Classes))
+        {
+            _logger.LogWarning($"La classe {classe.Name} ne peut pas être mappée car c'est une enum");
+            return;
+        }
+
         fw.WriteLine();
         fw.WriteDocStart(1, $"Map les champs des classes passées en paramètre dans l'objet target'");
         fw.WriteParam("target", $"Instance de '{classe}' (ou null pour créer une nouvelle instance)");
@@ -418,6 +430,12 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
     private void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
     {
+        if (Config.CanClassUseEnums(mapper.Class, Classes))
+        {
+            _logger.LogWarning($"La classe {mapper.Class.Name} ne peut pas être mappée car c'est une enum");
+            return;
+        }
+
         fw.WriteLine();
         fw.WriteDocStart(1, $"Mappe '{classe}' vers '{mapper.Class.NamePascal}'");
         if (mapper.Comment != null)

@@ -28,13 +28,17 @@ public class JavaEnumDtoGenerator : JavaDtoGenerator
 
     protected override bool FilterClass(Class classe)
     {
-        return !classe.Abstract && Config.CanClassUseEnums(classe, Classes) && !classe.IsPersistent;
+        return !classe.Abstract
+        && Config.CanClassUseEnums(classe, Classes)
+        && !Config.EnumsAsEnums
+        && !classe.IsPersistent;
     }
 
     protected override void WriteConstuctors(JavaWriter fw, Class classe, string tag)
     {
         ConstructorGenerator.WriteNoArgConstructor(fw, classe);
-        ConstructorGenerator.WriteEnumConstructor(fw, classe, Classes, tag);
+        ConstructorGenerator.WriteEnumCodeFinder(fw, classe, tag);
+        ConstructorGenerator.WriteEnumValueConstructor(fw, classe, Classes, tag);
     }
 
     protected override void WriteSetters(JavaWriter fw, Class classe, string tag)
@@ -42,15 +46,16 @@ public class JavaEnumDtoGenerator : JavaDtoGenerator
         return;
     }
 
-    protected override void WriteStaticMembers(JavaWriter fw, Class classe)
+    protected override void WriteStaticMembers(JavaWriter fw, Class classe, string tag)
     {
-        base.WriteStaticMembers(fw, classe);
+        base.WriteStaticMembers(fw, classe, tag);
         fw.WriteLine();
         var codeProperty = classe.EnumKey!;
         foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
         {
             var code = refValue.Value[codeProperty];
-            fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({Config.GetEnumName(codeProperty, classe)}.{code});");
+            fw.AddImport($"{Config.GetEnumValuePackageName(classe, tag)}.{classe.NamePascal}{Config.EnumValueSuffix}");
+            fw.WriteLine(1, $@"public static final {classe.NamePascal} {code} = new {classe.NamePascal}({classe.NamePascal}{Config.EnumValueSuffix}.{code});");
         }
     }
 }

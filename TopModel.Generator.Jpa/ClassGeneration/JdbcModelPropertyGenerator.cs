@@ -27,13 +27,9 @@ public class JdbcModelPropertyGenerator(JpaConfig config, IEnumerable<Class> cla
         return _config.GetType(property, _classes, false);
     }
 
-    public override void WriteProperties(JavaWriter fw, Class classe, string tag)
+    public override IList<IProperty> GetProperties(Class classe)
     {
-        var properties = classe.Properties.Where(p => !(p is AssociationProperty ap && (ap.Type == AssociationType.OneToMany || ap.Type == AssociationType.ManyToMany)));
-        foreach (var property in properties)
-        {
-            WriteProperty(fw, property, tag);
-        }
+        return classe.Properties.Where(p => !(p is AssociationProperty ap && (ap.Type == AssociationType.OneToMany || ap.Type == AssociationType.ManyToMany))).ToList();
     }
 
     protected override IEnumerable<JavaAnnotation> GetAnnotations(AliasProperty property, string tag)

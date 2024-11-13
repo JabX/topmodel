@@ -15,9 +15,19 @@ public class JpaConfig : GeneratorConfigBase
     public string EntitiesPath { get; set; } = "javagen:{app}/entities/{module}";
 
     /// <summary>
-    /// Localisation des classes persistées du modèle, relative au répertoire de génération. Par défaut, 'javagen/{app}/entities/{module}'.
+    /// Localisation des enums, relative au répertoire de génération. Par défaut, 'javagen:{app}/enums/{module}'.
     /// </summary>
     public string EnumsPath { get; set; } = "javagen:{app}/enums/{module}";
+
+    /// <summary>
+    /// Transforme les classes contenant des values en enum. Par défaut, false.
+    /// </summary>
+    public bool EnumsAsEnums { get; set; } = false;
+
+    /// <summary>
+    /// Localisation des enums de valeurs, relative au répertoire de génération. Par défaut, 'javagen:{app}/enums/{module}'.
+    /// </summary>
+    public string EnumsValuesPath { get; set; } = "default";
 
     /// <summary>
     /// Localisation des DAOs, relative au répertoire de génération.
@@ -158,6 +168,7 @@ public class JpaConfig : GeneratorConfigBase
         nameof(DtosPath),
         nameof(ApiPath),
         nameof(EnumsPath),
+        nameof(EnumsValuesPath),
         nameof(ApiGeneration),
         nameof(ResourcesPath),
         nameof(DbSchema)
@@ -170,8 +181,11 @@ public class JpaConfig : GeneratorConfigBase
         nameof(DtosPath),
         nameof(ApiPath),
         nameof(EnumsPath),
+        nameof(EnumsValuesPath),
         nameof(DataFlowsPath)
     ];
+
+    public string EnumValueSuffix => EnumsAsEnums ? string.Empty : "Enum";
 
     public override bool CanClassUseEnums(Class classe, IEnumerable<Class>? availableClasses = null, IProperty? prop = null)
     {
@@ -224,6 +238,14 @@ public class JpaConfig : GeneratorConfigBase
             $"{df.Name.ToPascalCase()}PartialFlow.java");
     }
 
+    public IEnumerable<JavaAnnotation> GetDomainJavaAnnotations(IProperty property, string tag)
+    {
+        return GetDomainAnnotationsAndImports(property, tag).Select(a =>
+        {
+            return new JavaAnnotation(name: a.Annotation, imports: a.Imports.ToArray());
+        });
+    }
+
     public string GetEnumFileName(IProperty property, Class classe, string tag)
     {
         return Path.Combine(
@@ -240,6 +262,19 @@ public class JpaConfig : GeneratorConfigBase
     public string GetEnumPackageName(Class classe, string tag)
     {
         return GetPackageName(classe.Namespace, EnumsPath, tag);
+    }
+
+    public string GetEnumValueFileName(IProperty property, Class classe, string tag)
+    {
+        return Path.Combine(
+            OutputDirectory,
+            ResolveVariables(EnumsValuesPath, tag, module: classe.Namespace.Module).ToFilePath(),
+            $"{classe.NamePascal}{EnumValueSuffix}.java");
+    }
+
+    public string GetEnumValuePackageName(Class classe, string tag)
+    {
+        return GetPackageName(classe.Namespace, EnumsValuesPath, tag);
     }
 
     public string GetMapperFilePath((Class Classe, FromMapper Mapper) mapper, string tag)
@@ -319,12 +354,9 @@ public class JpaConfig : GeneratorConfigBase
         return ResolveVariables(modelPath, tag, module: ns.Module).ToPackageName();
     }
 
-    public IEnumerable<JavaAnnotation> GetDomainJavaAnnotations(IProperty property, string tag)
+    public bool IsEnumNameJavaValid(string name)
     {
-        return GetDomainAnnotationsAndImports(property, tag).Select(a =>
-        {
-            return new JavaAnnotation(name: a.Annotation, imports: a.Imports.ToArray());
-        });
+        return IsEnumNameValid(name);
     }
 
     protected override string GetConstEnumName(string className, string refName)

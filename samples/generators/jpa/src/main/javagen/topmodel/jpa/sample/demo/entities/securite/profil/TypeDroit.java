@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 import topmodel.jpa.sample.demo.enums.securite.profil.TypeDroitCode;
+import topmodel.jpa.sample.demo.enums.securite.profil.TypeDroitEnum;
 
 /**
  * Type de droit.
@@ -30,11 +31,11 @@ import topmodel.jpa.sample.demo.enums.securite.profil.TypeDroitCode;
 public class TypeDroit {
 
 	@Transient
-	public static final TypeDroit ADMIN = new TypeDroit(TypeDroitCode.ADMIN);
+	public static final TypeDroit ADMIN = new TypeDroit(TypeDroitEnum.ADMIN);
 	@Transient
-	public static final TypeDroit READ = new TypeDroit(TypeDroitCode.READ);
+	public static final TypeDroit READ = new TypeDroit(TypeDroitEnum.READ);
 	@Transient
-	public static final TypeDroit WRITE = new TypeDroit(TypeDroitCode.WRITE);
+	public static final TypeDroit WRITE = new TypeDroit(TypeDroitEnum.WRITE);
 
 	/**
 	 * Code du type de droit.
@@ -58,22 +59,24 @@ public class TypeDroit {
 	}
 
 	/**
-	 * Enum constructor.
+	 * Enum code finder.
 	 * @param code Code dont on veut obtenir l'instance.
 	 */
-	public TypeDroit(TypeDroitCode code) {
-		this.code = code;
-		switch(code) {
-		case ADMIN :
-			this.libelle = "securite.profil.typeDroit.values.Admin";
-			break;
-		case READ :
-			this.libelle = "securite.profil.typeDroit.values.Read";
-			break;
-		case WRITE :
-			this.libelle = "securite.profil.typeDroit.values.Write";
-			break;
-		}
+	public static TypeDroit from(TypeDroitCode code) {
+		return switch (code) {
+			case ADMIN -> ADMIN;
+			case READ -> READ;
+			case WRITE -> WRITE;
+		};
+	}
+
+	/**
+	 * Enum constructor.
+	 * @param typeDroitEnum Enum de valeur dont on veut obtenir l'entité.
+	 */
+	public TypeDroit(TypeDroitEnum typeDroitEnum) {
+		this.code = typeDroitEnum.getCode();
+		this.libelle = typeDroitEnum.getLibelle();
 	}
 
 	/**

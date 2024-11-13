@@ -91,6 +91,16 @@
       "description": "Localisation des enums du modèle, relative au répertoire de génération.",
       "default": "javagen:{app}/enums/{module}"
     },
+    "enumsValuesPath": {
+      "type": "string",
+      "description": "Localisation des enums de valeur du modèle, relative au répertoire de génération.",
+      "default": "javagen:{app}/enums/{module}"
+    },
+    "enumsAsEnums": {
+      "type": "boolean",
+      "description": "Transforme les classes contenant des values en enum. Par défaut, false",
+      "default": "false"
+    },
     "apiPath": {
       "type": "string",
       "description": "Localisation du l'API générée (client ou serveur), relative au répertoire de génération. Par défaut, 'javagen:{app}/api/{module}'.",

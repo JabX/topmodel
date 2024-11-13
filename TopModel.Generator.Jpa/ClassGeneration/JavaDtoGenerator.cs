@@ -57,7 +57,7 @@ public class JavaDtoGenerator : JavaClassGeneratorBase
 
         fw.WriteClassDeclaration(classe.NamePascal, null, extends, implements);
 
-        WriteStaticMembers(fw, classe);
+        WriteStaticMembers(fw, classe, tag);
         JpaModelPropertyGenerator.WriteProperties(fw, classe, tag);
         WriteConstuctors(fw, classe, tag);
 
@@ -92,7 +92,7 @@ public class JavaDtoGenerator : JavaClassGeneratorBase
         }
     }
 
-    protected virtual void WriteStaticMembers(JavaWriter fw, Class classe)
+    protected virtual void WriteStaticMembers(JavaWriter fw, Class classe, string tag)
     {
         fw.WriteLine("	/** Serial ID */");
         fw.WriteLine(1, "private static final long serialVersionUID = 1L;");

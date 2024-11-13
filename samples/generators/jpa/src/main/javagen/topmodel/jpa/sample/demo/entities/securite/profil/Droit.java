@@ -21,6 +21,8 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 import topmodel.jpa.sample.demo.enums.securite.profil.DroitCode;
+import topmodel.jpa.sample.demo.enums.securite.profil.DroitEnum;
+import topmodel.jpa.sample.demo.enums.securite.profil.TypeDroitEnum;
 
 /**
  * Droits de l'application.
@@ -33,13 +35,13 @@ import topmodel.jpa.sample.demo.enums.securite.profil.DroitCode;
 public class Droit {
 
 	@Transient
-	public static final Droit CREATE = new Droit(DroitCode.CREATE);
+	public static final Droit CREATE = new Droit(DroitEnum.CREATE);
 	@Transient
-	public static final Droit DELETE = new Droit(DroitCode.DELETE);
+	public static final Droit DELETE = new Droit(DroitEnum.DELETE);
 	@Transient
-	public static final Droit READ = new Droit(DroitCode.READ);
+	public static final Droit READ = new Droit(DroitEnum.READ);
 	@Transient
-	public static final Droit UPDATE = new Droit(DroitCode.UPDATE);
+	public static final Droit UPDATE = new Droit(DroitEnum.UPDATE);
 
 	/**
 	 * Code du droit.
@@ -70,28 +72,27 @@ public class Droit {
 	}
 
 	/**
-	 * Enum constructor.
+	 * Enum code finder.
 	 * @param code Code dont on veut obtenir l'instance.
 	 */
-	public Droit(DroitCode code) {
-		this.code = code;
-		switch(code) {
-		case CREATE :
-			this.libelle = "securite.profil.droit.values.Create";
-			this.typeDroit = TypeDroit.WRITE;
-			break;
-		case DELETE :
-			this.libelle = "securite.profil.droit.values.Delete";
-			this.typeDroit = TypeDroit.ADMIN;
-			break;
-		case READ :
-			this.libelle = "securite.profil.droit.values.Read";
-			this.typeDroit = TypeDroit.READ;
-			break;
-		case UPDATE :
-			this.libelle = "securite.profil.droit.values.Update";
-			this.typeDroit = TypeDroit.WRITE;
-			break;
+	public static Droit from(DroitCode code) {
+		return switch (code) {
+			case CREATE -> CREATE;
+			case DELETE -> DELETE;
+			case READ -> READ;
+			case UPDATE -> UPDATE;
+		};
+	}
+
+	/**
+	 * Enum constructor.
+	 * @param droitEnum Enum de valeur dont on veut obtenir l'entité.
+	 */
+	public Droit(DroitEnum droitEnum) {
+		this.code = droitEnum.getCode();
+		this.libelle = droitEnum.getLibelle();
+		if (droitEnum.getTypeDroitEnum() != null) {
+			this.typeDroit = new TypeDroit(droitEnum.getTypeDroitEnum());
 		}
 	}
 

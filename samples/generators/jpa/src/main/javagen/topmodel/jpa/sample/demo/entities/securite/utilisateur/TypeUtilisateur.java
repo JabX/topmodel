@@ -18,6 +18,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 
 import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
+import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurEnum;
 
 /**
  * Type d'utilisateur.
@@ -30,11 +31,11 @@ import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
 public class TypeUtilisateur {
 
 	@Transient
-	public static final TypeUtilisateur ADMIN = new TypeUtilisateur(TypeUtilisateurCode.ADMIN);
+	public static final TypeUtilisateur ADMIN = new TypeUtilisateur(TypeUtilisateurEnum.ADMIN);
 	@Transient
-	public static final TypeUtilisateur CLIENT = new TypeUtilisateur(TypeUtilisateurCode.CLIENT);
+	public static final TypeUtilisateur CLIENT = new TypeUtilisateur(TypeUtilisateurEnum.CLIENT);
 	@Transient
-	public static final TypeUtilisateur GEST = new TypeUtilisateur(TypeUtilisateurCode.GEST);
+	public static final TypeUtilisateur GESTIONNAIRE = new TypeUtilisateur(TypeUtilisateurEnum.GESTIONNAIRE);
 
 	/**
 	 * Code du type d'utilisateur.
@@ -58,22 +59,24 @@ public class TypeUtilisateur {
 	}
 
 	/**
-	 * Enum constructor.
+	 * Enum code finder.
 	 * @param code Code dont on veut obtenir l'instance.
 	 */
-	public TypeUtilisateur(TypeUtilisateurCode code) {
-		this.code = code;
-		switch(code) {
-		case ADMIN :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Admin";
-			break;
-		case CLIENT :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Client";
-			break;
-		case GEST :
-			this.libelle = "securite.utilisateur.typeUtilisateur.values.Gestionnaire";
-			break;
-		}
+	public static TypeUtilisateur from(TypeUtilisateurCode code) {
+		return switch (code) {
+			case ADMIN -> ADMIN;
+			case CLIENT -> CLIENT;
+			case GESTIONNAIRE -> GESTIONNAIRE;
+		};
+	}
+
+	/**
+	 * Enum constructor.
+	 * @param typeUtilisateurEnum Enum de valeur dont on veut obtenir l'entité.
+	 */
+	public TypeUtilisateur(TypeUtilisateurEnum typeUtilisateurEnum) {
+		this.code = typeUtilisateurEnum.getCode();
+		this.libelle = typeUtilisateurEnum.getLibelle();
 	}
 
 	/**

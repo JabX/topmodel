@@ -53,7 +53,13 @@ public static class ImportsJpaExtensions
         var imports = new List<string>();
 
         imports.AddRange(config.GetDomainImports(ap, config.GetBestClassTag(ap.Association, tag)));
-        if (!config.UseJdbc && ap.Class != null && ap.Association.IsPersistent)
+        if (config.CanClassUseEnums(ap.Association) && config.EnumsAsEnums)
+        {
+            imports.Add($"{config.GetEnumValuePackageName(ap.Association, config.GetBestClassTag(ap.Association, tag))}.{ap.Association.NamePascal}{config.EnumValueSuffix}");
+        }
+        else if (!config.UseJdbc
+            && ap.Class != null
+            && ap.Association.IsPersistent)
         {
             imports.Add(ap.Association.GetImport(config, config.GetBestClassTag(ap.Association, tag)));
         }

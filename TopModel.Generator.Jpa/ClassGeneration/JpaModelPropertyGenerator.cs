@@ -153,9 +153,19 @@ public class JpaModelPropertyGenerator
         fw.Write(indentLevel, method);
     }
 
+    public virtual IList<IProperty> GetProperties(Class classe)
+    {
+        return classe.GetProperties(_classes);
+    }
+
     public virtual void WriteProperties(JavaWriter fw, Class classe, string tag)
     {
-        foreach (var property in classe.GetProperties(_classes))
+        WriteProperties(fw, classe, tag, GetProperties(classe));
+    }
+
+    public virtual void WriteProperties(JavaWriter fw, Class classe, string tag, IList<IProperty> properties)
+    {
+        foreach (var property in properties)
         {
             WriteProperty(fw, property, tag);
         }
@@ -222,7 +232,9 @@ public class JpaModelPropertyGenerator
 
     protected virtual IEnumerable<JavaAnnotation> GetAnnotations(AliasProperty property, string tag)
     {
-        var shouldWriteAssociation = property.Class.IsPersistent && property.Property is AssociationProperty;
+        var shouldWriteAssociation = property.Class.IsPersistent
+            && property.Property is AssociationProperty ap
+            && !(_config.EnumsAsEnums && _config.CanClassUseEnums(ap.Association));
         if (property.PrimaryKey && property.Class.IsPersistent)
         {
             foreach (var a in GetIdAnnotations(property))
@@ -266,7 +278,11 @@ public class JpaModelPropertyGenerator
     {
         if (property.Class.IsPersistent)
         {
-            if (!property.PrimaryKey || property.Class.PrimaryKey.Count() <= 1)
+            if (_config.CanClassUseEnums(property.Association) && _config.EnumsAsEnums)
+            {
+                yield return GetColumnAnnotation(property);
+            }
+            else if (!property.PrimaryKey || property.Class.PrimaryKey.Count() <= 1)
             {
                 foreach (var a in GetJpaAssociationAnnotations(property, tag))
                 {

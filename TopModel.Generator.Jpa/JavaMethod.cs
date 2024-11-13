@@ -23,19 +23,19 @@ public class JavaMethod
 
     public List<string> Imports { get; } = new();
 
-    public string Signature => $@"{_visibility}{(GenericTypes.Count() > 0 ? $"<{string.Join(", ", GenericTypes)}> " : string.Empty)}{ReturnType} {Name}({string.Join(", ", Parameters.Select(p => p.Declaration))})";
+    public virtual string Signature => $@"{(!string.IsNullOrEmpty(Visibility) ? $"{Visibility} " : string.Empty)}{(Static ? "static " : string.Empty)}{(GenericTypes.Count() > 0 ? $"<{string.Join(", ", GenericTypes)}> " : string.Empty)}{ReturnType} {Name}({string.Join(", ", Parameters.Select(p => p.Declaration))})";
 
-    public string Visibility { get => this._visibility.Trim(); set => _visibility = string.IsNullOrEmpty(value) ? string.Empty : $"{value} "; }
+    public string Visibility { get; set; } = string.Empty;
 
-    private string _visibility { get; set; } = string.Empty;
+    public bool Static { get; set; }
 
-    private string Name { get; }
+    protected string Name { get; }
 
-    private string ReturnType { get; }
+    protected string ReturnType { get; }
 
-    private List<string> GenericTypes { get; } = new();
+    protected List<string> GenericTypes { get; } = new();
 
-    private List<JavaMethodParameter> Parameters { get; } = new();
+    protected List<JavaMethodParameter> Parameters { get; } = new();
 
     public JavaMethod AddAnnotation(JavaAnnotation annotation)
     {
@@ -62,10 +62,25 @@ public class JavaMethod
         return this;
     }
 
-    public JavaMethod AddParameter(JavaMethodParameter parameter)
+    public virtual JavaMethod AddParameter(JavaMethodParameter parameter)
     {
         Imports.AddRange(parameter.Imports);
         Parameters.Add(parameter);
         return this;
+    }
+
+    public JavaMethod AddParameters(IEnumerable<JavaMethodParameter> parameters)
+    {
+        foreach (var parameter in parameters)
+        {
+            AddParameter(parameter);
+        }
+
+        return this;
+    }
+
+    public string CallWith(params string[] parameters)
+    {
+        return $"{Name}{string.Join(", ", parameters)}";
     }
 }
