@@ -234,7 +234,7 @@ public class JpaModelPropertyGenerator
     {
         var shouldWriteAssociation = property.Class.IsPersistent
             && property.Property is AssociationProperty ap
-            && !(_config.EnumsAsEnums && _config.CanClassUseEnums(ap.Association));
+            && !(_config.EnumsAsEnums && ap.Association.Values.Any());
         if (property.PrimaryKey && property.Class.IsPersistent)
         {
             foreach (var a in GetIdAnnotations(property))
@@ -278,7 +278,7 @@ public class JpaModelPropertyGenerator
     {
         if (property.Class.IsPersistent)
         {
-            if (_config.CanClassUseEnums(property.Association) && _config.EnumsAsEnums)
+            if (property.Association.Values.Any() && _config.EnumsAsEnums)
             {
                 yield return GetColumnAnnotation(property);
             }
@@ -392,14 +392,14 @@ public class JpaModelPropertyGenerator
 
     private string GetDefaultValue(IProperty property)
     {
+        var defaultValue = _config.GetValue(property, _classes);
         if (property is AssociationProperty ap)
         {
             if (ap.Association.PrimaryKey.Count() == 1 && _config.CanClassUseEnums(ap.Association, _classes, prop: ap.Association.PrimaryKey.Single()))
             {
-                var defaultValue = _config.GetValue(property, _classes);
                 if (defaultValue != "null")
                 {
-                    return $" = new {ap.Association.NamePascal}({defaultValue})";
+                    return $" = {ap.Association.NamePascal}.from({defaultValue})";
                 }
             }
 
@@ -407,7 +407,6 @@ public class JpaModelPropertyGenerator
         }
         else
         {
-            var defaultValue = _config.GetValue(property, _classes);
             var suffix = defaultValue != "null" ? $" = {defaultValue}" : string.Empty;
             return suffix;
         }

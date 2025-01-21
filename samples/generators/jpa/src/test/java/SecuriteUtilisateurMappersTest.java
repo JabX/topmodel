@@ -32,7 +32,7 @@ public class SecuriteUtilisateurMappersTest {
         profil.setId(2);
         profil.setDroits(Arrays.asList(Droit.CREATE, Droit.DELETE));
         utilisateur.setProfil(profil);
-        utilisateur.setTypeUtilisateur(new TypeUtilisateur(TypeUtilisateurCode.ADMIN));
+        utilisateur.setTypeUtilisateur(TypeUtilisateur.from(TypeUtilisateurCode.ADMIN));
 
         // WHEN
         UtilisateurRead utilisateurRead = SecuriteUtilisateurMappers.createUtilisateurRead(utilisateur, null);
@@ -77,16 +77,12 @@ public class SecuriteUtilisateurMappersTest {
     @Test
     public void testToUtilisateurWithNullSource() {
         // WHEN & THEN
-        assertThatThrownBy(() -> {
-            SecuriteUtilisateurMappers.toUtilisateur(null, null);
-        }).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SecuriteUtilisateurMappers.toUtilisateur(null, null)).isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
     public void testCreateUtilisateurReadWithNullUtilisateur() {
         // WHEN & THEN
-        assertThatThrownBy(() -> {
-            SecuriteUtilisateurMappers.createUtilisateurRead(null, null);
-        }).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> SecuriteUtilisateurMappers.createUtilisateurRead(null, null)).isInstanceOf(IllegalArgumentException.class);
     }
 }

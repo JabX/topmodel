@@ -24,26 +24,24 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
     public override IEnumerable<string> GeneratedFiles => Files
         .Values
         .SelectMany(f => f.Classes.Where(FilterClass))
-        .SelectMany(c => Config.Tags.Intersect(c.Tags).SelectMany(tag => GetEnumProperties(c).Select(p => GetFileName(p, c, tag)))).Distinct();
+        .SelectMany(c => Config.Tags.Intersect(c.Tags).SelectMany(tag => GetEnumProperties(c).Select(p => GetFileName(c, tag)))).Distinct();
 
     protected bool FilterClass(Class classe)
     {
         return !classe.Abstract
-            && Config.CanClassUseEnums(classe, Classes.ToList())
-            && GetAllValues(classe).All(v => Config.IsEnumNameJavaValid(v.Name));
+            && (Config.CanClassUseEnums(classe, Classes.ToList()) || Config.EnumsAsEnums && classe.Enum)
+            && classe.Enum
+            && (Config.EnumsAsEnums || GetAllValues(classe).All(v => Config.IsEnumNameJavaValid(v.Name)));
     }
 
-    protected string GetFileName(IProperty property, Class classe, string tag)
+    protected string GetFileName(Class classe, string tag)
     {
-        return Config.GetEnumValueFileName(property, classe, tag);
+        return Config.GetEnumValueFileName(classe, tag);
     }
 
     protected void HandleClass(Class classe, string tag)
     {
-        foreach (var p in GetEnumProperties(classe))
-        {
-            WriteEnum(p, classe, tag);
-        }
+        WriteEnum(classe, tag);
     }
 
     protected override void HandleFiles(IEnumerable<ModelFile> files)
@@ -95,10 +93,10 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
         fw.Write(1, constructor);
     }
 
-    private void WriteEnum(IProperty property, Class classe, string tag)
+    private void WriteEnum(Class classe, string tag)
     {
         var packageName = Config.GetEnumValuePackageName(classe, tag);
-        using var fw = new JavaWriter(Config.GetEnumValueFileName(property, classe, tag), _logger, packageName, null);
+        using var fw = new JavaWriter(Config.GetEnumValueFileName(classe, tag), _logger, packageName, null);
         fw.WriteLine();
         var codeProperty = classe.EnumKey!;
         fw.WriteDocStart(0, $"Enumération des valeurs possibles de la classe {classe.NamePascal}");

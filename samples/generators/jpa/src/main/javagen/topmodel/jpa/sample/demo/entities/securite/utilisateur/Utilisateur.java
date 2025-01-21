@@ -93,7 +93,7 @@ public class Utilisateur {
 	 */
 	@ManyToOne(fetch = FetchType.LAZY, optional = false, targetEntity = TypeUtilisateur.class)
 	@JoinColumn(name = "TUT_CODE", referencedColumnName = "TUT_CODE")
-	private TypeUtilisateur typeUtilisateur = new TypeUtilisateur(TypeUtilisateurCode.GEST);
+	private TypeUtilisateur typeUtilisateur = TypeUtilisateur.from(TypeUtilisateurCode.GEST);
 
 	/**
 	 * Date de création de l'utilisateur.

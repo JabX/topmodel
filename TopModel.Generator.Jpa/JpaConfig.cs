@@ -189,7 +189,8 @@ public class JpaConfig : GeneratorConfigBase
 
     public override bool CanClassUseEnums(Class classe, IEnumerable<Class>? availableClasses = null, IProperty? prop = null)
     {
-        return !UseJdbc && base.CanClassUseEnums(classe, availableClasses, prop)
+        return !UseJdbc
+            && base.CanClassUseEnums(classe, availableClasses, prop)
             && !classe.Properties.OfType<AssociationProperty>().Any(a => a.Association != classe && !CanClassUseEnums(a.Association, availableClasses));
     }
 
@@ -264,7 +265,7 @@ public class JpaConfig : GeneratorConfigBase
         return GetPackageName(classe.Namespace, EnumsPath, tag);
     }
 
-    public string GetEnumValueFileName(IProperty property, Class classe, string tag)
+    public string GetEnumValueFileName(Class classe, string tag)
     {
         return Path.Combine(
             OutputDirectory,
@@ -361,7 +362,7 @@ public class JpaConfig : GeneratorConfigBase
 
     protected override string GetConstEnumName(string className, string refName)
     {
-        return $"{className.ToPascalCase()}.Values.{refName}";
+        return EnumsAsEnums ? refName : $"{className.ToPascalCase()}.Values.{refName}";
     }
 
     protected override string GetEnumType(string className, string propName, bool isPrimaryKeyDef = false)
