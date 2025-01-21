@@ -66,7 +66,7 @@ public class TypeUtilisateur {
 		return switch (code) {
 			case ADMIN -> ADMIN;
 			case CLIENT -> CLIENT;
-			case GESTIONNAIRE -> GESTIONNAIRE;
+			case GEST -> GESTIONNAIRE;
 		};
 	}
 

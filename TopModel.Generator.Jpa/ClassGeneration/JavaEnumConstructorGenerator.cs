@@ -33,7 +33,8 @@ public class JavaEnumConstructorGenerator : JavaConstructorGenerator
         foreach (var refValue in classe.Values.OrderBy(x => x.Name, StringComparer.Ordinal))
         {
             var code = refValue.Name.ToConstantCase();
-            method.AddBodyLine(1, $@"case {code} -> {code};");
+            var codeRef = refValue.Value[classe.EnumKey!].ToConstantCase();
+            method.AddBodyLine(1, $@"case {codeRef} -> {code};");
         }
 
         method.AddBodyLine("};");
