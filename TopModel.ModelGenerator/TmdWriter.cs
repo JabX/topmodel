@@ -230,11 +230,7 @@ public class TmdWriter : IDisposable
             _writer.WriteLine($"    {listPrefix}  property: {sp.Alias.Name}");
 
             _writer.WriteLine($"    {listPrefix}name: {property.Name}");
-
-            if (sp.Required)
-            {
-                _writer.WriteLine($"    {listPrefix}required: true");
-            }
+            _writer.WriteLine($"    {listPrefix}required: {sp.Required.ToString().ToLower()}");
 
             if (!string.IsNullOrEmpty(sp.As))
             {
