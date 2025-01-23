@@ -45,6 +45,7 @@ endpoint:
   returns:
     composition: Order
     name: Result
+    required: true
     comment: Non documenté
 ---
 endpoint:
@@ -56,8 +57,10 @@ endpoint:
   params:
     - composition: Order
       name: body
+      required: true
       comment: Non documenté
   returns:
     composition: Order
     name: Result
+    required: true
     comment: Non documenté

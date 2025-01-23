@@ -221,6 +221,8 @@ public class TmdWriter : IDisposable
                 _writer.WriteLine($"    {listPrefix}domain: {property.Domain}");
             }
 
+            _writer.WriteLine($"    {listPrefix}required: {cp.Required.ToString().ToLower()}");
+
             _writer.WriteLine($@"    {listPrefix}comment: {property.Comment}");
         }
         else if (property is TmdAliasProperty sp)
@@ -228,9 +230,12 @@ public class TmdWriter : IDisposable
             _writer.WriteLine($"    {(noList ? string.Empty : "- ")}alias:");
             _writer.WriteLine($"    {listPrefix}  class: {sp.Alias.Class.Name}");
             _writer.WriteLine($"    {listPrefix}  property: {sp.Alias.Name}");
-
             _writer.WriteLine($"    {listPrefix}name: {property.Name}");
-            _writer.WriteLine($"    {listPrefix}required: {sp.Required.ToString().ToLower()}");
+
+            if (sp.Required)
+            {
+                _writer.WriteLine($"    {listPrefix}required: true");
+            }
 
             if (!string.IsNullOrEmpty(sp.As))
             {

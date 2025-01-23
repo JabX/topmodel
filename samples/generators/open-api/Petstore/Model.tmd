@@ -125,6 +125,7 @@ class:
 
     - composition: Category
       name: category
+      required: true
       comment: Non documenté
 
     - name: photoUrls
@@ -135,6 +136,7 @@ class:
     - composition: Tag
       name: tags
       domain: DO_LIST
+      required: true
       comment: Non documenté
 
     - alias:

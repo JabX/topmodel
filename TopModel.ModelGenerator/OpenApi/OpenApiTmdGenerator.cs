@@ -596,7 +596,8 @@ public class OpenApiTmdGenerator : ModelGenerator
         {
             var compositionProperty = new TmdCompositionProperty()
             {
-                Name = $"{property.Key}"
+                Name = $"{property.Key}",
+                Required = !property.Value.Nullable,
             };
             var domainKind = TmdGenUtils.GetDomainString(config.Domains, type: kind);
             if (kind != "object")

@@ -12,4 +12,6 @@ public class TmdProperty
     public string Comment { get; set; } = "Non documenté";
 
     public string Domain { get; set; }
+
+    public bool Required { get; set; }
 }
