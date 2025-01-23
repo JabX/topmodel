@@ -161,7 +161,7 @@ public class OpenApiTmdGenerator : ModelGenerator
                         classeProperties.Add(new TmdAliasProperty()
                         {
                             Alias = enumClass.Properties[0],
-                            Name = $"{property.Key.ToPascalCase()}",
+                            Name = $"{property.Key}",
                             Comment = @$"{property.Value.Description.Format()}",
                             Class = classe
                         });

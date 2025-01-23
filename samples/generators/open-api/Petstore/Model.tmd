@@ -85,7 +85,7 @@ class:
     - alias:
         class: OrderStatus
         property: Value
-      name: Status
+      name: status
       comment: Order Status
 
     - name: complete
@@ -140,7 +140,7 @@ class:
     - alias:
         class: PetStatus
         property: Value
-      name: Status
+      name: status
       comment: pet status in the store
 ---
 class:
