@@ -51,27 +51,6 @@ public class JavaWriter : IDisposable
     }
 
     /// <summary>
-    /// Ecrit l'annotation avec le niveau indenté.
-    /// </summary>
-    /// <param name="indentationLevel">Niveau d'indentation.</param>
-    /// <param name="javaAnnotation">Valeur à écrire dans le flux.</param>
-    public void WriteLine(int indentationLevel, JavaAnnotation javaAnnotation)
-    {
-        AddImports(javaAnnotation.Imports);
-        _toWrite.Add(new WriterLine() { Line = javaAnnotation.ToString(), Indent = indentationLevel });
-    }
-
-    /// <summary>
-    /// Ecrit l'annotation avec le niveau indenté.
-    /// </summary>
-    /// <param name="javaAnnotation">Valeur à écrire dans le flux.</param>
-    public void WriteLine(JavaAnnotation javaAnnotation)
-    {
-        AddImports(javaAnnotation.Imports);
-        _toWrite.Add(new WriterLine() { Line = javaAnnotation.ToString(), Indent = 0 });
-    }
-
-    /// <summary>
     /// Ecrit la signature de méthode avec le niveau indenté.
     /// </summary>
     /// <param name="indentationLevel">Niveau d'indentation.</param>
@@ -80,6 +59,21 @@ public class JavaWriter : IDisposable
     {
         AddImports(javaMethod.Imports);
         WriteAnnotations(indentationLevel, javaMethod.Annotations);
+        if (!string.IsNullOrEmpty(javaMethod.Comment))
+        {
+            WriteDocStart(indentationLevel, javaMethod.Comment);
+            foreach (var param in javaMethod.Parameters)
+            {
+                WriteParam(param.Name, param.Comment);
+            }
+
+            if (!string.IsNullOrEmpty(javaMethod.ReturnComment))
+            {
+                WriteReturns(indentationLevel, javaMethod.ReturnComment);
+            }
+
+            WriteDocEnd(indentationLevel);
+        }
 
         var hasBody = javaMethod.Body.Count() > 0;
         _toWrite.Add(new WriterLine() { Line = @$"{javaMethod.Signature}{(hasBody ? " {" : ";")}", Indent = indentationLevel });
@@ -163,6 +157,27 @@ public class JavaWriter : IDisposable
         {
             WriteLine(indentationLevel, LoadDocStart(value));
         }
+    }
+
+    /// <summary>
+    /// Ecrit l'annotation avec le niveau indenté.
+    /// </summary>
+    /// <param name="indentationLevel">Niveau d'indentation.</param>
+    /// <param name="javaAnnotation">Valeur à écrire dans le flux.</param>
+    public void WriteLine(int indentationLevel, JavaAnnotation javaAnnotation)
+    {
+        AddImports(javaAnnotation.Imports);
+        _toWrite.Add(new WriterLine() { Line = javaAnnotation.ToString(), Indent = indentationLevel });
+    }
+
+    /// <summary>
+    /// Ecrit l'annotation avec le niveau indenté.
+    /// </summary>
+    /// <param name="javaAnnotation">Valeur à écrire dans le flux.</param>
+    public void WriteLine(JavaAnnotation javaAnnotation)
+    {
+        AddImports(javaAnnotation.Imports);
+        _toWrite.Add(new WriterLine() { Line = javaAnnotation.ToString(), Indent = 0 });
     }
 
     /// <summary>

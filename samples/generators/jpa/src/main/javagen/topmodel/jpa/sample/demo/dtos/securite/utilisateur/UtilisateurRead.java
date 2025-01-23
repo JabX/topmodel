@@ -217,7 +217,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#id id}.
-	 * @param id value to set
+	 * @param id value to set.
 	 */
 	public void setId(Integer id) {
 		this.id = id;
@@ -225,7 +225,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#nom nom}.
-	 * @param nom value to set
+	 * @param nom value to set.
 	 */
 	public void setNom(String nom) {
 		this.nom = nom;
@@ -233,7 +233,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#prenom prenom}.
-	 * @param prenom value to set
+	 * @param prenom value to set.
 	 */
 	public void setPrenom(String prenom) {
 		this.prenom = prenom;
@@ -241,7 +241,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#email email}.
-	 * @param email value to set
+	 * @param email value to set.
 	 */
 	public void setEmail(String email) {
 		this.email = email;
@@ -249,7 +249,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#dateNaissance dateNaissance}.
-	 * @param dateNaissance value to set
+	 * @param dateNaissance value to set.
 	 */
 	public void setDateNaissance(LocalDate dateNaissance) {
 		this.dateNaissance = dateNaissance;
@@ -257,7 +257,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#adresse adresse}.
-	 * @param adresse value to set
+	 * @param adresse value to set.
 	 */
 	public void setAdresse(String adresse) {
 		this.adresse = adresse;
@@ -265,7 +265,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#actif actif}.
-	 * @param actif value to set
+	 * @param actif value to set.
 	 */
 	public void setActif(Boolean actif) {
 		this.actif = actif;
@@ -273,7 +273,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#profilId profilId}.
-	 * @param profilId value to set
+	 * @param profilId value to set.
 	 */
 	public void setProfilId(Integer profilId) {
 		this.profilId = profilId;
@@ -281,7 +281,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#typeUtilisateurCode typeUtilisateurCode}.
-	 * @param typeUtilisateurCode value to set
+	 * @param typeUtilisateurCode value to set.
 	 */
 	public void setTypeUtilisateurCode(TypeUtilisateurCode typeUtilisateurCode) {
 		this.typeUtilisateurCode = typeUtilisateurCode;
@@ -289,7 +289,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#dateCreation dateCreation}.
-	 * @param dateCreation value to set
+	 * @param dateCreation value to set.
 	 */
 	public void setDateCreation(LocalDateTime dateCreation) {
 		this.dateCreation = dateCreation;
@@ -297,7 +297,7 @@ public class UtilisateurRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurRead#dateModification dateModification}.
-	 * @param dateModification value to set
+	 * @param dateModification value to set.
 	 */
 	public void setDateModification(LocalDateTime dateModification) {
 		this.dateModification = dateModification;

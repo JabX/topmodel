@@ -131,13 +131,12 @@ public class JpaModelPropertyGenerator
         var propertyName = GetPropertyName(property);
         var propertyType = GetPropertyType(property);
         fw.WriteLine();
-        fw.WriteDocStart(indentLevel, $"Getter for {propertyName}");
-        fw.WriteReturns(indentLevel, $"value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}");
-        fw.WriteDocEnd(indentLevel);
         string getterName = GetGetterName(property);
         var method = new JavaMethod(propertyType, getterName)
         {
-            Visibility = "public"
+            Visibility = "public",
+            Comment = $"Getter for {propertyName}",
+            ReturnComment = $"value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}"
         };
         var genericType = propertyType.Split('<').First();
         if (_newableTypes.TryGetValue(genericType, out var newableType) && property.Class.IsPersistent)
@@ -189,11 +188,15 @@ public class JpaModelPropertyGenerator
     {
         var propertyName = GetPropertyName(property);
         fw.WriteLine();
-        fw.WriteDocStart(indentLevel, $"Set the value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}");
-        fw.WriteLine(indentLevel, $" * @param {propertyName} value to set");
-        fw.WriteDocEnd(indentLevel);
-        var method = new JavaMethod("void", GetSetterName(property)) { Visibility = "public" }
-            .AddParameter(new JavaMethodParameter(GetPropertyType(property), propertyName))
+        var method = new JavaMethod("void", GetSetterName(property))
+            {
+                Visibility = "public",
+                Comment = $"Set the value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}"
+            }
+            .AddParameter(new JavaMethodParameter(GetPropertyType(property), propertyName)
+            {
+                Comment = $"value to set"
+            })
             .AddBodyLine(@$"this.{propertyName} = {propertyName};");
         fw.Write(indentLevel, method);
     }
@@ -376,11 +379,11 @@ public class JpaModelPropertyGenerator
 
     private string GetDefaultValue(IProperty property)
     {
+        var defaultValue = _config.GetValue(property, _classes);
         if (property is AssociationProperty ap)
         {
             if (ap.Association.PrimaryKey.Count() == 1 && _config.CanClassUseEnums(ap.Association, _classes, prop: ap.Association.PrimaryKey.Single()))
             {
-                var defaultValue = _config.GetValue(property, _classes);
                 if (defaultValue != "null")
                 {
                     return $" = new {ap.Association.NamePascal}({defaultValue})";
@@ -391,7 +394,6 @@ public class JpaModelPropertyGenerator
         }
         else
         {
-            var defaultValue = _config.GetValue(property, _classes);
             var suffix = defaultValue != "null" ? $" = {defaultValue}" : string.Empty;
             return suffix;
         }
@@ -399,11 +401,11 @@ public class JpaModelPropertyGenerator
 
     private IEnumerable<string> GetDefaultValueImports(IProperty property, string tag)
     {
+        var defaultValue = _config.GetValue(property, _classes);
         if (property is AssociationProperty ap)
         {
             if (ap.Association.PrimaryKey.Count() == 1 && _config.CanClassUseEnums(ap.Association, _classes, prop: ap.Association.PrimaryKey.Single()))
             {
-                var defaultValue = _config.GetValue(property, _classes);
                 if (defaultValue != "null")
                 {
                     return [$"{_config.GetEnumPackageName(property.Class, _config.GetBestClassTag(property.Class, tag))}.{GetPropertyType(ap.Association.PrimaryKey.Single())}"];

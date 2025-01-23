@@ -55,7 +55,7 @@ public class ProfilWrite implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilWrite#libelle libelle}.
-	 * @param libelle value to set
+	 * @param libelle value to set.
 	 */
 	public void setLibelle(String libelle) {
 		this.libelle = libelle;
@@ -63,7 +63,7 @@ public class ProfilWrite implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilWrite#droits droits}.
-	 * @param droits value to set
+	 * @param droits value to set.
 	 */
 	public void setDroits(List<DroitCode> droits) {
 		this.droits = droits;

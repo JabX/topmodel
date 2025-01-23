@@ -138,7 +138,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#id id}.
-	 * @param id value to set
+	 * @param id value to set.
 	 */
 	public void setId(Integer id) {
 		this.id = id;
@@ -146,7 +146,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#libelle libelle}.
-	 * @param libelle value to set
+	 * @param libelle value to set.
 	 */
 	public void setLibelle(String libelle) {
 		this.libelle = libelle;
@@ -154,7 +154,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#droits droits}.
-	 * @param droits value to set
+	 * @param droits value to set.
 	 */
 	public void setDroits(List<DroitCode> droits) {
 		this.droits = droits;
@@ -162,7 +162,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#dateCreation dateCreation}.
-	 * @param dateCreation value to set
+	 * @param dateCreation value to set.
 	 */
 	public void setDateCreation(LocalDateTime dateCreation) {
 		this.dateCreation = dateCreation;
@@ -170,7 +170,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#dateModification dateModification}.
-	 * @param dateModification value to set
+	 * @param dateModification value to set.
 	 */
 	public void setDateModification(LocalDateTime dateModification) {
 		this.dateModification = dateModification;
@@ -178,7 +178,7 @@ public class ProfilRead implements Serializable {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.dtos.securite.profil.ProfilRead#utilisateurs utilisateurs}.
-	 * @param utilisateurs value to set
+	 * @param utilisateurs value to set.
 	 */
 	public void setUtilisateurs(List<UtilisateurItem> utilisateurs) {
 		this.utilisateurs = utilisateurs;

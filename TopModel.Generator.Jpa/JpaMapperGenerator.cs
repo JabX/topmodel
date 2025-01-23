@@ -241,6 +241,12 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
     private void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
     {
+        if (Config.CanClassUseEnums(classe, Classes))
+        {
+            _logger.LogWarning($"La classe {classe.Name} ne peut pas être mappée car c'est une enum");
+            return;
+        }
+
         fw.WriteLine();
         fw.WriteDocStart(1, $"Map les champs des classes passées en paramètre dans l'objet target'");
         fw.WriteParam("target", $"Instance de '{classe}' (ou null pour créer une nouvelle instance)");
@@ -418,6 +424,12 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
     private void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
     {
+        if (Config.CanClassUseEnums(mapper.Class, Classes))
+        {
+            _logger.LogWarning($"La classe {mapper.Class.Name} ne peut pas être mappée car c'est une enum");
+            return;
+        }
+
         fw.WriteLine();
         fw.WriteDocStart(1, $"Mappe '{classe}' vers '{mapper.Class.NamePascal}'");
         if (mapper.Comment != null)

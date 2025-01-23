@@ -68,15 +68,17 @@ public class JavaConstructorGenerator
     public void WriteNoArgConstructor(JavaWriter fw, Class classe)
     {
         fw.WriteLine();
-        fw.WriteDocStart(1, "No arg constructor");
-        fw.WriteDocEnd(1);
-        fw.WriteLine(1, $"public {classe.NamePascal}() {{");
+        var constructor = new JavaConstructor(classe.NamePascal)
+        {
+            Visibility = "public",
+            Comment = "No arg constructor"
+        };
         if (classe.Extends != null || classe.Decorators.Any(d => Config.GetImplementation(d.Decorator)?.Extends is not null))
         {
-            fw.WriteLine(2, $"super();");
+            constructor.AddBodyLine("super();");
         }
 
-        fw.WriteLine(2, "// No arg constructor");
-        fw.WriteLine(1, $"}}");
+        constructor.AddBodyLine("// No arg constructor");
+        fw.Write(1, constructor);
     }
 }

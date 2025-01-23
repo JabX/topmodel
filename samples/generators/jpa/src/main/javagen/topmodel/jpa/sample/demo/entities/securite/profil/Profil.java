@@ -140,7 +140,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#id id}.
-	 * @param id value to set
+	 * @param id value to set.
 	 */
 	public void setId(Integer id) {
 		this.id = id;
@@ -148,7 +148,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#libelle libelle}.
-	 * @param libelle value to set
+	 * @param libelle value to set.
 	 */
 	public void setLibelle(String libelle) {
 		this.libelle = libelle;
@@ -156,7 +156,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#droits droits}.
-	 * @param droits value to set
+	 * @param droits value to set.
 	 */
 	public void setDroits(List<Droit> droits) {
 		this.droits = droits;
@@ -164,7 +164,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#dateCreation dateCreation}.
-	 * @param dateCreation value to set
+	 * @param dateCreation value to set.
 	 */
 	public void setDateCreation(LocalDateTime dateCreation) {
 		this.dateCreation = dateCreation;
@@ -172,7 +172,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#dateModification dateModification}.
-	 * @param dateModification value to set
+	 * @param dateModification value to set.
 	 */
 	public void setDateModification(LocalDateTime dateModification) {
 		this.dateModification = dateModification;
@@ -180,7 +180,7 @@ public class Profil {
 
 	/**
 	 * Set the value of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#utilisateurs utilisateurs}.
-	 * @param utilisateurs value to set
+	 * @param utilisateurs value to set.
 	 */
 	public void setUtilisateurs(Utilisateur utilisateurs) {
 		this.utilisateurs = utilisateurs;

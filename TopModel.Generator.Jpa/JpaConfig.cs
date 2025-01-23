@@ -15,7 +15,7 @@ public class JpaConfig : GeneratorConfigBase
     public string EntitiesPath { get; set; } = "javagen:{app}/entities/{module}";
 
     /// <summary>
-    /// Localisation des classes persistées du modèle, relative au répertoire de génération. Par défaut, 'javagen/{app}/entities/{module}'.
+    /// Localisation des enums, relative au répertoire de génération. Par défaut, 'javagen:{app}/enums/{module}'.
     /// </summary>
     public string EnumsPath { get; set; } = "javagen:{app}/enums/{module}";
 
@@ -224,6 +224,14 @@ public class JpaConfig : GeneratorConfigBase
             $"{df.Name.ToPascalCase()}PartialFlow.java");
     }
 
+    public IEnumerable<JavaAnnotation> GetDomainJavaAnnotations(IProperty property, string tag)
+    {
+        return GetDomainAnnotationsAndImports(property, tag).Select(a =>
+        {
+            return new JavaAnnotation(name: a.Annotation, imports: a.Imports.ToArray());
+        });
+    }
+
     public string GetEnumFileName(IProperty property, Class classe, string tag)
     {
         return Path.Combine(
@@ -317,14 +325,6 @@ public class JpaConfig : GeneratorConfigBase
     public string GetPackageName(Namespace ns, string modelPath, string tag)
     {
         return ResolveVariables(modelPath, tag, module: ns.Module).ToPackageName();
-    }
-
-    public IEnumerable<JavaAnnotation> GetDomainJavaAnnotations(IProperty property, string tag)
-    {
-        return GetDomainAnnotationsAndImports(property, tag).Select(a =>
-        {
-            return new JavaAnnotation(name: a.Annotation, imports: a.Imports.ToArray());
-        });
     }
 
     protected override string GetConstEnumName(string className, string refName)
