@@ -377,7 +377,7 @@ public class JpaModelPropertyGenerator
         return convert;
     }
 
-    protected string GetDefaultValue(IProperty property)
+    protected virtual string GetDefaultValue(IProperty property)
     {
         var defaultValue = _config.GetValue(property, _classes);
         if (property is AssociationProperty ap)
