@@ -1,0 +1,55 @@
+﻿####
+#### ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+####
+
+---
+module: Autres
+tags:
+  - Back
+---
+class:
+  name: Compte
+  sqlName: compte
+  comment: Non documenté
+  trigram: COM
+  properties:
+    - name: Mail
+      domain: DO_LIBELLE
+      required: true
+      primaryKey: true
+      comment: Non documenté
+
+    - name: DepositaireIdentifiantExterne
+      domain: DO_ID
+      required: true
+      comment: Non documenté
+
+  unique:
+    - [DepositaireIdentifiantExterne]
+---
+class:
+  name: Couleur
+  sqlName: couleur
+  comment: Non documenté
+  properties:
+    - name: CouCode
+      domain: DO_LIBELLE
+      required: true
+      primaryKey: true
+      comment: Non documenté
+---
+class:
+  name: TypeProfil
+  sqlName: type_profil
+  comment: Non documenté
+  trigram: TPR
+  properties:
+    - name: Code
+      domain: DO_LIBELLE
+      required: true
+      primaryKey: true
+      comment: Non documenté
+
+    - name: Libelle
+      domain: DO_LIBELLE
+      comment: Non documenté
