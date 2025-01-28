@@ -221,7 +221,10 @@ public class TmdWriter : IDisposable
                 _writer.WriteLine($"    {listPrefix}domain: {property.Domain}");
             }
 
-            _writer.WriteLine($"    {listPrefix}required: {cp.Required.ToString().ToLower()}");
+            if (!cp.Required)
+            {
+                _writer.WriteLine($"    {listPrefix}required: false");
+            }
 
             _writer.WriteLine($@"    {listPrefix}comment: {property.Comment}");
         }
