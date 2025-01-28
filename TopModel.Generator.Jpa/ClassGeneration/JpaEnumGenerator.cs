@@ -68,7 +68,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    protected void WriteEnum(IProperty property, Class classe, string tag)
+    protected virtual void WriteEnum(IProperty property, Class classe, string tag)
     {
         var packageName = Config.GetEnumPackageName(classe, tag);
         using var fw = new JavaWriter(Config.GetEnumFileName(property, classe, tag), _logger, packageName, null);

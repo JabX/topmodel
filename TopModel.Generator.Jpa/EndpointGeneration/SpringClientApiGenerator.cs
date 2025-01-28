@@ -36,7 +36,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         return Path.Combine(Config.GetApiPath(file, tag), $"{GetClassName(file.Options.Endpoints.FileName)}.java");
     }
 
-    protected IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
+    protected virtual IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
     {
         var properties = endpoints.SelectMany(endpoint => endpoint.Params)
             .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
@@ -80,7 +80,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    protected void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
+    protected virtual void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
     {
         fw.WriteLine();
         fw.WriteDocStart(1, endpoint.Description);
@@ -195,7 +195,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.Write(1, method);
     }
 
-    protected void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
+    protected virtual void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
     {
         fw.AddImports(GetTypeImports(endpoints, tag));
         fw.AddImports(endpoints.SelectMany(e => Config.GetDecoratorImports(e, tag)));

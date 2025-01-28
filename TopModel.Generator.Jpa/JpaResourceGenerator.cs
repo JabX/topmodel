@@ -64,7 +64,7 @@ public class JpaResourceGenerator : TranslationGeneratorBase<JpaConfig>
     /// <param name="fw">Flux de sortie.</param>
     /// <param name="container">Classe.</param>
     /// <param name="lang">Langue de traduction.</param>
-    protected void WriteClasse(FileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
+    protected virtual void WriteClasse(FileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
     {
         if (Config.TranslateProperties == true)
         {

@@ -35,7 +35,7 @@ public abstract class JavaClassGeneratorBase : ClassGeneratorBase<JpaConfig>
         }
     }
 
-    protected JpaModelPropertyGenerator JpaModelPropertyGenerator
+    protected virtual JpaModelPropertyGenerator JpaModelPropertyGenerator
     {
         get
         {
@@ -61,7 +61,7 @@ public abstract class JavaClassGeneratorBase : ClassGeneratorBase<JpaConfig>
         }
     }
 
-    protected void WriteFieldsEnum(JavaWriter fw, Class classe, string tag)
+    protected virtual void WriteFieldsEnum(JavaWriter fw, Class classe, string tag)
     {
         if (!classe.Properties.Any())
         {
@@ -137,7 +137,7 @@ public abstract class JavaClassGeneratorBase : ClassGeneratorBase<JpaConfig>
         }
     }
 
-    protected void WriteToMappers(JavaWriter fw, Class classe, string tag)
+    protected virtual void WriteToMappers(JavaWriter fw, Class classe, string tag)
     {
         var toMappers = classe.ToMappers.Where(p => Classes.Contains(p.Class)).Select(m => (classe, m))
         .OrderBy(m => m.m.Name)

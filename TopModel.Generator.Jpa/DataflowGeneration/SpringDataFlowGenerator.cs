@@ -99,7 +99,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    protected string GetProcessorName(DataFlow dataFlow, FlowHook flowHook, int index)
+    protected virtual string GetProcessorName(DataFlow dataFlow, FlowHook flowHook, int index)
     {
         var suffix = string.Empty;
         if (dataFlow.Hooks.Where(h => h == flowHook).Count() > 1)
@@ -120,7 +120,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         };
     }
 
-    protected Class? GetProcessorTargetClass(FlowHook flowHook, DataFlow flow)
+    protected virtual Class? GetProcessorTargetClass(FlowHook flowHook, DataFlow flow)
     {
         return flowHook switch
         {
@@ -130,7 +130,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         };
     }
 
-    protected void HandleDataFlow(string fileName, DataFlow dataFlow, string tag)
+    protected virtual void HandleDataFlow(string fileName, DataFlow dataFlow, string tag)
     {
         WriteClassFlow(fileName, dataFlow, tag);
         WritePartialInterface(dataFlow, tag);
@@ -157,7 +157,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    protected void WriteBeanReader(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected virtual void WriteBeanReader(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.WriteLine();
         var tagToUse = tag;
@@ -281,7 +281,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    protected void WriteBeanWriter(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected virtual void WriteBeanWriter(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.AddImport("io.github.kleecontrib.spring.batch.bulk.upsert.BulkItemWriter");
 
@@ -294,7 +294,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         WriteWriterMapper(fw, dataFlow, tag);
     }
 
-    protected void WriteClassFlow(string fileName, DataFlow dataFlow, string tag)
+    protected virtual void WriteClassFlow(string fileName, DataFlow dataFlow, string tag)
     {
         var packageName = Config.ResolveVariables(
             Config.DataFlowsPath!,
@@ -334,7 +334,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    protected void WriteModuleConfig(string module, IEnumerable<DataFlow> flows)
+    protected virtual void WriteModuleConfig(string module, IEnumerable<DataFlow> flows)
     {
         var configFilePath = Config.GetDataFlowConfigFilePath(module);
         var packageName = Config.ResolveVariables(
@@ -388,7 +388,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    protected void WritePartialInterface(DataFlow dataFlow, string tag)
+    protected virtual void WritePartialInterface(DataFlow dataFlow, string tag)
     {
         if (dataFlow.Hooks.Any() || dataFlow.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
         {
@@ -455,7 +455,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    protected void WriteWriterMapper(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected virtual void WriteWriterMapper(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.WriteLine();
         if (dataFlow.Type != DataFlowType.Merge)

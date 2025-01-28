@@ -36,7 +36,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         return Path.Combine(Config.GetApiPath(file, tag), $"{GetClassName(file.Options.Endpoints.FileName)}.java");
     }
 
-    protected List<string> GetMethodParams(Endpoint endpoint, bool withType = true, bool withBody = true)
+    protected virtual List<string> GetMethodParams(Endpoint endpoint, bool withType = true, bool withBody = true)
     {
         var methodParams = new List<string>();
         foreach (var param in endpoint.GetRouteParams())
@@ -79,7 +79,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         return methodParams;
     }
 
-    protected IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
+    protected virtual IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
     {
         var properties = endpoints.SelectMany(endpoint => endpoint.Params).Concat(endpoints.Where(endpoint => endpoint.Returns is not null).Select(endpoint => endpoint.Returns));
         return properties.SelectMany(property => property!.GetTypeImports(Config, tag));
@@ -131,7 +131,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    protected void WriteEndpoint(JavaWriter fw, Endpoint endpoint)
+    protected virtual void WriteEndpoint(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteLine();
         WriteUriBuilderMethod(fw, endpoint);
@@ -139,7 +139,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         WriteEndpointCallMethod(fw, endpoint);
     }
 
-    protected void WriteEndpointCallMethod(JavaWriter fw, Endpoint endpoint)
+    protected virtual void WriteEndpointCallMethod(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteDocStart(1, endpoint.Description);
 
@@ -192,7 +192,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    protected void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
+    protected virtual void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
     {
         var imports = new List<string>();
         imports.AddRange(GetTypeImports(endpoints, tag).Distinct());
@@ -207,7 +207,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.AddImports(imports);
     }
 
-    protected void WriteUriBuilderMethod(JavaWriter fw, Endpoint endpoint)
+    protected virtual void WriteUriBuilderMethod(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteDocStart(1, $"UriComponentsBuilder pour la méthode {endpoint.NameCamel}");
 

@@ -19,7 +19,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
     public override string Name => "JpaMapperGenerator";
 
-    protected JpaModelPropertyGenerator JpaModelPropertyGenerator
+    protected virtual JpaModelPropertyGenerator JpaModelPropertyGenerator
     {
         get
         {
@@ -38,7 +38,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         return Config.GetMapperFilePath(mapper, GetBestClassTag(mapper.Classe, tag));
     }
 
-    protected (string Getter, bool CheckSourceNull) GetSourceGetter(IProperty propertySource, IProperty propertyTarget, Class classe, JavaWriter fw, string sourceName, string tag)
+    protected virtual (string Getter, bool CheckSourceNull) GetSourceGetter(IProperty propertySource, IProperty propertyTarget, Class classe, JavaWriter fw, string sourceName, string tag)
     {
         var getter = string.Empty;
         var getterName = JpaModelPropertyGenerator.GetGetterName(propertySource);
@@ -239,7 +239,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    protected void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
+    protected virtual void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
     {
         if (Config.CanClassUseEnums(classe, Classes))
         {
@@ -422,7 +422,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    protected void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
+    protected virtual void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
     {
         if (Config.CanClassUseEnums(mapper.Class, Classes))
         {

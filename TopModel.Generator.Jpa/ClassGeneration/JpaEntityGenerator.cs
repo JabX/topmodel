@@ -33,7 +33,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
             $"{classe.NamePascal}.java");
     }
 
-    protected string GetterToCompareCompositePkPk(IProperty pk)
+    protected virtual string GetterToCompareCompositePkPk(IProperty pk)
     {
         if (pk is AssociationProperty ap)
         {
@@ -89,7 +89,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
         fw.WriteLine("}");
     }
 
-    protected void WriteAdders(JavaWriter fw, Class classe, string tag)
+    protected virtual void WriteAdders(JavaWriter fw, Class classe, string tag)
     {
         if (classe.IsPersistent && Config.AssociationAdders)
         {
@@ -195,7 +195,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
         }
     }
 
-    protected void WriteCompositePrimaryKeyClass(JavaWriter fw, Class classe, string tag)
+    protected virtual void WriteCompositePrimaryKeyClass(JavaWriter fw, Class classe, string tag)
     {
         if (classe.PrimaryKey.Count() <= 1)
         {
@@ -281,7 +281,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
         }
     }
 
-    protected void WriteRemovers(JavaWriter fw, Class classe, string tag)
+    protected virtual void WriteRemovers(JavaWriter fw, Class classe, string tag)
     {
         if (classe.IsPersistent && Config.AssociationRemovers)
         {
