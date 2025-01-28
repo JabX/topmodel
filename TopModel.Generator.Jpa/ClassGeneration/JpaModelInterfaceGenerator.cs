@@ -58,7 +58,7 @@ public class JpaModelInterfaceGenerator : ClassGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private void WriteGetters(JavaWriter fw, Class classe, string tag)
+    protected void WriteGetters(JavaWriter fw, Class classe, string tag)
     {
         foreach (var property in classe.Properties.Where(p => !(p is AssociationProperty apo && apo.Association.Reference && (apo.Type == AssociationType.OneToOne || apo.Type == AssociationType.ManyToOne))))
         {
@@ -71,7 +71,7 @@ public class JpaModelInterfaceGenerator : ClassGeneratorBase<JpaConfig>
         }
     }
 
-    private void WriteHydrate(JavaWriter fw, Class classe)
+    protected void WriteHydrate(JavaWriter fw, Class classe)
     {
         var properties = classe.Properties
             .Where(p => !p.Readonly)
@@ -100,7 +100,7 @@ public class JpaModelInterfaceGenerator : ClassGeneratorBase<JpaConfig>
         fw.WriteLine(1, $"void hydrate({signature});");
     }
 
-    private void WriteImports(JavaWriter fw, Class classe, string tag)
+    protected void WriteImports(JavaWriter fw, Class classe, string tag)
     {
         var imports = new List<string>
             {

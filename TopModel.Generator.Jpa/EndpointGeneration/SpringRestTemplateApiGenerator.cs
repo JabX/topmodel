@@ -21,6 +21,11 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
 
     public override string Name => "SpringRestTemplateGen";
 
+    protected static string GetClassName(string fileName)
+    {
+        return $"Abstract{fileName.ToPascalCase()}Client";
+    }
+
     protected override bool FilterTag(string tag)
     {
         return Config.ResolveVariables(Config.ApiGeneration!, tag) == ApiGeneration.Client;
@@ -29,6 +34,55 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
     protected override string GetFilePath(ModelFile file, string tag)
     {
         return Path.Combine(Config.GetApiPath(file, tag), $"{GetClassName(file.Options.Endpoints.FileName)}.java");
+    }
+
+    protected List<string> GetMethodParams(Endpoint endpoint, bool withType = true, bool withBody = true)
+    {
+        var methodParams = new List<string>();
+        foreach (var param in endpoint.GetRouteParams())
+        {
+            if (withType)
+            {
+                methodParams.Add($"{Config.GetType(param)} {param.GetParamName()}");
+            }
+            else
+            {
+                methodParams.Add(param.GetParamName());
+            }
+        }
+
+        foreach (var param in endpoint.GetQueryParams())
+        {
+            if (withType)
+            {
+                methodParams.Add($"{Config.GetType(param)} {param.GetParamName()}");
+            }
+            else
+            {
+                methodParams.Add(param.GetParamName());
+            }
+        }
+
+        var bodyParam = endpoint.GetJsonBodyParam();
+        if (bodyParam != null && withBody)
+        {
+            if (withType)
+            {
+                methodParams.Add($"{Config.GetType(bodyParam)} {bodyParam.GetParamName()}");
+            }
+            else
+            {
+                methodParams.Add(bodyParam.GetParamName());
+            }
+        }
+
+        return methodParams;
+    }
+
+    protected IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
+    {
+        var properties = endpoints.SelectMany(endpoint => endpoint.Params).Concat(endpoints.Where(endpoint => endpoint.Returns is not null).Select(endpoint => endpoint.Returns));
+        return properties.SelectMany(property => property!.GetTypeImports(Config, tag));
     }
 
     protected override void HandleFile(string filePath, string fileName, string tag, IList<Endpoint> endpoints)
@@ -77,61 +131,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private static string GetClassName(string fileName)
-    {
-        return $"Abstract{fileName.ToPascalCase()}Client";
-    }
-
-    private List<string> GetMethodParams(Endpoint endpoint, bool withType = true, bool withBody = true)
-    {
-        var methodParams = new List<string>();
-        foreach (var param in endpoint.GetRouteParams())
-        {
-            if (withType)
-            {
-                methodParams.Add($"{Config.GetType(param)} {param.GetParamName()}");
-            }
-            else
-            {
-                methodParams.Add(param.GetParamName());
-            }
-        }
-
-        foreach (var param in endpoint.GetQueryParams())
-        {
-            if (withType)
-            {
-                methodParams.Add($"{Config.GetType(param)} {param.GetParamName()}");
-            }
-            else
-            {
-                methodParams.Add(param.GetParamName());
-            }
-        }
-
-        var bodyParam = endpoint.GetJsonBodyParam();
-        if (bodyParam != null && withBody)
-        {
-            if (withType)
-            {
-                methodParams.Add($"{Config.GetType(bodyParam)} {bodyParam.GetParamName()}");
-            }
-            else
-            {
-                methodParams.Add(bodyParam.GetParamName());
-            }
-        }
-
-        return methodParams;
-    }
-
-    private IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
-    {
-        var properties = endpoints.SelectMany(endpoint => endpoint.Params).Concat(endpoints.Where(endpoint => endpoint.Returns is not null).Select(endpoint => endpoint.Returns));
-        return properties.SelectMany(property => property!.GetTypeImports(Config, tag));
-    }
-
-    private void WriteEndpoint(JavaWriter fw, Endpoint endpoint)
+    protected void WriteEndpoint(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteLine();
         WriteUriBuilderMethod(fw, endpoint);
@@ -139,7 +139,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         WriteEndpointCallMethod(fw, endpoint);
     }
 
-    private void WriteEndpointCallMethod(JavaWriter fw, Endpoint endpoint)
+    protected void WriteEndpointCallMethod(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteDocStart(1, endpoint.Description);
 
@@ -192,7 +192,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
+    protected void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
     {
         var imports = new List<string>();
         imports.AddRange(GetTypeImports(endpoints, tag).Distinct());
@@ -207,7 +207,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.AddImports(imports);
     }
 
-    private void WriteUriBuilderMethod(JavaWriter fw, Endpoint endpoint)
+    protected void WriteUriBuilderMethod(JavaWriter fw, Endpoint endpoint)
     {
         fw.WriteDocStart(1, $"UriComponentsBuilder pour la méthode {endpoint.NameCamel}");
 

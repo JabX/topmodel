@@ -31,28 +31,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
 
     public override string Name => "SpringDataFlowGen";
 
-    protected override void HandleFiles(IEnumerable<ModelFile> files)
-    {
-        foreach (var file in files)
-        {
-            foreach (var dataFlow in file.DataFlows)
-            {
-                foreach (var (tag, fileName) in Config.Tags.Intersect(file.Tags)
-                    .Select(tag => (tag, fileName: Config.GetDataFlowFilePath(dataFlow, tag)))
-                    .DistinctBy(t => t.fileName))
-                {
-                    HandleDataFlow(fileName, dataFlow, tag);
-                }
-            }
-        }
-
-        foreach (var module in files.Where(f => f.DataFlows.Any()).Select(f => f.Namespace.Module))
-        {
-            WriteModuleConfig(module, files.Where(f => f.Namespace.Module == module).SelectMany(f => f.DataFlows));
-        }
-    }
-
-    private static void WriteBeanFlow(JavaWriter fw, DataFlow dataFlow)
+    protected static void WriteBeanFlow(JavaWriter fw, DataFlow dataFlow)
     {
         fw.AddImports([
             "org.springframework.context.annotation.Bean",
@@ -103,7 +82,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private static void WriteBeanTruncateStep(JavaWriter fw, DataFlow dataFlow)
+    protected static void WriteBeanTruncateStep(JavaWriter fw, DataFlow dataFlow)
     {
         fw.WriteLine();
         fw.AddImport("io.github.kleecontrib.spring.batch.tasklet.QueryTasklet");
@@ -120,7 +99,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private string GetProcessorName(DataFlow dataFlow, FlowHook flowHook, int index)
+    protected string GetProcessorName(DataFlow dataFlow, FlowHook flowHook, int index)
     {
         var suffix = string.Empty;
         if (dataFlow.Hooks.Where(h => h == flowHook).Count() > 1)
@@ -131,7 +110,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         return $@"{flowHook}{suffix}";
     }
 
-    private Class? GetProcessorSourceClass(FlowHook flowHook, DataFlow flow)
+    protected Class? GetProcessorSourceClass(FlowHook flowHook, DataFlow flow)
     {
         return flowHook switch
         {
@@ -141,7 +120,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         };
     }
 
-    private Class? GetProcessorTargetClass(FlowHook flowHook, DataFlow flow)
+    protected Class? GetProcessorTargetClass(FlowHook flowHook, DataFlow flow)
     {
         return flowHook switch
         {
@@ -151,13 +130,34 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         };
     }
 
-    private void HandleDataFlow(string fileName, DataFlow dataFlow, string tag)
+    protected void HandleDataFlow(string fileName, DataFlow dataFlow, string tag)
     {
         WriteClassFlow(fileName, dataFlow, tag);
         WritePartialInterface(dataFlow, tag);
     }
 
-    private void WriteBeanReader(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected override void HandleFiles(IEnumerable<ModelFile> files)
+    {
+        foreach (var file in files)
+        {
+            foreach (var dataFlow in file.DataFlows)
+            {
+                foreach (var (tag, fileName) in Config.Tags.Intersect(file.Tags)
+                    .Select(tag => (tag, fileName: Config.GetDataFlowFilePath(dataFlow, tag)))
+                    .DistinctBy(t => t.fileName))
+                {
+                    HandleDataFlow(fileName, dataFlow, tag);
+                }
+            }
+        }
+
+        foreach (var module in files.Where(f => f.DataFlows.Any()).Select(f => f.Namespace.Module))
+        {
+            WriteModuleConfig(module, files.Where(f => f.Namespace.Module == module).SelectMany(f => f.DataFlows));
+        }
+    }
+
+    protected void WriteBeanReader(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.WriteLine();
         var tagToUse = tag;
@@ -184,7 +184,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private void WriteBeanStep(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected void WriteBeanStep(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.AddImport("org.springframework.batch.core.step.builder.StepBuilder");
         fw.AddImport("org.springframework.batch.core.repository.JobRepository");
@@ -281,7 +281,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private void WriteBeanWriter(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected void WriteBeanWriter(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.AddImport("io.github.kleecontrib.spring.batch.bulk.upsert.BulkItemWriter");
 
@@ -294,7 +294,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         WriteWriterMapper(fw, dataFlow, tag);
     }
 
-    private void WriteClassFlow(string fileName, DataFlow dataFlow, string tag)
+    protected void WriteClassFlow(string fileName, DataFlow dataFlow, string tag)
     {
         var packageName = Config.ResolveVariables(
             Config.DataFlowsPath!,
@@ -334,7 +334,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private void WriteModuleConfig(string module, IEnumerable<DataFlow> flows)
+    protected void WriteModuleConfig(string module, IEnumerable<DataFlow> flows)
     {
         var configFilePath = Config.GetDataFlowConfigFilePath(module);
         var packageName = Config.ResolveVariables(
@@ -388,7 +388,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private void WritePartialInterface(DataFlow dataFlow, string tag)
+    protected void WritePartialInterface(DataFlow dataFlow, string tag)
     {
         if (dataFlow.Hooks.Any() || dataFlow.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
         {
@@ -455,7 +455,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    private void WriteWriterMapper(JavaWriter fw, DataFlow dataFlow, string tag)
+    protected void WriteWriterMapper(JavaWriter fw, DataFlow dataFlow, string tag)
     {
         fw.WriteLine();
         if (dataFlow.Type != DataFlowType.Merge)

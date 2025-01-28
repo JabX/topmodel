@@ -21,6 +21,12 @@ public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
 
     public override string Name => "SpringApiServerGen";
 
+    protected void AddImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
+    {
+        fw.AddImports(GetTypeImports(endpoints, tag));
+        fw.AddImports(endpoints.SelectMany(e => Config.GetDecoratorImports(e, tag)));
+    }
+
     protected override bool FilterTag(string tag)
     {
         return Config.ResolveVariables(Config.ApiGeneration!, tag) == ApiGeneration.Server;
@@ -49,6 +55,17 @@ public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
         return Path.Combine(Config.GetApiPath(file, tag), $"{GetClassName(file.Options.Endpoints.FileName)}.java");
     }
 
+    protected IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
+    {
+        var properties = endpoints.SelectMany(endpoint => endpoint.Params)
+            .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
+            .Select(endpoint => endpoint.Returns));
+        return properties.SelectMany(property => property!.GetTypeImports(Config, tag))
+                .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
+                .Select(e => e.Returns).OfType<CompositionProperty>()
+                .SelectMany(c => c.GetKindImports(Config, tag)));
+    }
+
     protected override void HandleFile(string filePath, string fileName, string tag, IList<Endpoint> endpoints)
     {
         var className = GetClassName(fileName);
@@ -69,24 +86,7 @@ public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private void AddImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
-    {
-        fw.AddImports(GetTypeImports(endpoints, tag));
-        fw.AddImports(endpoints.SelectMany(e => Config.GetDecoratorImports(e, tag)));
-    }
-
-    private IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
-    {
-        var properties = endpoints.SelectMany(endpoint => endpoint.Params)
-            .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
-            .Select(endpoint => endpoint.Returns));
-        return properties.SelectMany(property => property!.GetTypeImports(Config, tag))
-                .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
-                .Select(e => e.Returns).OfType<CompositionProperty>()
-                .SelectMany(c => c.GetKindImports(Config, tag)));
-    }
-
-    private void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
+    protected void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
     {
         fw.WriteLine();
         fw.WriteDocStart(1, endpoint.Description);

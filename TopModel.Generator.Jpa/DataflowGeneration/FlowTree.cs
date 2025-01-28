@@ -114,7 +114,7 @@ public class FlowTree
         return result;
     }
 
-    private List<List<DataFlow>> Graps(List<DataFlow> flows)
+    protected List<List<DataFlow>> Graps(List<DataFlow> flows)
     {
         var graps = new List<List<DataFlow>>();
         while (flows.Any(f => !graps.SelectMany(t => t).Contains(f)))

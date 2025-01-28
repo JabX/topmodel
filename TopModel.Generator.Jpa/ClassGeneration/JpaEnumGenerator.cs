@@ -28,6 +28,19 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         return !classe.Abstract && Config.CanClassUseEnums(classe, Classes.ToList());
     }
 
+    protected IEnumerable<IProperty> GetEnumProperties(Class classe)
+    {
+        List<IProperty> result = new();
+        if (classe.EnumKey != null && Config.CanClassUseEnums(classe, prop: classe.EnumKey) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey)))
+        {
+            result.Add(classe.EnumKey);
+        }
+
+        var uks = classe.UniqueKeys.Where(uk => uk.Count == 1 && Config.CanClassUseEnums(classe, Classes, uk.Single()) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey))).Select(uk => uk.Single());
+        result.AddRange(uks);
+        return result;
+    }
+
     protected string GetFileName(IProperty property, Class classe, string tag)
     {
         return Config.GetEnumFileName(property, classe, tag);
@@ -55,20 +68,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    private IEnumerable<IProperty> GetEnumProperties(Class classe)
-    {
-        List<IProperty> result = new();
-        if (classe.EnumKey != null && Config.CanClassUseEnums(classe, prop: classe.EnumKey) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey)))
-        {
-            result.Add(classe.EnumKey);
-        }
-
-        var uks = classe.UniqueKeys.Where(uk => uk.Count == 1 && Config.CanClassUseEnums(classe, Classes, uk.Single()) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey))).Select(uk => uk.Single());
-        result.AddRange(uks);
-        return result;
-    }
-
-    private void WriteEnum(IProperty property, Class classe, string tag)
+    protected void WriteEnum(IProperty property, Class classe, string tag)
     {
         var packageName = Config.GetEnumPackageName(classe, tag);
         using var fw = new JavaWriter(Config.GetEnumFileName(property, classe, tag), _logger, packageName, null);

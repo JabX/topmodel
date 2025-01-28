@@ -38,54 +38,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         return Config.GetMapperFilePath(mapper, GetBestClassTag(mapper.Classe, tag));
     }
 
-    protected override void HandleFile(string fileName, string tag, IList<(Class Classe, FromMapper Mapper)> fromMappers, IList<(Class Classe, ClassMappings Mapper)> toMappers)
-    {
-        var sampleFromMapper = fromMappers.FirstOrDefault();
-        var sampleToMapper = toMappers.FirstOrDefault();
-
-        var (mapperNs, modelPath) = sampleFromMapper != default
-            ? Config.GetMapperLocation(sampleFromMapper)
-            : Config.GetMapperLocation(sampleToMapper);
-
-        var package = Config.GetPackageName(mapperNs, modelPath, GetBestClassTag(sampleFromMapper.Classe != null ? sampleFromMapper.Classe : sampleToMapper.Classe, tag));
-
-        using var fw = new JavaWriter(fileName, _logger, package, null);
-
-        var imports = fromMappers.SelectMany(m => m.Mapper.ClassParams.Select(p => p.Class).Concat([m.Classe]))
-            .Concat(toMappers.SelectMany(m => new[] { m.Classe, m.Mapper.Class }))
-            .Where(c => Classes.Contains(c))
-            .Select(c => c.GetImport(Config, c.Tags.Contains(tag) ? tag : c.Tags.Intersect(Config.Tags).First()))
-            .Distinct()
-            .ToArray();
-
-        fw.AddImports(imports);
-        fw.WriteLine();
-        if (Config.GeneratedHint)
-        {
-            fw.WriteLine(0, Config.GeneratedAnnotation);
-        }
-
-        fw.WriteLine($@"public class {Config.GetMapperName(mapperNs, modelPath)} {{");
-
-        fw.WriteLine();
-        fw.WriteLine(1, $@"private {Config.GetMapperName(mapperNs, modelPath)}() {{");
-        fw.WriteLine(2, "// private constructor to hide implicite public one");
-        fw.WriteLine(1, "}");
-
-        foreach (var (classe1, mapper) in fromMappers)
-        {
-            WriteFromMapper(classe1, mapper, fw, GetBestClassTag(classe1, tag));
-        }
-
-        foreach (var (classe, mapper1) in toMappers)
-        {
-            WriteToMapper(classe, mapper1, fw, GetBestClassTag(classe, tag));
-        }
-
-        fw.WriteLine("}");
-    }
-
-    private (string Getter, bool CheckSourceNull) GetSourceGetter(IProperty propertySource, IProperty propertyTarget, Class classe, JavaWriter fw, string sourceName, string tag)
+    protected (string Getter, bool CheckSourceNull) GetSourceGetter(IProperty propertySource, IProperty propertyTarget, Class classe, JavaWriter fw, string sourceName, string tag)
     {
         var getter = string.Empty;
         var getterName = JpaModelPropertyGenerator.GetGetterName(propertySource);
@@ -239,7 +192,54 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                 propertyTarget.Domain), CheckSourceNull: checkSourceNull);
     }
 
-    private void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
+    protected override void HandleFile(string fileName, string tag, IList<(Class Classe, FromMapper Mapper)> fromMappers, IList<(Class Classe, ClassMappings Mapper)> toMappers)
+    {
+        var sampleFromMapper = fromMappers.FirstOrDefault();
+        var sampleToMapper = toMappers.FirstOrDefault();
+
+        var (mapperNs, modelPath) = sampleFromMapper != default
+            ? Config.GetMapperLocation(sampleFromMapper)
+            : Config.GetMapperLocation(sampleToMapper);
+
+        var package = Config.GetPackageName(mapperNs, modelPath, GetBestClassTag(sampleFromMapper.Classe != null ? sampleFromMapper.Classe : sampleToMapper.Classe, tag));
+
+        using var fw = new JavaWriter(fileName, _logger, package, null);
+
+        var imports = fromMappers.SelectMany(m => m.Mapper.ClassParams.Select(p => p.Class).Concat([m.Classe]))
+            .Concat(toMappers.SelectMany(m => new[] { m.Classe, m.Mapper.Class }))
+            .Where(c => Classes.Contains(c))
+            .Select(c => c.GetImport(Config, c.Tags.Contains(tag) ? tag : c.Tags.Intersect(Config.Tags).First()))
+            .Distinct()
+            .ToArray();
+
+        fw.AddImports(imports);
+        fw.WriteLine();
+        if (Config.GeneratedHint)
+        {
+            fw.WriteLine(0, Config.GeneratedAnnotation);
+        }
+
+        fw.WriteLine($@"public class {Config.GetMapperName(mapperNs, modelPath)} {{");
+
+        fw.WriteLine();
+        fw.WriteLine(1, $@"private {Config.GetMapperName(mapperNs, modelPath)}() {{");
+        fw.WriteLine(2, "// private constructor to hide implicite public one");
+        fw.WriteLine(1, "}");
+
+        foreach (var (classe1, mapper) in fromMappers)
+        {
+            WriteFromMapper(classe1, mapper, fw, GetBestClassTag(classe1, tag));
+        }
+
+        foreach (var (classe, mapper1) in toMappers)
+        {
+            WriteToMapper(classe, mapper1, fw, GetBestClassTag(classe, tag));
+        }
+
+        fw.WriteLine("}");
+    }
+
+    protected void WriteFromMapper(Class classe, FromMapper mapper, JavaWriter fw, string tag)
     {
         if (Config.CanClassUseEnums(classe, Classes))
         {
@@ -422,7 +422,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         fw.WriteLine(1, "}");
     }
 
-    private void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
+    protected void WriteToMapper(Class classe, ClassMappings mapper, JavaWriter fw, string tag)
     {
         if (Config.CanClassUseEnums(mapper.Class, Classes))
         {

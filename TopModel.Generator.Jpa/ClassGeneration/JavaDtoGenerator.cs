@@ -19,8 +19,6 @@ public class JavaDtoGenerator : JavaClassGeneratorBase
 
     public override string Name => "JavaDtoGen";
 
-    private List<Class> AvailableClasses => Classes.ToList();
-
     protected override bool FilterClass(Class classe)
     {
         return !classe.Abstract && !classe.IsPersistent && !Config.CanClassUseEnums(classe, Classes);
@@ -88,7 +86,7 @@ public class JavaDtoGenerator : JavaClassGeneratorBase
 
         if (Config.MappersInClass)
         {
-            ConstructorGenerator.WriteFromMappers(fw, classe, AvailableClasses, tag);
+            ConstructorGenerator.WriteFromMappers(fw, classe, Classes, tag);
         }
     }
 

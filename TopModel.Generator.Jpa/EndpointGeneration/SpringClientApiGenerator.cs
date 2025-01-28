@@ -21,6 +21,11 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
 
     public override string Name => "SpringApiClientGen";
 
+    protected static string GetClassName(string fileName)
+    {
+        return $"{fileName.ToPascalCase()}Client";
+    }
+
     protected override bool FilterTag(string tag)
     {
         return Config.ResolveVariables(Config.ApiGeneration!, tag) == ApiGeneration.Client;
@@ -29,6 +34,17 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
     protected override string GetFilePath(ModelFile file, string tag)
     {
         return Path.Combine(Config.GetApiPath(file, tag), $"{GetClassName(file.Options.Endpoints.FileName)}.java");
+    }
+
+    protected IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
+    {
+        var properties = endpoints.SelectMany(endpoint => endpoint.Params)
+            .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
+            .Select(endpoint => endpoint.Returns));
+        return properties.SelectMany(property => property!.GetTypeImports(Config, tag))
+                .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
+                .Select(e => e.Returns).OfType<CompositionProperty>()
+                .SelectMany(c => c.GetKindImports(Config, tag)));
     }
 
     protected override void HandleFile(string filePath, string fileName, string tag, IList<Endpoint> endpoints)
@@ -64,23 +80,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.WriteLine("}");
     }
 
-    private static string GetClassName(string fileName)
-    {
-        return $"{fileName.ToPascalCase()}Client";
-    }
-
-    private IEnumerable<string> GetTypeImports(IEnumerable<Endpoint> endpoints, string tag)
-    {
-        var properties = endpoints.SelectMany(endpoint => endpoint.Params)
-            .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
-            .Select(endpoint => endpoint.Returns));
-        return properties.SelectMany(property => property!.GetTypeImports(Config, tag))
-                .Concat(endpoints.Where(endpoint => endpoint.Returns is not null)
-                .Select(e => e.Returns).OfType<CompositionProperty>()
-                .SelectMany(c => c.GetKindImports(Config, tag)));
-    }
-
-    private void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
+    protected void WriteEndpoint(JavaWriter fw, Endpoint endpoint, string tag)
     {
         fw.WriteLine();
         fw.WriteDocStart(1, endpoint.Description);
@@ -195,7 +195,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         fw.Write(1, method);
     }
 
-    private void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
+    protected void WriteImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
     {
         fw.AddImports(GetTypeImports(endpoints, tag));
         fw.AddImports(endpoints.SelectMany(e => Config.GetDecoratorImports(e, tag)));
