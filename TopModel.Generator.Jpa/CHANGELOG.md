@@ -1,3 +1,7 @@
+## 1.3.0
+
+- [#434](https://github.com/klee-contrib/topmodel/pull/434) - Enumérations représentant totalement l'entité. Ajout du mode `enumsAsEnums`
+
 ## 1.2.5
 
 - [48855](https://github.com/klee-contrib/topmodel/commit/48855ffee1a89e8157770b720c3dbc72aa563241) [JPA] Fix api client génériques
