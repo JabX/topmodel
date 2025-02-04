@@ -112,14 +112,29 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             {
                 if (apSource.Type == AssociationType.OneToOne || apSource.Type == AssociationType.ManyToOne)
                 {
-                    getter = $"{sourceName}.{getterName}().get{apSource.Property.NameByClassPascal}()";
+                    if (Config.EnumsAsEnums && Config.CanClassUseEnums(apSource.Association, prop: apSource.Property, availableClasses: Classes))
+                    {
+                        getter = $"{sourceName}.{getterName}()";
+                        checkSourceNull = false;
+                    }
+                    else
+                    {
+                        getter = $"{sourceName}.{getterName}().get{apSource.Property.NameByClassPascal}()";
+                    }
                 }
                 else
                 {
-                    getter = $"{sourceName}.{getterName}().stream().filter(Objects::nonNull).map({apSource.Association.NamePascal}::get{apSource.Property.NameByClassPascal}).collect(Collectors.toList())";
                     fw.AddImport("java.util.stream.Collectors");
                     fw.AddImport("java.util.Objects");
-                    fw.AddImport(apSource.Association.GetImport(Config, tag));
+                    if (Config.EnumsAsEnums && Config.CanClassUseEnums(apSource.Association, prop: apSource.Property, availableClasses: Classes))
+                    {
+                        getter = $"{sourceName}.{getterName}().stream().filter(Objects::nonNull).collect(Collectors.toList())";
+                    }
+                    else
+                    {
+                        getter = $"{sourceName}.{getterName}().stream().filter(Objects::nonNull).map({apSource.Association.NamePascal}::get{apSource.Property.NameByClassPascal}).collect(Collectors.toList())";
+                        fw.AddImport(apSource.Association.GetImport(Config, tag));
+                    }
                 }
             }
         }
@@ -130,25 +145,38 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             {
                 if (!propertySource.Class.IsPersistent)
                 {
-                    if (apTarget.Type.IsToMany())
+                    if (Config.EnumsAsEnums)
                     {
-                        getter = $@"{sourceName}.{getterName}().stream().map({apTarget.Association.NamePascal}::new).collect(Collectors.toList())";
-                        fw.AddImport("java.util.stream.Collectors");
+                        if (apTarget.Type.IsToMany())
+                        {
+                            getter = $@"{sourceName}.{getterName}().stream().collect(Collectors.toList())";
+                            fw.AddImport("java.util.stream.Collectors");
+                        }
+                        else
+                        {
+                            getter = $@"{sourceName}.{getterName}()";
+                            fw.AddImport(apTarget.Association.GetImport(Config, tag));
+                            checkSourceNull = false;
+                        }
                     }
                     else
                     {
-                        getter = $"new {apTarget.Association.NamePascal}({sourceName}.{getterName}())";
-                        fw.AddImport(apTarget.Association.GetImport(Config, tag));
-                        checkSourceNull = true;
+                        if (apTarget.Type.IsToMany())
+                        {
+                            getter = $@"{sourceName}.{getterName}().stream().map({apTarget.Association.NamePascal}::new).collect(Collectors.toList())";
+                            fw.AddImport("java.util.stream.Collectors");
+                        }
+                        else
+                        {
+                            getter = $"new {apTarget.Association.NamePascal}({sourceName}.{getterName}())";
+                            fw.AddImport(apTarget.Association.GetImport(Config, tag));
+                            checkSourceNull = true;
+                        }
                     }
                 }
                 else
                 {
                     getter = $@"{sourceName}.{getterName}()";
-                    if (!apTarget.Type.IsToMany())
-                    {
-                        checkSourceNull = true;
-                    }
                 }
             }
             else if (propertyTarget.Class.IsPersistent && propertySource.Class.IsPersistent)
@@ -335,9 +363,8 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             {
                 var propertyTarget = mapping.Key;
                 var propertySource = mapping.Value!;
-                var getterPrefix = Config.GetType(propertyTarget!) == "boolean" ? "is" : "get";
                 var (getter, checkSourceNull) = GetSourceGetter(propertySource, propertyTarget, classe, fw, param.Name.ToCamelCase(), tag);
-                var propertyTargetName = Config.UseJdbc || propertyTarget is AssociationProperty ap && !ap.Association.IsPersistent ? propertyTarget.NamePascal : propertyTarget.NameByClassPascal;
+                var propertyTargetName = _jpaModelPropertyGenerator!.GetPropertyName(propertyTarget);
                 if (classe.Abstract)
                 {
                     if (!isFirst)
@@ -351,7 +378,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
                     if (checkSourceNull)
                     {
-                        hydrate += $"{param.Name}.{propertyTargetName.WithPrefix(getterPrefix)}() != null ? {getter} : null";
+                        hydrate += $"{param.Name}.{_jpaModelPropertyGenerator!.GetGetterName(propertyTarget)}() != null ? {getter} : null";
                     }
                     else
                     {
@@ -364,10 +391,10 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                     {
                         if (checkSourceNull)
                         {
-                            fw.WriteLine(indent, $"if ({param.Name}.{propertySource.NameByClassPascal.WithPrefix(getterPrefix)}() != null) {{");
+                            fw.WriteLine(indent, $"if ({param.Name}.{_jpaModelPropertyGenerator!.GetGetterName(propertySource)}() != null) {{");
                         }
 
-                        fw.WriteLine(indent + (checkSourceNull ? 1 : 0), $"target.{propertyTargetName!.WithPrefix("set")}({getter});");
+                        fw.WriteLine(indent + (checkSourceNull ? 1 : 0), $"target.{_jpaModelPropertyGenerator!.GetSetterName(propertyTarget)}({getter});");
 
                         if (checkSourceNull)
                         {
@@ -408,7 +435,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             }
             else
             {
-                fw.WriteLine(2, $"target.{propertyTargetName.WithPrefix("set")}({param.Property.NameCamel});");
+                fw.WriteLine(2, $"target.{_jpaModelPropertyGenerator!.GetSetterName(param.TargetProperty)}({param.Property.NameCamel}); /*toto*/");
             }
         }
 
@@ -503,7 +530,7 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                         fw.WriteLine(2, $"if (source.{propertySource.NameByClassPascal.WithPrefix(getterPrefix)}() != null) {{");
                     }
 
-                    fw.WriteLine(2 + (checkSourceNull ? 1 : 0), $"target.{propertyTargetName.WithPrefix("set")}({getter});");
+                    fw.WriteLine(2 + (checkSourceNull ? 1 : 0), $"target.{_jpaModelPropertyGenerator!.GetSetterName(propertyTarget)}({getter});");
 
                     if (checkSourceNull)
                     {

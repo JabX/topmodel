@@ -271,7 +271,7 @@ public class JpaModelPropertyGenerator
     {
         if (property.Class.IsPersistent)
         {
-            if (property.Association.IsPersistent)
+            if (property.Association.IsPersistent && !(_config.EnumsAsEnums && _config.CanClassUseEnums(property.Property.Class, _classes, property.Property)))
             {
                 if (!property.PrimaryKey || property.Class.PrimaryKey.Count() <= 1)
                 {
@@ -399,7 +399,14 @@ public class JpaModelPropertyGenerator
             {
                 if (defaultValue != "null")
                 {
-                    return $" = new {ap.Association.NamePascal}({defaultValue})";
+                    if (_config.EnumsAsEnums)
+                    {
+                        return $" = {defaultValue}";
+                    }
+                    else
+                    {
+                        return $" = new {ap.Association.NamePascal}({defaultValue})";
+                    }
                 }
             }
 
