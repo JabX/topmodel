@@ -189,10 +189,10 @@ public class JpaModelPropertyGenerator
         var propertyName = GetPropertyName(property);
         fw.WriteLine();
         var method = new JavaMethod("void", GetSetterName(property))
-            {
-                Visibility = "public",
-                Comment = $"Set the value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}"
-            }
+        {
+            Visibility = "public",
+            Comment = $"Set the value of {{@link {property.Class.GetImport(_config, tag)}#{propertyName} {propertyName}}}"
+        }
             .AddParameter(new JavaMethodParameter(GetPropertyType(property), propertyName)
             {
                 Comment = $"value to set"
@@ -225,43 +225,45 @@ public class JpaModelPropertyGenerator
 
     protected virtual IEnumerable<JavaAnnotation> GetAnnotations(AliasProperty property, string tag)
     {
-        var shouldWriteAssociation = property.Class.IsPersistent && property.Property is AssociationProperty;
-        if (property.PrimaryKey && property.Class.IsPersistent)
+        if (property.Class.IsPersistent)
         {
-            foreach (var a in GetIdAnnotations(property))
+            var shouldWriteAssociation = property.Property is AssociationProperty ap && ap.Association.IsPersistent;
+            if (property.PrimaryKey && property.Class.IsPersistent)
             {
-                yield return a;
+                foreach (var a in GetIdAnnotations(property))
+                {
+                    yield return a;
+                }
+            }
+
+            if (shouldWriteAssociation)
+            {
+                foreach (var a in GetJpaAssociationAnnotations((AssociationProperty)property.Property, tag))
+                {
+                    yield return a;
+                }
+            }
+            else if (!(property.PrimaryKey && property.Class.PrimaryKey.Count() > 1))
+            {
+                yield return GetColumnAnnotation(property);
+            }
+
+            if (property.Property is CompositionProperty cp)
+            {
+                foreach (var a in GetAnnotations(cp, tag))
+                {
+                    yield return a;
+                }
+            }
+
+            if (_config.CanClassUseEnums(property.Property.Class, _classes, property.Property))
+            {
+                yield return EnumAnnotation;
             }
         }
-
-        if (shouldWriteAssociation)
-        {
-            foreach (var a in GetJpaAssociationAnnotations((AssociationProperty)property.Property, tag))
-            {
-                yield return a;
-            }
-        }
-        else if (property.Class.IsPersistent && !(property.PrimaryKey && property.Class.PrimaryKey.Count() > 1))
-        {
-            yield return GetColumnAnnotation(property);
-        }
-
-        if (property.Property is CompositionProperty cp)
-        {
-            foreach (var a in GetAnnotations(cp, tag))
-            {
-                yield return a;
-            }
-        }
-
-        if (property.Required && !property.PrimaryKey && !property.Class.IsPersistent)
+        else if (property.Required && !property.PrimaryKey)
         {
             yield return NotNullAnnotation;
-        }
-
-        if (_config.CanClassUseEnums(property.Property.Class, _classes, property.Property) && property.Class.IsPersistent)
-        {
-            yield return EnumAnnotation;
         }
     }
 
@@ -269,27 +271,38 @@ public class JpaModelPropertyGenerator
     {
         if (property.Class.IsPersistent)
         {
-            if (!property.PrimaryKey || property.Class.PrimaryKey.Count() <= 1)
+            if (property.Association.IsPersistent)
             {
-                foreach (var a in GetJpaAssociationAnnotations(property, tag))
+                if (!property.PrimaryKey || property.Class.PrimaryKey.Count() <= 1)
                 {
-                    yield return a;
+                    foreach (var a in GetJpaAssociationAnnotations(property, tag))
+                    {
+                        yield return a;
+                    }
+                }
+
+                if (property.Type == AssociationType.ManyToMany || property.Type == AssociationType.OneToMany)
+                {
+                    if (property.Association.OrderProperty != null && GetPropertyType(property).Contains("List"))
+                    {
+                        yield return new JavaAnnotation("OrderBy", $@"""{property.Association.OrderProperty.NameByClassCamel} ASC""", $"{JavaxOrJakarta}.persistence.OrderBy");
+                    }
+                }
+
+                if (property.PrimaryKey)
+                {
+                    foreach (var a in GetIdAnnotations(property))
+                    {
+                        yield return a;
+                    }
                 }
             }
-
-            if (property.Type == AssociationType.ManyToMany || property.Type == AssociationType.OneToMany)
+            else
             {
-                if (property.Association.OrderProperty != null && GetPropertyType(property).Contains("List"))
+                yield return GetColumnAnnotation(property);
+                if (_config.CanClassUseEnums(property.Property.Class, _classes, property.Property) && property.Class.IsPersistent)
                 {
-                    yield return new JavaAnnotation("OrderBy", $@"""{property.Association.OrderProperty.NameByClassCamel} ASC""", $"{JavaxOrJakarta}.persistence.OrderBy");
-                }
-            }
-
-            if (property.PrimaryKey)
-            {
-                foreach (var a in GetIdAnnotations(property))
-                {
-                    yield return a;
+                    yield return EnumAnnotation;
                 }
             }
         }
