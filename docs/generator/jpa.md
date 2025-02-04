@@ -273,11 +273,7 @@ Par ailleurs, elles implémentent toutes l'interface `java.io.Serializable`. Est
 De plus, toutes les propriétés `required: true` reçoivent l'annotation `javax.validation.constraints.NotNull` (ou `jakarata.validation.constraints.NotNull` selon la configuration choisie).
 
 Précautions d'emploi :
-
-- Ne pas ajouter d'association (non sens dans un modèle non persisté)
 - Ne pas composer avec une entité persitée
-
-Ceci afin d'éviter de mélanger les objets persistés et non persistés. En effet, si votre objet est sérializé, Hibernate risque de charger tout l'arbre de l'objet correspondant
 
 #### Classes abstraites
 
@@ -716,6 +712,26 @@ Le générateur créé un fichier de configuration de job par module. Ce job ord
   _Valeur par défaut_: `"javagen:{app}/enums/{module}"`
 
   _Variables par tag_: **oui** (plusieurs définition de classes pourraient être générées si un fichier à plusieurs tags)
+
+- `enumsValuesPath`
+
+  Localisation des classes d'enums dans le mode `enumsAsEnums`, relative au répertoire de génération.
+
+  Le chemin des fichiers cibles sera calculé en remplaçant les `.` et le `:` par des `/` dans cette valeur, tandis que le nom du package des classes générées sera calculé en prenant ce qui est à droite du dernier `:` et en remplaçant tous les `/` par des `.`.
+
+  _Templating_: `{module}`
+
+  _Valeur par défaut_: `"javagen:{app}/enums/{module}"`
+
+  _Variables par tag_: **oui** (plusieurs définition de classes pourraient être générées si un fichier à plusieurs tags)
+
+- `enumsAsEnums`
+
+  Mode de génération des enums (voir documentation)
+
+  _Valeur par défaut_: `false`
+
+  _Variables par tag_: **non**
 
 - `apiPath`
 
