@@ -18,7 +18,6 @@ endpoint:
   params:
     - composition: User
       name: body
-      required: true
       comment: Non documenté
 ---
 endpoint:
@@ -31,12 +30,10 @@ endpoint:
     - composition: User
       name: body
       domain: DO_LIST
-      required: true
       comment: Non documenté
   returns:
     composition: User
     name: Result
-    required: true
     comment: Non documenté
 ---
 endpoint:
@@ -63,7 +60,6 @@ endpoint:
   returns:
     composition: User
     name: Result
-    required: true
     comment: Non documenté
 ---
 endpoint:
@@ -102,7 +98,6 @@ endpoint:
   params:
     - composition: User
       name: body
-      required: true
       comment: Non documenté
 
     - name: username

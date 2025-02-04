@@ -10,6 +10,11 @@ namespace TopModel.Generator.Jpa;
 public class JpaConfig : GeneratorConfigBase
 {
     /// <summary>
+    /// Transforme les classes contenant des values en enum. Par défaut, false.
+    /// </summary>
+    public bool EnumsAsEnums { get; set; } = false;
+
+    /// <summary>
     /// Localisation des classes persistées du modèle, relative au répertoire de génération. Par défaut, 'javagen/{app}/entities/{module}'.
     /// </summary>
     public string EntitiesPath { get; set; } = "javagen:{app}/entities/{module}";
@@ -173,6 +178,11 @@ public class JpaConfig : GeneratorConfigBase
         nameof(DataFlowsPath)
     ];
 
+    /// <summary>
+    /// Localisation des enums de valeurs, relative au répertoire de génération. Par défaut, 'javagen:{app}/enums/{module}'.
+    /// </summary>
+    public string EnumsValuesPath { get; set; } = "default";
+
     public override bool CanClassUseEnums(Class classe, IEnumerable<Class>? availableClasses = null, IProperty? prop = null)
     {
         return !UseJdbc && base.CanClassUseEnums(classe, availableClasses, prop)
@@ -248,6 +258,19 @@ public class JpaConfig : GeneratorConfigBase
     public string GetEnumPackageName(Class classe, string tag)
     {
         return GetPackageName(classe.Namespace, EnumsPath, tag);
+    }
+
+    public string GetEnumValueFileName(Class classe, string tag)
+    {
+        return Path.Combine(
+            OutputDirectory,
+            ResolveVariables(EnumsValuesPath, tag, module: classe.Namespace.Module).ToFilePath(),
+            $"{classe.NamePascal}.java");
+    }
+
+    public string GetEnumValuePackageName(Class classe, string tag)
+    {
+        return GetPackageName(classe.Namespace, EnumsValuesPath, tag);
     }
 
     public string GetMapperFilePath((Class Classe, FromMapper Mapper) mapper, string tag)
@@ -327,13 +350,23 @@ public class JpaConfig : GeneratorConfigBase
         return ResolveVariables(modelPath, tag, module: ns.Module).ToPackageName();
     }
 
+    public bool IsEnumNameJavaValid(string name)
+    {
+        return IsEnumNameValid(name);
+    }
+
     protected override string GetConstEnumName(string className, string refName)
     {
-        return $"{className.ToPascalCase()}.Values.{refName}";
+        return $"{className.ToPascalCase()}.{refName}";
     }
 
     protected override string GetEnumType(string className, string propName, bool isPrimaryKeyDef = false)
     {
+        if (EnumsAsEnums)
+        {
+            return $"{className.ToPascalCase()}";
+        }
+
         return $"{className.ToPascalCase()}{propName.ToPascalCase()}";
     }
 
@@ -341,4 +374,5 @@ public class JpaConfig : GeneratorConfigBase
     {
         return base.IsEnumNameValid(name) && !Regex.IsMatch(name ?? string.Empty, "(?<=[^$\\w'\"\\])(?!(abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|double|do|else|enum|extends|false|final|finally|float|for|goto|if|implements|import|instanceof|int|interface|long|native|new|null|package|private|protected|public|return|short|static|strictfp|super|switch|synchronized|this|throw|throws|transient|true|try|void|volatile|while|_\\b))([A-Za-z_$][$\\w]*)");
     }
+
 }

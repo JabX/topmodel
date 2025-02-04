@@ -14,7 +14,7 @@ public static class ImportsJpaExtensions
         return config.GetDomainImports(cp, config.GetBestClassTag(cp.Composition, tag)).ToList();
     }
 
-    public static List<string> GetTypeImports(this IProperty p, JpaConfig config, string tag)
+    public static IEnumerable<string> GetTypeImports(this IProperty p, JpaConfig config, string tag)
     {
         return p switch
         {
@@ -48,21 +48,28 @@ public static class ImportsJpaExtensions
         return imports;
     }
 
-    private static List<string> GetTypeImports(this AssociationProperty ap, JpaConfig config, string tag)
+    private static IEnumerable<string> GetTypeImports(this AssociationProperty ap, JpaConfig config, string tag)
     {
-        var imports = new List<string>();
-
-        imports.AddRange(config.GetDomainImports(ap, config.GetBestClassTag(ap.Association, tag)));
-        if (!config.UseJdbc && ap.Class != null && ap.Association.IsPersistent)
+        foreach (var import in config.GetDomainImports(ap, config.GetBestClassTag(ap.Association, tag)))
         {
-            imports.Add(ap.Association.GetImport(config, config.GetBestClassTag(ap.Association, tag)));
-        }
-        else if (!(ap.Association.IsPersistent || ap.Class != null && !ap.Class.IsPersistent || ap.Class == null) && config.CanClassUseEnums(ap.Association, prop: ap.Property))
-        {
-            imports.Add($"{config.GetEnumPackageName(ap.Association, config.GetBestClassTag(ap.Association, tag))}.{config.GetEnumName(ap.Property, ap.Association)}");
+            yield return import;
         }
 
-        return imports;
+        if (config.EnumsAsEnums && config.CanClassUseEnums(ap.Association, prop: ap.Property))
+        {
+            yield return $"{config.GetEnumValuePackageName(ap.Association.EnumKey!.Class, tag)}.{ap.Association.NamePascal}";
+        }
+        else
+        {
+            if (!config.UseJdbc && ap.Class != null && ap.Association.IsPersistent)
+            {
+                yield return ap.Association.GetImport(config, config.GetBestClassTag(ap.Association, tag));
+            }
+            else if (!(ap.Association.IsPersistent || ap.Class != null && !ap.Class.IsPersistent || ap.Class == null) && config.CanClassUseEnums(ap.Association, prop: ap.Property))
+            {
+                yield return $"{config.GetEnumPackageName(ap.Association, config.GetBestClassTag(ap.Association, tag))}.{config.GetEnumName(ap.Property, ap.Association)}";
+            }
+        }
     }
 
     private static List<string> GetTypeImports(this CompositionProperty cp, JpaConfig config, string tag)
@@ -79,11 +86,25 @@ public static class ImportsJpaExtensions
 
         if (config.CanClassUseEnums(ap.Property.Class, prop: ap.Property))
         {
-            imports.Add($"{config.GetEnumPackageName(ap.Property.Class, config.GetBestClassTag(ap.Property.Class, tag))}.{config.GetEnumName(ap.Property, ap.Property.Class)}");
+            if (config.EnumsAsEnums)
+            {
+                imports.Add($"{config.GetEnumValuePackageName(ap.Property.Class.EnumKey!.Class, tag)}.{ap.Property.Class.NamePascal}");
+            }
+            else
+            {
+                imports.Add($"{config.GetEnumPackageName(ap.Property.Class, config.GetBestClassTag(ap.Property.Class, tag))}.{config.GetEnumName(ap.Property, ap.Property.Class)}");
+            }
         }
-        else if (ap.Property is AssociationProperty apr && apr.Association.PrimaryKey.Count() == 1 && config.CanClassUseEnums(apr.Association, prop: apr.Property))
+        else if (ap.Property is AssociationProperty apr && apr.Association.PrimaryKey.Count() <= 1 && config.CanClassUseEnums(apr.Association, prop: apr.Property))
         {
-            imports.Add($"{config.GetEnumPackageName(apr.Association, config.GetBestClassTag(apr.Association, tag))}.{config.GetEnumName(apr.Property, apr.Association)}");
+            if (config.EnumsAsEnums)
+            {
+                imports.Add($"{config.GetEnumValuePackageName(apr.Association, config.GetBestClassTag(apr.Association, tag))}.{apr.Association.NamePascal}");
+            }
+            else
+            {
+                imports.Add($"{config.GetEnumPackageName(ap.Property.Class, config.GetBestClassTag(ap.Property.Class, tag))}.{config.GetEnumName(apr.Property, apr.Property.Class)}");
+            }
         }
         else if (ap.Property is CompositionProperty cp)
         {
