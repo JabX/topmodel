@@ -11,16 +11,9 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpApiServerGenerator : EndpointsGeneratorBase<CsharpConfig>
+public class CSharpApiServerGenerator(ILogger<CSharpApiServerGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<CSharpApiServerGenerator> _logger;
-
-    public CSharpApiServerGenerator(ILogger<CSharpApiServerGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpApiServerGen";
 
     protected override bool FilterTag(string tag)
@@ -165,7 +158,7 @@ public class {className} : Controller
                 var index = endpoints.IndexOf(endpoint);
                 var firstMethod = controller.Members.OfType<MethodDeclarationSyntax>().FirstOrDefault();
                 var start = firstMethod != null ? controller.Members.IndexOf(firstMethod) : 0;
-                controller = controller.WithMembers(List(controller.Members.Take(start + index).Concat(new[] { method }).Concat(controller.Members.Skip(start + index))));
+                controller = controller.WithMembers(List(controller.Members.Take(start + index).Concat([method]).Concat(controller.Members.Skip(start + index))));
             }
         }
 
@@ -182,7 +175,8 @@ public class {className} : Controller
             controller = controller.WithOpenBraceToken(controller.OpenBraceToken.WithoutTrivia());
         }
 
-        using var fw = new FileWriter(filePath, _logger, true) { HeaderMessage = "ATTENTION, CE FICHIER EST PARTIELLEMENT GENERE AUTOMATIQUEMENT !" };
+        using var fw = OpenFileWriter(filePath);
+        fw.HeaderMessage = "ATTENTION, CE FICHIER EST PARTIELLEMENT GENERE AUTOMATIQUEMENT !";
         fw.Write(syntaxTree.GetRoot().ReplaceNode(existingController, controller).ToString());
     }
 }

@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Utils;
@@ -9,10 +10,18 @@ public abstract class GeneratorBase<T> : IModelWatcher
     where T : GeneratorConfigBase
 {
     private readonly ILogger _logger;
+    private readonly GeneratedFileWriterProvider? _writerProvider;
 
+    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
     protected GeneratorBase(ILogger logger)
     {
         _logger = logger;
+    }
+
+    protected GeneratorBase(ILogger logger, GeneratedFileWriterProvider writerProvider)
+    {
+        _logger = logger;
+        _writerProvider = writerProvider;
     }
 
     public abstract string Name { get; }
@@ -69,6 +78,26 @@ public abstract class GeneratorBase<T> : IModelWatcher
         }
 
         HandleFiles(handledFiles);
+    }
+
+    public GeneratedFileWriter OpenFileWriter(string fileName, bool encoderShouldEmitUTF8Identifier = true)
+    {
+        if (_writerProvider == null)
+        {
+            throw new NotImplementedException();
+        }
+
+        return _writerProvider.OpenFileWriter(Path.Combine(Config.OutputDirectory, fileName).Replace("\\", "/"), _logger, encoderShouldEmitUTF8Identifier);
+    }
+
+    public GeneratedFileWriter OpenFileWriter(string fileName, Encoding encoding)
+    {
+        if (_writerProvider == null)
+        {
+            throw new NotImplementedException();
+        }
+
+        return _writerProvider.OpenFileWriter(Path.Combine(Config.OutputDirectory, fileName).Replace("\\", "/"), _logger, encoding);
     }
 
     protected IEnumerable<ClassValue> GetAllValues(Class classe)

@@ -1,22 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de DAOs JPA.
 /// </summary>
-public class JpaModelInterfaceGenerator : ClassGeneratorBase<JpaConfig>
+public class JpaModelInterfaceGenerator(ILogger<JpaModelInterfaceGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JpaModelInterfaceGenerator> _logger;
-
-    public JpaModelInterfaceGenerator(ILogger<JpaModelInterfaceGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JpaInterfaceGen";
 
     protected override bool FilterClass(Class classe)
@@ -32,7 +26,7 @@ public class JpaModelInterfaceGenerator : ClassGeneratorBase<JpaConfig>
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
         var packageName = Config.GetPackageName(classe, tag);
-        using var fw = new JavaWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(fileName, packageName, null);
         var javaxOrJakarta = Config.PersistenceMode.ToString().ToLower();
 
         WriteImports(fw, classe, tag);

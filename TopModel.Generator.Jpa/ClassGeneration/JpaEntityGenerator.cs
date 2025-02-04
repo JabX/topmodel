@@ -2,22 +2,16 @@
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEntityGenerator : JavaClassGeneratorBase
+public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : JavaClassGeneratorBase(logger, writerProvider)
 {
-    private readonly ILogger<JpaEntityGenerator> _logger;
-
-    public JpaEntityGenerator(ILogger<JpaEntityGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JpaEntityGen";
 
     protected override bool FilterClass(Class classe)
@@ -50,7 +44,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
         var packageName = Config.GetPackageName(classe, tag);
-        using var fw = new JavaWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(fileName, packageName, null);
 
         fw.WriteLine();
 
@@ -132,7 +126,7 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
 
         var table = @$"@Table(name = ""{classe.SqlName}""";
         fw.AddImport($"{JavaxOrJakarta}.persistence.Table");
-        if (classe.UniqueKeys.Any())
+        if (classe.UniqueKeys.Count > 0)
         {
             fw.AddImport($"{JavaxOrJakarta}.persistence.UniqueConstraint");
             table += ", uniqueConstraints = {";
@@ -177,11 +171,10 @@ public class JpaEntityGenerator : JavaClassGeneratorBase
 
         if (classe.Reference)
         {
-            fw.AddImports(new List<string>()
-                {
-                    "org.hibernate.annotations.Cache",
-                    "org.hibernate.annotations.CacheConcurrencyStrategy"
-                });
+            fw.AddImports([
+                "org.hibernate.annotations.Cache",
+                "org.hibernate.annotations.CacheConcurrencyStrategy"
+            ]);
             if (Config.CanClassUseEnums(classe))
             {
                 fw.AddImport("org.hibernate.annotations.Immutable");

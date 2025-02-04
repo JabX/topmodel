@@ -30,6 +30,7 @@ public static class ServiceExtensions
     public static void FixConfig(this ModelConfig config, string rootDir)
     {
         config.ModelRoot ??= string.Empty;
+        config.LockFileName ??= "topmodel.lock";
         ModelUtils.TrimSlashes(config, c => c.ModelRoot);
         ModelUtils.CombinePath(rootDir, config, c => c.ModelRoot);
         ModelUtils.CombinePath(rootDir, config.I18n, c => c.RootPath);

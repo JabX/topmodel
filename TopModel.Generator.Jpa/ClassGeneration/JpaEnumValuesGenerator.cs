@@ -9,16 +9,9 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
+public class JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : GeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JpaEnumValuesGenerator> _logger;
-
-    public JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JpaEnumValuesGen";
 
     public override IEnumerable<string> GeneratedFiles => Files
@@ -96,7 +89,7 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
     private void WriteEnum(Class classe, string tag)
     {
         var packageName = Config.GetEnumValuePackageName(classe, tag);
-        using var fw = new JavaWriter(Config.GetEnumValueFileName(classe, tag), _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(Config.GetEnumValueFileName(classe, tag), packageName, null);
         fw.WriteLine();
         var codeProperty = classe.EnumKey!;
         fw.WriteDocStart(0, $"Enumération des valeurs possibles de la classe {classe.NamePascal}");

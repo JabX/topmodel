@@ -8,19 +8,10 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptConfig>
+public class JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> logger, TranslationStore translationStore, ModelConfig modelConfig, GeneratedFileWriterProvider writerProvider)
+    : TranslationGeneratorBase<JavascriptConfig>(logger, translationStore, writerProvider)
 {
-    private readonly ILogger<JavascriptResourceGenerator> _logger;
-    private readonly ModelConfig _modelConfig;
-    private readonly TranslationStore _translationStore;
-
-    public JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> logger, TranslationStore translationStore, ModelConfig modelConfig)
-        : base(logger, translationStore)
-    {
-        _logger = logger;
-        _modelConfig = modelConfig;
-        _translationStore = translationStore;
-    }
+    private readonly TranslationStore _translationStore = translationStore;
 
     public override string Name => "JSResourceGen";
 
@@ -31,7 +22,7 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
             return null;
         }
 
-        return Config.GetCommentResourcesFilePath(property.Parent.Namespace, tag, _modelConfig.I18n.DefaultLang);
+        return Config.GetCommentResourcesFilePath(property.Parent.Namespace, tag, modelConfig.I18n.DefaultLang);
     }
 
     protected override string? GetMainResourceFilePath(string tag, string lang)
@@ -51,7 +42,8 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
 
     protected override void HandleCommentResourceFile(string filePath, string lang, IEnumerable<IProperty> properties)
     {
-        using var fw = new FileWriter(filePath, _logger, encoderShouldEmitUTF8Identifier: false) { EnableHeader = Config.ResourceMode == ResourceMode.JS };
+        using var fw = OpenFileWriter(filePath, false);
+        fw.EnableHeader = Config.ResourceMode == ResourceMode.JS;
 
         var module = properties.First().Parent.Namespace.RootModule;
 
@@ -64,7 +56,7 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
             fw.WriteLine($"export const {module.ToCamelCase()}Comments = {{");
         }
 
-        WriteSubModule(fw, _modelConfig.I18n.DefaultLang, properties.Where(p => Config.ExtendedCompositions || p is not CompositionProperty and not AliasProperty { Property: CompositionProperty }), true, 1);
+        WriteSubModule(fw, modelConfig.I18n.DefaultLang, properties.Where(p => Config.ExtendedCompositions || p is not CompositionProperty and not AliasProperty { Property: CompositionProperty }), true, 1);
 
         if (Config.ResourceMode != ResourceMode.JS)
         {
@@ -78,7 +70,7 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
 
     protected override void HandleMainResourceFile(string mainFilePath, IEnumerable<(string ModuleFilePath, string ModuleName)> modules)
     {
-        using var fw = new FileWriter(mainFilePath, _logger, encoderShouldEmitUTF8Identifier: false) { EnableHeader = true };
+        using var fw = OpenFileWriter(mainFilePath, false);
 
         foreach (var (moduleFilePath, moduleName) in modules)
         {
@@ -99,7 +91,8 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
 
     protected override void HandleResourceFile(string filePath, string lang, IEnumerable<IProperty> properties)
     {
-        using var fw = new FileWriter(filePath, _logger, encoderShouldEmitUTF8Identifier: false) { EnableHeader = Config.ResourceMode == ResourceMode.JS };
+        using var fw = OpenFileWriter(filePath, false);
+        fw.EnableHeader = Config.ResourceMode == ResourceMode.JS;
 
         var module = properties.First().Parent.Namespace.RootModule;
 
@@ -129,7 +122,7 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
         return Config.ResourceMode == ResourceMode.JS ? name : $@"""{name}""";
     }
 
-    private void WriteClasseNode(FileWriter fw, IGrouping<IPropertyContainer, IProperty> container, bool isComment, bool isLast, string lang, int indentLevel, bool onlyProperties = false)
+    private void WriteClasseNode(GeneratedFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, bool isComment, bool isLast, string lang, int indentLevel, bool onlyProperties = false)
     {
         if (!onlyProperties)
         {
@@ -152,11 +145,11 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
 
                 fw.Write(indentLevel + 1, $"{Quote(property.NameCamel)}: ");
                 fw.Write($@"""{translation}""");
-                fw.WriteLine(container.Count() == i++ && !onlyProperties && !(Config.TranslateReferences == true && container.Key is Class { DefaultProperty: not null, Enum: true } && ((container.Key as Class)?.Values.Any() ?? false)) ? string.Empty : ",");
+                fw.WriteLine(container.Count() == i++ && !onlyProperties && !(Config.TranslateReferences == true && container.Key is Class { DefaultProperty: not null, Enum: true } && container.Key is Class { Values.Count: > 0 }) ? string.Empty : ",");
             }
         }
 
-        if (Config.TranslateReferences == true && container.Key is Class { DefaultProperty: not null, Enum: true } classe && (classe?.Values.Any() ?? false))
+        if (Config.TranslateReferences == true && container.Key is Class { DefaultProperty: not null, Enum: true } classe && classe?.Values.Count > 0)
         {
             i = 1;
             fw.WriteLine(indentLevel + 1, @$"{Quote("values")}: {{");
@@ -177,7 +170,7 @@ public class JavascriptResourceGenerator : TranslationGeneratorBase<JavascriptCo
         }
     }
 
-    private void WriteSubModule(FileWriter fw, string lang, IEnumerable<IProperty> properties, bool isComment, int level)
+    private void WriteSubModule(GeneratedFileWriter fw, string lang, IEnumerable<IProperty> properties, bool isComment, int level)
     {
         var classes = properties.GroupBy(prop => prop.Parent);
         var modules = classes

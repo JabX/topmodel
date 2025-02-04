@@ -1,22 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de DAOs JPA.
 /// </summary>
-public class JpaDaoGenerator : ClassGeneratorBase<JpaConfig>
+public class JpaDaoGenerator(ILogger<JpaDaoGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JpaDaoGenerator> _logger;
-
-    public JpaDaoGenerator(ILogger<JpaDaoGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JpaDaoGen";
 
     protected override bool FilterClass(Class classe)
@@ -46,7 +40,7 @@ public class JpaDaoGenerator : ClassGeneratorBase<JpaConfig>
             tag,
             module: classe.Namespace.Module).ToPackageName();
 
-        using var fw = new JavaWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(fileName, packageName, null);
         fw.WriteLine();
         if (Config.CanClassUseEnums(classe))
         {
@@ -76,8 +70,8 @@ public class JpaDaoGenerator : ClassGeneratorBase<JpaConfig>
         fw.AddImport(classe.GetImport(Config, tag));
         if (Config.DaosInterface != null)
         {
-            int lastIndexOf = Config.DaosInterface.LastIndexOf(".");
-            string daosInterfaceName = lastIndexOf > -1 ? Config.DaosInterface.Substring(lastIndexOf + 1) : Config.DaosInterface;
+            int lastIndexOf = Config.DaosInterface.LastIndexOf('.');
+            string daosInterfaceName = lastIndexOf > -1 ? Config.DaosInterface[(lastIndexOf + 1)..] : Config.DaosInterface;
             daosInterface = $"{daosInterfaceName}<{classe.NamePascal}, {pk}>";
             fw.AddImport($"{Config.DaosInterface}");
         }

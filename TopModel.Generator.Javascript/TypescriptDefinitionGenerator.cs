@@ -10,16 +10,9 @@ using static JavascriptUtils;
 /// <summary>
 /// Générateur de définitions Typescript.
 /// </summary>
-public class TypescriptDefinitionGenerator : ClassGeneratorBase<JavascriptConfig>
+public class TypescriptDefinitionGenerator(ILogger<TypescriptDefinitionGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
-    private readonly ILogger<TypescriptDefinitionGenerator> _logger;
-
-    public TypescriptDefinitionGenerator(ILogger<TypescriptDefinitionGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JSDefinitionGen";
 
     protected override bool FilterClass(Class classe)
@@ -34,7 +27,7 @@ public class TypescriptDefinitionGenerator : ClassGeneratorBase<JavascriptConfig
 
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
-        using var fw = new FileWriter(fileName, _logger, false);
+        using var fw = OpenFileWriter(fileName, false);
 
         if (Config.EntityMode == EntityMode.TYPED)
         {
@@ -75,7 +68,7 @@ public class TypescriptDefinitionGenerator : ClassGeneratorBase<JavascriptConfig
             fw.WriteLine($"import {{{import.Import}}} from \"{import.Path}\";");
         }
 
-        if (imports.Any())
+        if (imports.Count > 0)
         {
             fw.WriteLine();
         }

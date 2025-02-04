@@ -4,21 +4,14 @@ using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.EndpointGeneration;
 
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
+public class SpringClientApiGenerator(ILogger<SpringClientApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<SpringClientApiGenerator> _logger;
-
-    public SpringClientApiGenerator(ILogger<SpringClientApiGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "SpringApiClientGen";
 
     protected static string GetClassName(string fileName)
@@ -51,7 +44,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
     {
         var className = GetClassName(fileName);
         var packageName = Config.GetPackageName(endpoints.First(), tag);
-        using var fw = new JavaWriter(filePath, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(filePath, packageName, null);
 
         WriteImports(endpoints, fw, tag);
         fw.WriteLine();
@@ -107,7 +100,7 @@ public class SpringClientApiGenerator : EndpointsGeneratorBase<JpaConfig>
         {
             foreach (var annotation in Config.GetDecoratorAnnotations(endpoint, tag))
             {
-                fw.WriteLine(1, $"{(annotation.StartsWith("@") ? string.Empty : "@")}{annotation}");
+                fw.WriteLine(1, $"{(annotation.StartsWith('@') ? string.Empty : "@")}{annotation}");
             }
 
             var accept = string.Empty;

@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Logging;
 using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
@@ -7,31 +6,24 @@ namespace TopModel.Generator.Csharp;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du C#.
 /// </summary>
-public class CSharpWriter : IDisposable
+public class CSharpWriter(GeneratedFileWriter writer) : IDisposable
 {
-    private readonly FileWriter _writer;
-
-    public CSharpWriter(string name, ILogger logger)
-    {
-        _writer = new FileWriter(name, logger);
-    }
-
     public bool EnableHeader
     {
-        get => _writer.EnableHeader;
-        set => _writer.EnableHeader = value;
+        get => writer.EnableHeader;
+        set => writer.EnableHeader = value;
     }
 
     public string HeaderMessage
     {
-        get => _writer.HeaderMessage;
-        set => _writer.HeaderMessage = value;
+        get => writer.HeaderMessage;
+        set => writer.HeaderMessage = value;
     }
 
     /// <inheritdoc cref="IDisposable.Dispose" />
     public void Dispose()
     {
-        _writer.Dispose();
+        writer.Dispose();
     }
 
     /// <summary>
@@ -52,7 +44,7 @@ public class CSharpWriter : IDisposable
     {
         var indentValue = GetIdentValue(indentationLevel);
         value = value.Replace("\r\n", "\r\n" + indentValue);
-        _writer.Write(indentValue + value);
+        writer.Write(indentValue + value);
     }
 
     /// <summary>
@@ -74,7 +66,7 @@ public class CSharpWriter : IDisposable
     public virtual void WriteAttribute(int indentLevel, string attributeName, params string[] attributeParams)
     {
         var aParams = string.Empty;
-        if (attributeParams.Any())
+        if (attributeParams.Length > 0)
         {
             aParams = $@"({string.Join(", ", attributeParams)})";
         }
@@ -169,7 +161,7 @@ public class CSharpWriter : IDisposable
     {
         var indentValue = GetIdentValue(indentationLevel);
         value = value.Replace("\r\n", "\r\n" + indentValue);
-        _writer.WriteLine(indentValue + value);
+        writer.WriteLine(indentValue + value);
     }
 
     /// <summary>
@@ -385,7 +377,7 @@ public class CSharpWriter : IDisposable
         var indentValue = string.Empty;
         for (var i = 0; i < indentationLevel; ++i)
         {
-            indentValue += _writer.IndentValue;
+            indentValue += writer.IndentValue;
         }
 
         return indentValue;

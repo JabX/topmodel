@@ -1,7 +1,11 @@
 ﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using TopModel.Core;
+using TopModel.Core.FileModel;
+using TopModel.Generator.Core;
+using TopModel.Utils;
 
-namespace TopModel.Generator.Sql.Ssdt.Scripter;
+namespace TopModel.Generator.Sql.Ssdt;
 
 /// <summary>
 /// Scripter permettant d'écrire les scripts de création d'une table SQL avec :
@@ -11,67 +15,94 @@ namespace TopModel.Generator.Sql.Ssdt.Scripter;
 /// - ses indexes FK
 /// - ses contraintes d'unicité sur colonne unique.
 /// </summary>
-public class SqlTableScripter : ISqlScripter<Class>
+public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGeneratorBase<SqlConfig>(logger, writerProvider)
 {
-    private readonly SqlConfig _config;
+    public override string Name => "SsdtTableGen";
 
-    public SqlTableScripter(SqlConfig config)
+    protected override bool PersistentOnly => true;
+
+    protected override bool FilterClass(Class classe)
     {
-        _config = config;
+        return classe.IsPersistent && !classe.Abstract;
     }
 
-    /// <summary>
-    /// Calcul le nom du script pour la table.
-    /// </summary>
-    /// <param name="item">Table à scripter.</param>
-    /// <returns>Nom du fichier de script.</returns>
-    public string GetScriptName(Class item)
+    protected override IEnumerable<Class> GetExtraClasses(ModelFile file)
     {
-        return item == null
-            ? throw new ArgumentNullException(nameof(item))
-            : item.SqlName + ".sql";
+        var manyToManyProperties = file.Classes.Where(FilterClass).SelectMany(cl => cl.Properties).OfType<AssociationProperty>().Where(ap => ap.Type == AssociationType.ManyToMany);
+        foreach (var ap in manyToManyProperties)
+        {
+            var traClass = new Class
+            {
+                Comment = ap.Comment,
+                Label = ap.Label,
+                SqlName = $"{ap.Class.SqlName}_{ap.Association.SqlName}{(ap.Role != null ? $"_{ap.Role.ToConstantCase()}" : string.Empty)}",
+                ModelFile = file
+            };
+
+            traClass.Properties.Add(new AssociationProperty
+            {
+                Association = ap.Class,
+                Class = traClass,
+                Comment = ap.Comment,
+                Type = AssociationType.ManyToOne,
+                PrimaryKey = true,
+                Required = true,
+                Role = ap.Role,
+                DefaultValue = ap.DefaultValue,
+                Label = ap.Label,
+                Trigram = ap.Class.PrimaryKey.Single().Trigram
+            });
+
+            traClass.Properties.Add(new AssociationProperty
+            {
+                Association = ap.Association,
+                Class = traClass,
+                Comment = ap.Comment,
+                Type = AssociationType.ManyToOne,
+                PrimaryKey = true,
+                Required = true,
+                Role = ap.Role,
+                DefaultValue = ap.DefaultValue,
+                Label = ap.Label,
+                Trigram = ap.Trigram ?? ap.Property.Trigram ?? ap.Association.Trigram
+            });
+
+            yield return traClass;
+        }
     }
 
-    /// <summary>
-    /// Ecrit dans un flux le script de création pour la table.
-    /// </summary>
-    /// <param name="writer">Flux d'écriture.</param>
-    /// <param name="item">Table à scripter.</param>
-    /// <param name="availableClasses">Classes disponibles.</param>
-    public void WriteItemScript(TextWriter writer, Class item, IEnumerable<Class> availableClasses)
+    protected override string GetFileName(Class classe, string tag)
     {
-        if (writer == null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
+        return Path.Combine(Config.Ssdt!.TableScriptFolder!, classe.SqlName + ".sql");
+    }
 
-        if (item == null)
-        {
-            throw new ArgumentNullException(nameof(item));
-        }
+    protected override void HandleClass(string fileName, Class classe, string tag)
+    {
+        using var writer = this.OpenSqlFileWriter(fileName);
 
         // TODO : rendre paramétrable.
         var useCompression = false;
 
         // Entête du fichier.
-        WriteHeader(writer, item.SqlName);
+        WriteHeader(writer, classe.SqlName);
 
         // Ouverture du create table.
-        WriteCreateTableOpening(writer, item);
+        WriteCreateTableOpening(writer, classe);
 
         // Intérieur du create table.
-        var properties = WriteInsideInstructions(writer, item, availableClasses);
+        var properties = WriteInsideInstructions(writer, classe);
 
         // Fin du create table.
-        WriteCreateTableClosing(writer, item, useCompression);
+        WriteCreateTableClosing(writer, classe, useCompression);
 
         // Indexes sur les clés étrangères.
-        GenerateIndexForeignKey(writer, item.SqlName, properties);
+        GenerateIndexForeignKey(writer, classe.SqlName, properties);
 
         // Définition
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
-            WriteTableDescriptionProperty(writer, item);
+            WriteTableDescriptionProperty(writer, classe);
         }
     }
 
@@ -80,7 +111,7 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="tableName">Nom de la table.</param>
-    private static void WriteHeader(TextWriter writer, string tableName)
+    private static void WriteHeader(GeneratedFileWriter writer, string tableName)
     {
         writer.WriteLine("-- ===========================================================================================");
         writer.WriteLine("--   Description		:	Création de la table " + tableName + ".");
@@ -93,7 +124,7 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="writer">Writer.</param>
     /// <param name="classe">Classe de la table.</param>
-    private static void WriteTableDescriptionProperty(TextWriter writer, Class classe)
+    private static void WriteTableDescriptionProperty(GeneratedFileWriter writer, Class classe)
     {
         writer.WriteLine("/* Description property. */");
         writer.WriteLine("EXECUTE sp_addextendedproperty 'Description', '" + classe.Label?.Replace("'", "''") + "', 'SCHEMA', 'dbo', 'TABLE', '" + classe.SqlName + "';");
@@ -105,7 +136,7 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// <param name="writer">Flux d'écriture.</param>
     /// <param name="tableName">Nom de la table.</param>
     /// <param name="properties">Champs.</param>
-    private void GenerateIndexForeignKey(TextWriter writer, string tableName, IList<IProperty> properties)
+    private void GenerateIndexForeignKey(GeneratedFileWriter writer, string tableName, IList<IProperty> properties)
     {
         var fkList = properties.OfType<AssociationProperty>().ToList();
         foreach (var property in fkList)
@@ -115,7 +146,7 @@ public class SqlTableScripter : ISqlScripter<Class>
 
             writer.WriteLine("/* Index on foreign key column for " + tableName + "." + propertyName + " */");
 
-            if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+            if (Config.TargetDBMS == TargetDBMS.Sqlserver)
             {
                 writer.WriteLine("create nonclustered index [" + indexName + "]");
                 writer.Write("\ton [dbo].[" + tableName + "] (");
@@ -144,29 +175,29 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="sb">Flux.</param>
     /// <param name="property">Propriété.</param>
-    private void WriteColumn(StringBuilder sb, IProperty property, IEnumerable<Class> availableClasses)
+    private void WriteColumn(StringBuilder sb, IProperty property)
     {
         var persistentType = property is not CompositionProperty
-            ? _config.GetType(property, availableClasses)
-            : _config.TargetDBMS == TargetDBMS.Postgre ? "jsonb" : "json";
+            ? Config.GetType(property, Classes)
+            : Config.TargetDBMS == TargetDBMS.Postgre ? "jsonb" : "json";
 
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
             sb.Append('[');
         }
 
         sb.Append(property.SqlName);
 
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
             sb.Append(']');
         }
 
         sb.Append($" {persistentType}");
 
-        if (property is not AssociationProperty && property.PrimaryKey && property.Domain.AutoGeneratedValue && _config.GetType(property, availableClasses).Contains("int") && !_config.Ssdt!.DisableIdentity)
+        if (property is not AssociationProperty && property.PrimaryKey && property.Domain.AutoGeneratedValue && Config.GetType(property, Classes).Contains("int") && !Config.Ssdt!.DisableIdentity)
         {
-            if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+            if (Config.TargetDBMS == TargetDBMS.Sqlserver)
             {
                 sb.Append(" identity");
             }
@@ -181,7 +212,7 @@ public class SqlTableScripter : ISqlScripter<Class>
             sb.Append(" not null");
         }
 
-        var defaultValue = _config.GetValue(property, availableClasses);
+        var defaultValue = Config.GetValue(property, Classes);
         if (defaultValue != "null")
         {
             sb.Append($" default {defaultValue}");
@@ -200,7 +231,7 @@ public class SqlTableScripter : ISqlScripter<Class>
         var propertyName = ((IProperty)property).SqlName;
         var referenceClass = property.Association;
 
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
             var constraintName = "FK_" + tableName + "_" + referenceClass.SqlName + "_" + propertyName;
             var propertyConcat = "[" + propertyName + "]";
@@ -221,17 +252,10 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// <param name="writer">Flux.</param>
     /// <param name="classe">Classe de la table.</param>
     /// <param name="useCompression">Indique si on utilise la compression.</param>
-    private void WriteCreateTableClosing(TextWriter writer, Class classe, bool useCompression)
+    private void WriteCreateTableClosing(GeneratedFileWriter writer, Class classe, bool useCompression)
     {
-        if (writer == null)
-        {
-            throw new ArgumentNullException(nameof(writer));
-        }
-
-        if (classe == null)
-        {
-            throw new ArgumentNullException(nameof(classe));
-        }
+        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(classe);
 
         writer.WriteLine(")");
 
@@ -240,7 +264,7 @@ public class SqlTableScripter : ISqlScripter<Class>
             writer.WriteLine("WITH (DATA_COMPRESSION=PAGE)");
         }
 
-        writer.WriteLine(_config.TargetDBMS == TargetDBMS.Sqlserver ? "go" : ";");
+        writer.WriteLine(Config.TargetDBMS == TargetDBMS.Sqlserver ? "go" : ";");
         writer.WriteLine();
     }
 
@@ -249,9 +273,9 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    private void WriteCreateTableOpening(TextWriter writer, Class table)
+    private void WriteCreateTableOpening(GeneratedFileWriter writer, Class table)
     {
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
             writer.WriteLine($"create table [dbo].[{table.SqlName}] (");
         }
@@ -266,8 +290,7 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    /// <param name="availableClasses">Classes disponibles.</param>
-    private IList<IProperty> WriteInsideInstructions(TextWriter writer, Class table, IEnumerable<Class> availableClasses)
+    private List<IProperty> WriteInsideInstructions(GeneratedFileWriter writer, Class table)
     {
         // Construction d'une liste de toutes les instructions.
         var definitions = new List<string>();
@@ -287,7 +310,7 @@ public class SqlTableScripter : ISqlScripter<Class>
             });
         }
 
-        var oneToManyProperties = availableClasses.SelectMany(cl => cl.Properties).OfType<AssociationProperty>().Where(ap => ap.Type == AssociationType.OneToMany && ap.Association == table);
+        var oneToManyProperties = Classes.SelectMany(cl => cl.Properties).OfType<AssociationProperty>().Where(ap => ap.Type == AssociationType.OneToMany && ap.Association == table);
         foreach (var ap in oneToManyProperties)
         {
             var asp = new AssociationProperty()
@@ -307,7 +330,7 @@ public class SqlTableScripter : ISqlScripter<Class>
         foreach (var property in properties)
         {
             sb.Clear();
-            WriteColumn(sb, property, availableClasses);
+            WriteColumn(sb, property);
             definitions.Add(sb.ToString());
         }
 
@@ -318,7 +341,7 @@ public class SqlTableScripter : ISqlScripter<Class>
         definitions.Add(sb.ToString());
 
         // Foreign key constraints
-        foreach (var property in properties.OfType<AssociationProperty>().Where(ap => ap.Association.IsPersistent && availableClasses.Contains(ap.Association)))
+        foreach (var property in properties.OfType<AssociationProperty>().Where(ap => ap.Association.IsPersistent && Classes.Contains(ap.Association)))
         {
             sb.Clear();
             WriteConstraintForeignKey(sb, property);
@@ -349,7 +372,7 @@ public class SqlTableScripter : ISqlScripter<Class>
             return;
         }
 
-        if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+        if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
             sb.Append("constraint [PK_").Append(classe.SqlName).Append("] primary key clustered (");
         }
@@ -361,7 +384,7 @@ public class SqlTableScripter : ISqlScripter<Class>
         foreach (var pk in properties.Where(p => p.PrimaryKey))
         {
             ++pkCount;
-            if (_config.TargetDBMS == TargetDBMS.Sqlserver)
+            if (Config.TargetDBMS == TargetDBMS.Sqlserver)
             {
                 sb.Append($"[{pk.SqlName}] ASC");
             }
@@ -384,11 +407,11 @@ public class SqlTableScripter : ISqlScripter<Class>
     /// </summary>
     /// <param name="classe">Classe de la table.</param>
     /// <returns>Liste des déclarations de contraintes d'unicité.</returns>
-    private IList<string> WriteUniqueConstraints(Class classe)
+    private List<string> WriteUniqueConstraints(Class classe)
     {
         return classe.UniqueKeys
             .Concat(classe.Properties.OfType<AssociationProperty>().Where(ap => ap.Type == AssociationType.OneToOne).Select(ap => new List<IProperty> { ap }))
-            .Select(uk => _config.TargetDBMS == TargetDBMS.Sqlserver
+            .Select(uk => Config.TargetDBMS == TargetDBMS.Sqlserver
              ? $"constraint [UK_{classe.SqlName}_{string.Join("_", uk.Select(p => p.SqlName))}] unique nonclustered ({string.Join(", ", uk.Select(p => $"[{p.SqlName}] ASC"))})"
              : $"constraint UK_{classe.SqlName}_{string.Join("_", uk.Select(p => p.SqlName))} unique ({string.Join(", ", uk.Select(p => $"{p.SqlName}"))})")
             .ToList();

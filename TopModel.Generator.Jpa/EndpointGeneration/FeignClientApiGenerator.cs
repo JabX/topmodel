@@ -1,24 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
-using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.EndpointGeneration;
 
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class FeignClientApiGenerator : SpringServerApiGenerator
+public class FeignClientApiGenerator(ILogger<FeignClientApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : SpringServerApiGenerator(logger, writerProvider)
 {
-    private readonly ILogger<FeignClientApiGenerator> _logger;
-
-    public FeignClientApiGenerator(ILogger<FeignClientApiGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "FeignClientApiGen";
 
     protected override bool FilterTag(string tag)

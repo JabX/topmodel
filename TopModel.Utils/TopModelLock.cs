@@ -9,14 +9,12 @@ namespace TopModel.Utils;
 
 public class TopModelLock : TopModelLockFile
 {
+    private readonly ConfigBase _config;
     private readonly IDeserializer _deserializer = new DeserializerBuilder()
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
         .Build();
 
-    private readonly string _lockFileName;
     private readonly ILogger _logger;
-    private readonly string _modelRoot;
-
     private readonly ISerializer _serializer = new SerializerBuilder()
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitEmptyCollections)
         .WithNamingConvention(CamelCaseNamingConvention.Instance)
@@ -24,13 +22,12 @@ public class TopModelLock : TopModelLockFile
         .Build();
 
     [SetsRequiredMembers]
-    public TopModelLock(ILogger logger, string modelRoot, string lockFileName)
+    public TopModelLock(ConfigBase config, ILogger logger)
     {
-        _lockFileName = lockFileName;
+        _config = config;
         _logger = logger;
-        _modelRoot = modelRoot;
 
-        var lockFile = new FileInfo(Path.Combine(modelRoot, lockFileName));
+        var lockFile = new FileInfo(Path.Combine(_config.ModelRoot, _config.LockFileName));
 
         if (lockFile.Exists)
         {
@@ -45,7 +42,7 @@ public class TopModelLock : TopModelLockFile
             }
             catch
             {
-                _logger.LogError($"Erreur à la lecture du fichier {lockFileName}. Merci de rétablir la version générée automatiquement.");
+                _logger.LogError($"Erreur à la lecture du fichier {_config.LockFileName}. Merci de rétablir la version générée automatiquement.");
                 throw;
             }
         }
@@ -66,7 +63,7 @@ public class TopModelLock : TopModelLockFile
         GeneratedFiles ??= [];
 
         var generatedFilesList = generatedFiles
-            .Select(f => f.ToRelative(_modelRoot))
+            .Select(f => f.ToRelative(_config.ModelRoot))
             .Distinct()
             .OrderBy(f => f)
             .ToList();
@@ -75,7 +72,7 @@ public class TopModelLock : TopModelLockFile
         var filesToPrune = GeneratedFiles
             .Select(f => f.Replace("\\", "/"))
             .Where(f => !generatedFilesList.Select(gf => isWindows ? gf.ToLowerInvariant() : gf).Contains(isWindows ? f.ToLowerInvariant() : f))
-            .Select(f => Path.Combine(_modelRoot, f));
+            .Select(f => Path.Combine(_config.ModelRoot, f));
 
         Parallel.ForEach(filesToPrune.Where(File.Exists), fileToPrune =>
         {
@@ -92,7 +89,7 @@ public class TopModelLock : TopModelLockFile
     {
         if (Modules.Count > 0 || GeneratedFiles.Count > 0)
         {
-            using var fw = new FileWriter(Path.Combine(_modelRoot, _lockFileName), _logger)
+            using var fw = new GeneratedFileWriter(_config, Path.Combine(_config.ModelRoot, _config.LockFileName), _logger, true)
             {
                 StartCommentToken = "#"
             };

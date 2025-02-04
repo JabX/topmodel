@@ -1,14 +1,21 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Core;
 
 public abstract class EndpointsGeneratorBase<T> : GeneratorBase<T>
     where T : GeneratorConfigBase
 {
+    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
     public EndpointsGeneratorBase(ILogger<EndpointsGeneratorBase<T>> logger)
         : base(logger)
+    {
+    }
+
+    public EndpointsGeneratorBase(ILogger<EndpointsGeneratorBase<T>> logger, GeneratedFileWriterProvider writerProvider)
+        : base(logger, writerProvider)
     {
     }
 

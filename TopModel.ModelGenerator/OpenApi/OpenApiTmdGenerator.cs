@@ -11,16 +11,18 @@ public class OpenApiTmdGenerator : ModelGenerator
 {
     private readonly OpenApiConfig _config;
     private readonly ILogger<OpenApiTmdGenerator> _logger;
+    private readonly GeneratedFileWriterProvider _writerProvider;
 
 #nullable disable
     private OpenApiDocument _model;
 #nullable enable
 
-    public OpenApiTmdGenerator(ILogger<OpenApiTmdGenerator> logger, OpenApiConfig config)
+    public OpenApiTmdGenerator(ILogger<OpenApiTmdGenerator> logger, OpenApiConfig config, GeneratedFileWriterProvider writerProvider)
         : base(logger)
     {
         _config = config;
         _logger = logger;
+        _writerProvider = writerProvider;
 
         if (_config.ModelTags.Count == 0)
         {
@@ -69,7 +71,9 @@ public class OpenApiTmdGenerator : ModelGenerator
             Path = Path.Combine(_config.OutputDirectory, _config.ModelFileName)
         };
         var fileName = Path.Combine(rootPath, tmdFile.Name + ".tmd");
-        using var tmdFileWriter = new TmdWriter(modelFileName, tmdFile, _logger, Path.GetFullPath(ModelRoot));
+
+        using var fileWriter = _writerProvider.OpenFileWriter(modelFileName, _logger);
+        using var tmdFileWriter = new TmdWriter(fileWriter, tmdFile, Path.GetFullPath(ModelRoot));
 
         var references = new HashSet<string>(referenceMap.SelectMany(r => r.Value).Select(r => r.Id).Distinct());
 
@@ -189,7 +193,8 @@ public class OpenApiTmdGenerator : ModelGenerator
                 Path = Path.Combine(_config.OutputDirectory, module.Key)
             };
 
-            using var tmdEndpointFileWriter = new TmdWriter(endpointFileName, tmdFileEnpoint, _logger, ModelRoot);
+            using var endpointFileWriter = _writerProvider.OpenFileWriter(endpointFileName, _logger);
+            using var tmdEndpointFileWriter = new TmdWriter(endpointFileWriter, tmdFileEnpoint, ModelRoot);
 
             if (referenceMap[module.Key].Any())
             {

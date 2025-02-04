@@ -1,20 +1,14 @@
 ﻿using System.Data.Common;
 using Microsoft.Extensions.Logging;
 using Npgsql;
+using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.Database;
 
-public class DatabasePgTmdGenerator : DatabaseTmdGenerator, IDisposable
+public class DatabasePgTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, GeneratedFileWriterProvider writerProvider)
+    : DatabaseTmdGenerator(logger, config, writerProvider), IDisposable
 {
-    private readonly DatabaseConfig _config;
-
-#pragma warning disable CS8618
-    public DatabasePgTmdGenerator(ILogger<DatabasePgTmdGenerator> logger, DatabaseConfig config)
-        : base(logger, config)
-    {
-        _config = config;
-    }
-#pragma warning restore CS8618
+    private readonly DatabaseConfig _config = config;
 
     public override string Name => "DatabasePgGen";
 

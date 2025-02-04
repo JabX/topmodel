@@ -9,24 +9,17 @@ namespace TopModel.Generator.Jpa;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JpaResourceGenerator : TranslationGeneratorBase<JpaConfig>
+public class JpaResourceGenerator(ILogger<JpaResourceGenerator> logger, TranslationStore translationStore, GeneratedFileWriterProvider writerProvider)
+    : TranslationGeneratorBase<JpaConfig>(logger, translationStore, writerProvider)
 {
-    private readonly ILogger<JpaResourceGenerator> _logger;
-    private readonly TranslationStore _translationStore;
-
-    public JpaResourceGenerator(ILogger<JpaResourceGenerator> logger, TranslationStore translationStore)
-        : base(logger, translationStore)
-    {
-        _logger = logger;
-        _translationStore = translationStore;
-    }
+    private readonly TranslationStore _translationStore = translationStore;
 
     public override string Name => "JpaResourceGen";
 
     protected override string? GetResourceFilePath(IProperty property, string tag, string lang)
     {
         var p = property.ResourceProperty;
-        if (p.Label != null || (p.Class?.Values.Any() ?? false) && p.Class?.DefaultProperty != null)
+        if (p.Label != null || p.Class?.Values.Count > 0 && p.Class?.DefaultProperty != null)
         {
             return Path.Combine(
                 Config.OutputDirectory,
@@ -49,7 +42,8 @@ public class JpaResourceGenerator : TranslationGeneratorBase<JpaConfig>
             };
         }
 
-        using var fw = new FileWriter(filePath, _logger, encoding) { EnableHeader = false };
+        using var fw = OpenFileWriter(filePath, encoding);
+        fw.EnableHeader = false;
         var containers = properties.GroupBy(prop => prop.Parent);
 
         foreach (var container in containers.OrderBy(c => c.Key.NameCamel))
@@ -64,7 +58,7 @@ public class JpaResourceGenerator : TranslationGeneratorBase<JpaConfig>
     /// <param name="fw">Flux de sortie.</param>
     /// <param name="container">Classe.</param>
     /// <param name="lang">Langue de traduction.</param>
-    protected virtual void WriteClasse(FileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
+    protected virtual void WriteClasse(GeneratedFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
     {
         if (Config.TranslateProperties == true)
         {

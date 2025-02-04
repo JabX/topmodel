@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Logging;
 using TopModel.Utils;
 
 namespace TopModel.Generator.Php;
@@ -7,25 +6,11 @@ namespace TopModel.Generator.Php;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du CPhp
 /// </summary>
-public class PhpWriter : IDisposable
+public class PhpWriter(GeneratedFileWriter writer, string packageName) : IDisposable
 {
-    private readonly Encoding _encoding;
-    private readonly ILogger _logger;
-    private readonly string _name;
-    private readonly string _packageName;
-    private readonly List<WriterLine> _toWrite;
+    private readonly List<WriterLine> _toWrite = [];
 
-    private List<string> _imports;
-
-    public PhpWriter(string name, ILogger logger, string packageName, int? codePage = 1252)
-    {
-        _logger = logger;
-        _name = name;
-        _packageName = packageName;
-        _encoding = codePage != null ? CodePagesEncodingProvider.Instance.GetEncoding(codePage.Value)! : new UTF8Encoding(false);
-        _imports = new List<string>();
-        _toWrite = new List<WriterLine>();
-    }
+    private List<string> _imports = [];
 
     public void AddImport(string value)
     {
@@ -40,21 +25,18 @@ public class PhpWriter : IDisposable
     /// <inheritdoc cref="IDisposable.Dispose" />
     void IDisposable.Dispose()
     {
-        var writer = new FileWriter(_name, _logger, _encoding)
-        {
-            IndentValue = "  ",
-            EnableHeader = false
-        };
+        writer.IndentValue = "  ";
+        writer.EnableHeader = false;
 
         writer.WriteLine($"<?php");
         writer.WriteLine(writer.StartCommentToken);
         writer.WriteLine($"{writer.StartCommentToken} {writer.HeaderMessage}");
         writer.WriteLine(writer.StartCommentToken);
         writer.WriteLine();
-        writer.WriteLine($"namespace {_packageName};");
+        writer.WriteLine($"namespace {packageName};");
         writer.WriteLine();
 
-        this.WriteImports(writer);
+        WriteImports();
         _toWrite.ForEach(l => writer.WriteLine(l.Indent, l.Line));
         writer.Dispose();
     }
@@ -69,7 +51,7 @@ public class PhpWriter : IDisposable
     {
         var aParams = string.Empty;
 
-        if (attributeParams.Any())
+        if (attributeParams.Length > 0)
         {
             aParams = $@"({string.Join(", ", attributeParams)})";
         }
@@ -310,16 +292,16 @@ public class PhpWriter : IDisposable
     /// Ajoute les imports
     /// </summary>
     /// <param name="fw">FileWriter.</param>
-    private void WriteImports(FileWriter fw)
+    private void WriteImports()
     {
-        _imports = _imports.Distinct().Where(i => string.Join('\\', i.Split('\\').SkipLast(1).ToList()) != this._packageName).ToList();
+        _imports = _imports.Distinct().Where(i => string.Join('\\', i.Split('\\').SkipLast(1).ToList()) != packageName).ToList();
 
         foreach (var import in this._imports.OrderBy(x => x))
         {
             var package = import.Split('.').First();
-            fw.WriteLine($"use {import};");
+            writer.WriteLine($"use {import};");
         }
 
-        fw.WriteLine();
+        writer.WriteLine();
     }
 }

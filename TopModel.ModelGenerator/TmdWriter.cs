@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using TopModel.Utils;
+﻿using TopModel.Utils;
 
 namespace TopModel.ModelGenerator;
 
@@ -10,13 +9,14 @@ public class TmdWriter : IDisposable
 {
     private readonly TmdFile _file;
     private readonly string _modelRoot;
-    private readonly FileWriter _writer;
+    private readonly GeneratedFileWriter _writer;
 
-    public TmdWriter(string fileName, TmdFile file, ILogger logger, string modelRoot)
+    public TmdWriter(GeneratedFileWriter writer, TmdFile file, string modelRoot)
     {
         _file = file;
-        _writer = new FileWriter(fileName, logger) { StartCommentToken = "####" };
-        _modelRoot = Path.GetRelativePath(modelRoot, string.Join("/", fileName.Split('/').SkipLast(1)));
+        _writer = writer;
+        _writer.StartCommentToken = "####";
+        _modelRoot = Path.GetRelativePath(modelRoot, string.Join("/", writer.FileName.Split('/').SkipLast(1)));
         if (_modelRoot == ".")
         {
             _modelRoot = string.Empty;

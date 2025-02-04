@@ -246,7 +246,7 @@ for (var i = 0; i < configs.Count; i++)
     var storeConfig = new LoggingScope(i + 1, colors[i % colors.Length]);
     var logger = loggerProvider.CreateLogger("TopModel.Generator");
     using var scope = logger.BeginScope(storeConfig);
-    var topModelLock = new TopModelLock(logger, config.ModelRoot, config.LockFileName);
+    var topModelLock = new TopModelLock(config, logger);
 
     Console.WriteLine();
 
@@ -597,6 +597,7 @@ for (var i = 0; i < configs.Count; i++)
         .AddTransient(typeof(ILogger<>), typeof(Logger<>))
         .AddTransient<ILoggerFactory, LoggerFactory>()
         .AddSingleton<ILoggerProvider>(loggerProvider)
+        .AddSingleton(new GeneratedFileWriterProvider(config))
         .AddModelStore(fileChecker, config);
 
     var hasError = false;

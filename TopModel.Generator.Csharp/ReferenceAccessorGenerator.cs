@@ -1,19 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class ReferenceAccessorGenerator : ClassGroupGeneratorBase<CsharpConfig>
+public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGroupGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<ReferenceAccessorGenerator> _logger;
-
-    public ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpRefAccessGen";
 
     /// <summary>
@@ -32,7 +26,7 @@ public class ReferenceAccessorGenerator : ClassGroupGeneratorBase<CsharpConfig>
         var interfaceName = $"I{implementationName}";
         var interfaceNamespace = Config.GetReferenceInterfaceNamespace(ns, tag);
 
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         var usings = new HashSet<string>();
 
@@ -140,7 +134,7 @@ public class ReferenceAccessorGenerator : ClassGroupGeneratorBase<CsharpConfig>
             }
         }
 
-        foreach (var classe in classList.Where(c => !Config.NoPersistence(tag) && (c.IsPersistent || c.Values.Any())))
+        foreach (var classe in classList.Where(c => !Config.NoPersistence(tag) && (c.IsPersistent || c.Values.Count > 0)))
         {
             var serviceName = "Load" + (Config.DbContextPath == null ? $"{classe.NamePascal}List" : classe.PluralNamePascal);
             w.WriteLine(1, "/// <inheritdoc cref=\"" + interfaceName + "." + serviceName + "\" />");
@@ -170,7 +164,7 @@ public class ReferenceAccessorGenerator : ClassGroupGeneratorBase<CsharpConfig>
         var interfaceNamespace = Config.GetReferenceInterfaceNamespace(ns, tag);
         var interfaceName = $"I{Config.GetReferenceAccessorName(ns, tag)}";
 
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         var usings = new HashSet<string>();
 
@@ -216,7 +210,7 @@ public class ReferenceAccessorGenerator : ClassGroupGeneratorBase<CsharpConfig>
         if (classe.Reference)
         {
             yield return ("interface", Config.GetReferenceInterfaceFilePath(classe.Namespace, tag));
-            if (!Config.NoPersistence(tag) && (classe.IsPersistent || classe.Values.Any()))
+            if (!Config.NoPersistence(tag) && (classe.IsPersistent || classe.Values.Count > 0))
             {
                 yield return ("implementation", Config.GetReferenceImplementationFilePath(classe.Namespace, tag));
             }

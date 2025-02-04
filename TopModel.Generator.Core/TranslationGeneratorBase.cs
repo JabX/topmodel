@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Core;
 
@@ -9,8 +10,15 @@ public abstract class TranslationGeneratorBase<T> : GeneratorBase<T>
 {
     private readonly TranslationStore _translationStore;
 
+    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
     public TranslationGeneratorBase(ILogger<TranslationGeneratorBase<T>> logger, TranslationStore translationStore)
         : base(logger)
+    {
+        _translationStore = translationStore;
+    }
+
+    public TranslationGeneratorBase(ILogger<TranslationGeneratorBase<T>> logger, TranslationStore translationStore, GeneratedFileWriterProvider writerProvider)
+        : base(logger, writerProvider)
     {
         _translationStore = translationStore;
     }

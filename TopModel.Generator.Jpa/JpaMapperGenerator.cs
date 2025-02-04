@@ -6,17 +6,12 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 
-public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
+public class JpaMapperGenerator(ILogger<JpaMapperGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : MapperGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JpaMapperGenerator> _logger;
+    private readonly ILogger<JpaMapperGenerator> _logger = logger;
 
     private JpaModelPropertyGenerator? _jpaModelPropertyGenerator;
-
-    public JpaMapperGenerator(ILogger<JpaMapperGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "JpaMapperGenerator";
 
@@ -72,9 +67,9 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
         {
             getter = $"{sourceName}.{getterName}()";
         }
-        else if (propertySource.Class.IsPersistent && (!propertyTarget.Class.IsPersistent || !(propertyTarget is AssociationProperty)) && (propertySource is AssociationProperty apSource && apSource.Association.IsPersistent || propertySource is AliasProperty alpSource && alpSource.Property is AssociationProperty apSource2 && apSource2.Association.IsPersistent))
+        else if (propertySource.Class.IsPersistent && (!propertyTarget.Class.IsPersistent || propertyTarget is not AssociationProperty) && (propertySource is AssociationProperty apSource && apSource.Association.IsPersistent || propertySource is AliasProperty alpSource && alpSource.Property is AssociationProperty apSource2 && apSource2.Association.IsPersistent))
         {
-            apSource = propertySource is AssociationProperty ? (AssociationProperty)propertySource : (AssociationProperty)((AliasProperty)propertySource).Property;
+            apSource = propertySource is AssociationProperty ap ? ap : (AssociationProperty)((AliasProperty)propertySource).Property;
             checkSourceNull = true;
             if (propertyTarget is CompositionProperty cp)
             {
@@ -139,9 +134,9 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
                 }
             }
         }
-        else if ((!propertySource.Class.IsPersistent || !(propertySource is AssociationProperty)) && propertyTarget.Class.IsPersistent && (propertyTarget is AssociationProperty apTarget && apTarget.Association.IsPersistent || propertyTarget is AliasProperty ptAp && ptAp.Property is AssociationProperty ptApAss && ptApAss.Association.IsPersistent))
+        else if ((!propertySource.Class.IsPersistent || propertySource is not AssociationProperty) && propertyTarget.Class.IsPersistent && (propertyTarget is AssociationProperty apTarget && apTarget.Association.IsPersistent || propertyTarget is AliasProperty ptAp && ptAp.Property is AssociationProperty ptApAss && ptApAss.Association.IsPersistent))
         {
-            apTarget = propertyTarget is AssociationProperty ? (AssociationProperty)propertyTarget : (AssociationProperty)((AliasProperty)propertyTarget).Property;
+            apTarget = propertyTarget is AssociationProperty ap ? ap : (AssociationProperty)((AliasProperty)propertyTarget).Property;
             if (Config.CanClassUseEnums(apTarget.Property.Class))
             {
                 if (!propertySource.Class.IsPersistent)
@@ -230,9 +225,9 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
             ? Config.GetMapperLocation(sampleFromMapper)
             : Config.GetMapperLocation(sampleToMapper);
 
-        var package = Config.GetPackageName(mapperNs, modelPath, GetBestClassTag(sampleFromMapper.Classe != null ? sampleFromMapper.Classe : sampleToMapper.Classe, tag));
+        var package = Config.GetPackageName(mapperNs, modelPath, GetBestClassTag(sampleFromMapper.Classe ?? sampleToMapper.Classe, tag));
 
-        using var fw = new JavaWriter(fileName, _logger, package, null);
+        using var fw = this.OpenJavaWriter(fileName, package, null);
 
         var imports = fromMappers.SelectMany(m => m.Mapper.ClassParams.Select(p => p.Class).Concat([m.Classe]))
             .Concat(toMappers.SelectMany(m => new[] { m.Classe, m.Mapper.Class }))
@@ -298,8 +293,10 @@ public class JpaMapperGenerator : MapperGeneratorBase<JpaConfig>
 
         fw.WriteReturns(1, $"Une nouvelle instance de '{classe.NamePascal}' ou bien l'instance passée en paramètres sur lesquels les champs sources ont été mappée");
         fw.WriteDocEnd(1);
-        var useClassForAssociation = (IProperty p) => classe.IsPersistent && !Config.UseJdbc && p is AssociationProperty ap && ap.Association.IsPersistent;
-        var entryParams = mapper.ClassParams.Select(p => $"{p.Class} {p.Name.ToCamelCase()}").Concat(mapper.PropertyParams.Select(p => $"{Config.GetType(p.Property, Classes, useClassForAssociation: useClassForAssociation(p.Property))} {p.Property.NameCamel}"));
+
+        bool UseClassForAssociation(IProperty p) => classe.IsPersistent && !Config.UseJdbc && p is AssociationProperty ap && ap.Association.IsPersistent;
+
+        var entryParams = mapper.ClassParams.Select(p => $"{p.Class} {p.Name.ToCamelCase()}").Concat(mapper.PropertyParams.Select(p => $"{Config.GetType(p.Property, Classes, useClassForAssociation: UseClassForAssociation(p.Property))} {p.Property.NameCamel}"));
         var entryParamImports = mapper.PropertyParams.Select(p => p.Property.GetTypeImports(Config, tag)).SelectMany(p => p);
         fw.AddImports(entryParamImports.ToList());
         fw.WriteLine(1, $"public static {classe.NamePascal} create{classe.NamePascal}({string.Join(", ", entryParams)}, {classe.NamePascal} target) {{");

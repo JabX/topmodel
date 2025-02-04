@@ -1,4 +1,6 @@
 ﻿using TopModel.Core;
+using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Sql;
 
@@ -16,11 +18,15 @@ public static class ScriptUtils
     /// <returns>Nom du type de table.</returns>
     public static string GetTableTypeName(this Class classe)
     {
-        if (classe == null)
-        {
-            throw new ArgumentNullException(nameof(classe));
-        }
+        return classe == null
+            ? throw new ArgumentNullException(nameof(classe))
+            : classe.SqlName + "_TABLE_TYPE";
+    }
 
-        return classe.SqlName + "_TABLE_TYPE";
+    public static GeneratedFileWriter OpenSqlFileWriter(this GeneratorBase<SqlConfig> generator, string fileName)
+    {
+        var fw = generator.OpenFileWriter(fileName);
+        fw.StartCommentToken = "----";
+        return fw;
     }
 }

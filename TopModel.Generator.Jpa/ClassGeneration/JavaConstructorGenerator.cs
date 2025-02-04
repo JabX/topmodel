@@ -5,14 +5,9 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JavaConstructorGenerator
+public class JavaConstructorGenerator(JpaConfig config)
 {
-    public JavaConstructorGenerator(JpaConfig config)
-    {
-        Config = config;
-    }
-
-    protected JpaConfig Config { get; set; }
+    protected JpaConfig Config { get; set; } = config;
 
     public void WriteFromMappers(JavaWriter fw, Class classe, IEnumerable<Class> availableClasses, string tag)
     {

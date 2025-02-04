@@ -4,21 +4,14 @@ using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.EndpointGeneration;
 
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
+public class SpringRestTemplateApiGenerator(ILogger<SpringRestTemplateApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<SpringRestTemplateApiGenerator> _logger;
-
-    public SpringRestTemplateApiGenerator(ILogger<SpringRestTemplateApiGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "SpringRestTemplateGen";
 
     protected static string GetClassName(string fileName)
@@ -89,7 +82,7 @@ public class SpringRestTemplateApiGenerator : EndpointsGeneratorBase<JpaConfig>
     {
         var className = GetClassName(fileName);
         var packageName = Config.GetPackageName(endpoints.First(), tag);
-        using var fw = new JavaWriter(filePath, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(filePath, packageName, null);
 
         WriteImports(endpoints, fw, tag);
         fw.WriteLine();

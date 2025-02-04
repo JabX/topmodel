@@ -20,7 +20,25 @@ public class GeneratorRegistration : IGeneratorRegistration<SqlConfig>
             CombinePath(config.OutputDirectory, config.Ssdt, c => c.TableScriptFolder);
             CombinePath(config.OutputDirectory, config.Ssdt, c => c.TableTypeScriptFolder);
 
-            services.AddGenerator<SsdtGenerator, SqlConfig>(config, number);
+            if (config.Ssdt.TableScriptFolder != null)
+            {
+                services.AddGenerator<SsdtTableGenerator, SqlConfig>(config, number);
+            }
+
+            if (config.Ssdt.TableTypeScriptFolder != null)
+            {
+                services.AddGenerator<SsdtTableTypeGenerator, SqlConfig>(config, number);
+            }
+
+            if (config.Ssdt.InitListScriptFolder != null)
+            {
+                services.AddGenerator<SsdtReferenceListGenerator, SqlConfig>(config, number);
+
+                if (config.Ssdt.InitListMainScriptName != null)
+                {
+                    services.AddGenerator<SsdtMainReferenceListGenerator, SqlConfig>(config, number);
+                }
+            }
         }
 
         if (config.Procedural != null)

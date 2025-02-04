@@ -1,14 +1,12 @@
 ﻿#nullable disable
 
+using TopModel.Utils;
+
 namespace TopModel.Core;
 
-public class ModelConfig
+public class ModelConfig : ConfigBase
 {
     public string App { get; set; }
-
-    public string ModelRoot { get; set; }
-
-    public string LockFileName { get; set; } = "topmodel.lock";
 
     public IList<ModelErrorType> NoWarn { get; set; } = new List<ModelErrorType>();
 

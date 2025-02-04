@@ -7,20 +7,13 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaModelPropertyGenerator
+public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> classes, Dictionary<string, string> newableTypes)
 {
-    public JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> classes, Dictionary<string, string> newableTypes)
-    {
-        Classes = classes;
-        Config = config;
-        NewableTypes = newableTypes;
-    }
+    protected IEnumerable<Class> Classes { get; } = classes;
 
-    protected IEnumerable<Class> Classes { get; }
+    protected JpaConfig Config { get; } = config;
 
-    protected JpaConfig Config { get; }
-
-    protected Dictionary<string, string> NewableTypes { get; }
+    protected Dictionary<string, string> NewableTypes { get; } = newableTypes;
 
     protected virtual string JavaxOrJakarta => Config.JavaxOrJakarta;
 

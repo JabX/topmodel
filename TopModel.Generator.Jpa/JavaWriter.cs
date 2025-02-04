@@ -1,5 +1,4 @@
 ﻿using System.Text;
-using Microsoft.Extensions.Logging;
 using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
@@ -7,25 +6,11 @@ namespace TopModel.Generator.Jpa;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du CJava
 /// </summary>
-public class JavaWriter : IDisposable
+public class JavaWriter(GeneratedFileWriter writer, string packageName) : IDisposable
 {
-    private readonly Encoding _encoding;
-    private readonly ILogger _logger;
-    private readonly string _name;
-    private readonly string _packageName;
-    private readonly List<WriterLine> _toWrite;
+    private readonly List<WriterLine> _toWrite = [];
 
-    private List<string> _imports;
-
-    public JavaWriter(string name, ILogger logger, string packageName, int? codePage = 1252)
-    {
-        _logger = logger;
-        _name = name;
-        _packageName = packageName;
-        _encoding = codePage != null ? CodePagesEncodingProvider.Instance.GetEncoding(codePage.Value)! : new UTF8Encoding(false);
-        _imports = new List<string>();
-        _toWrite = new List<WriterLine>();
-    }
+    private List<string> _imports = [];
 
     public void AddImport(string value)
     {
@@ -40,12 +25,9 @@ public class JavaWriter : IDisposable
     /// <inheritdoc cref="IDisposable.Dispose" />
     void IDisposable.Dispose()
     {
-        var writer = new FileWriter(_name, _logger, _encoding)
-        {
-            IndentValue = "	"
-        };
-        writer.WriteLine($"package {_packageName};");
-        this.WriteImports(writer);
+        writer.IndentValue = "	";
+        writer.WriteLine($"package {packageName};");
+        WriteImports();
         _toWrite.ForEach(l => writer.WriteLine(l.Indent, l.Line));
         writer.Dispose();
     }
@@ -75,7 +57,7 @@ public class JavaWriter : IDisposable
             WriteDocEnd(indentationLevel);
         }
 
-        var hasBody = javaMethod.Body.Count() > 0;
+        var hasBody = javaMethod.Body.Count > 0;
         _toWrite.Add(new WriterLine() { Line = @$"{javaMethod.Signature}{(hasBody ? " {" : ";")}", Indent = indentationLevel });
         foreach (var bodyLine in javaMethod.Body)
         {
@@ -345,20 +327,20 @@ public class JavaWriter : IDisposable
     /// Ajoute les imports
     /// </summary>
     /// <param name="fw">FileWriter.</param>
-    private void WriteImports(FileWriter fw)
+    private void WriteImports()
     {
-        _imports = _imports.Distinct().Where(i => string.Join('.', i.Split('.').SkipLast(1).ToList()) != this._packageName).Distinct().ToArray().ToList();
+        _imports = _imports.Distinct().Where(i => string.Join('.', i.Split('.').SkipLast(1).ToList()) != packageName).Distinct().ToArray().ToList();
         var currentPackage = string.Empty;
         foreach (var import in this._imports.Where(i => i.StartsWith("java") || i.StartsWith("org")).OrderBy(x => x))
         {
             var package = import.Split('.').First();
             if (package != currentPackage)
             {
-                fw.WriteLine();
+                writer.WriteLine();
                 currentPackage = package;
             }
 
-            fw.WriteLine($"import {import};");
+            writer.WriteLine($"import {import};");
         }
 
         foreach (var import in this._imports.Where(i => !(i.StartsWith("java") || i.StartsWith("org"))).OrderBy(x => x))
@@ -366,11 +348,11 @@ public class JavaWriter : IDisposable
             var package = import.Split('.').First();
             if (package != currentPackage)
             {
-                fw.WriteLine();
+                writer.WriteLine();
                 currentPackage = package;
             }
 
-            fw.WriteLine($"import {import};");
+            writer.WriteLine($"import {import};");
         }
     }
 }

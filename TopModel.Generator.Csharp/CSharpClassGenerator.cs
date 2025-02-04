@@ -7,16 +7,9 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpClassGenerator : ClassGeneratorBase<CsharpConfig>
+public class CSharpClassGenerator(ILogger<CSharpClassGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : ClassGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<CSharpClassGenerator> _logger;
-
-    public CSharpClassGenerator(ILogger<CSharpClassGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpClassGen";
 
     protected virtual Dictionary<string, string> NewableTypes { get; } = new()
@@ -566,7 +559,7 @@ public class CSharpClassGenerator : ClassGeneratorBase<CsharpConfig>
 
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         GenerateUsings(w, classe, tag);
         w.WriteNamespace(Config.GetNamespace(classe, tag));

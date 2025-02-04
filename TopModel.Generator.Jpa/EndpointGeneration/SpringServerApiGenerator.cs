@@ -4,21 +4,14 @@ using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.EndpointGeneration;
 
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
+public class SpringServerApiGenerator(ILogger<SpringServerApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<SpringServerApiGenerator> _logger;
-
-    public SpringServerApiGenerator(ILogger<SpringServerApiGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "SpringApiServerGen";
 
     protected virtual void AddImports(IEnumerable<Endpoint> endpoints, JavaWriter fw, string tag)
@@ -70,7 +63,7 @@ public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
     {
         var className = GetClassName(fileName);
         var packageName = Config.GetPackageName(endpoints.First(), tag);
-        using var fw = new JavaWriter(filePath, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(filePath, packageName, null);
 
         AddImports(endpoints, fw, tag);
         fw.WriteLine();
@@ -148,7 +141,7 @@ public class SpringServerApiGenerator : EndpointsGeneratorBase<JpaConfig>
             ann += @$"@RequestParam(value = ""{param.GetParamName()}"", required = {param.Required.ToString().ToFirstLower()}) ";
             fw.AddImport("org.springframework.web.bind.annotation.RequestParam");
             fw.AddImports(Config.GetDomainImports(param, tag));
-            var decoratorAnnotations = string.Join(' ', Config.GetDomainAnnotations(param, tag).Select(a => a.StartsWith("@") ? a : "@" + a));
+            var decoratorAnnotations = string.Join(' ', Config.GetDomainAnnotations(param, tag).Select(a => a.StartsWith('@') ? a : "@" + a));
             methodParams.Add($"{ann}{(decoratorAnnotations.Length > 0 ? $" {decoratorAnnotations}" : string.Empty)}{Config.GetType(param)} {param.GetParamName()}");
         }
 

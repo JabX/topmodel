@@ -1,22 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JavaDtoGenerator : JavaClassGeneratorBase
+public class JavaDtoGenerator(ILogger<JavaDtoGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : JavaClassGeneratorBase(logger, writerProvider)
 {
-    private readonly ILogger<JavaDtoGenerator> _logger;
-
-    public JavaDtoGenerator(ILogger<JavaDtoGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JavaDtoGen";
 
     protected override bool FilterClass(Class classe)
@@ -35,7 +29,7 @@ public class JavaDtoGenerator : JavaClassGeneratorBase
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
         var packageName = Config.GetPackageName(classe, tag);
-        using var fw = new JavaWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(fileName, packageName, null);
 
         fw.WriteLine();
 

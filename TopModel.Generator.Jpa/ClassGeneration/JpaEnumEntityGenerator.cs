@@ -1,23 +1,17 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEnumEntityGenerator : JpaEntityGenerator
+public class JpaEnumEntityGenerator(ILogger<JpaEnumEntityGenerator> logger, GeneratedFileWriterProvider writerProvider)
+    : JpaEntityGenerator(logger, writerProvider)
 {
-    private readonly ILogger<JpaEnumEntityGenerator> _logger;
-
     private JavaEnumConstructorGenerator? _javaEnumConstructorGenerator;
-
-    public JpaEnumEntityGenerator(ILogger<JpaEnumEntityGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "JpaEnumEntityGen";
 
@@ -38,7 +32,7 @@ public class JpaEnumEntityGenerator : JpaEntityGenerator
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
         var packageName = Config.GetPackageName(classe, tag);
-        using var fw = new JavaWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(fileName, packageName, null);
 
         fw.WriteLine();
         WriteAnnotations(fw, classe, tag);

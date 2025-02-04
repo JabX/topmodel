@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TopModel.Generator.Core;
 using TopModel.Generator.Jpa.ClassGeneration;
+using TopModel.Generator.Jpa.DataflowGeneration;
+using TopModel.Generator.Jpa.EndpointGeneration;
 using static TopModel.Utils.ModelUtils;
 
 namespace TopModel.Generator.Jpa;
