@@ -1,4 +1,4 @@
-using TopModel.Utils;
+﻿using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 

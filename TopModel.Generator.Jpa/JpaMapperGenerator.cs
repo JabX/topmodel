@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Generator.Jpa.ClassGeneration;
 using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;

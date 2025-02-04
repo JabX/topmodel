@@ -156,6 +156,25 @@ public abstract class GeneratorConfigBase
         return null;
     }
 
+    public IEnumerable<string> GetConverterImports(Domain? fromDomain, Domain? toDomain)
+    {
+        if (fromDomain != null && toDomain != null && fromDomain != toDomain)
+        {
+            var converter = GetConverter(fromDomain, toDomain);
+            if (converter != null)
+            {
+                var imports = GetImplementation(converter)?.Imports;
+                if (imports != null)
+                {
+                    foreach (var import in imports)
+                    {
+                        yield return import;
+                    }
+                }
+            }
+        }
+    }
+
     public IEnumerable<string> GetDecoratorAnnotations(Class classe, string tag)
     {
         return classe.Decorators.SelectMany(d => (GetImplementation(d.Decorator)?.Annotations ?? [])
@@ -213,25 +232,6 @@ public abstract class GeneratorConfigBase
             foreach (var import in GetDomainAnnotationsAndImports(property, tag).SelectMany(a => a.Imports))
             {
                 yield return import;
-            }
-        }
-    }
-
-    public IEnumerable<string> GetConverterImports(Domain? fromDomain, Domain? toDomain)
-    {
-        if (fromDomain != null && toDomain != null && fromDomain != toDomain)
-        {
-            var converter = GetConverter(fromDomain, toDomain);
-            if (converter != null)
-            {
-                var imports = GetImplementation(converter)?.Imports;
-                if (imports != null)
-                {
-                    foreach (var import in imports)
-                    {
-                        yield return import;
-                    }
-                }
             }
         }
     }

@@ -1,9 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
-using TopModel.Generator.Core;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.

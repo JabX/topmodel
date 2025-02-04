@@ -1,10 +1,10 @@
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
@@ -13,7 +13,7 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
 {
     private readonly ILogger<JpaEnumValuesGenerator> _logger;
 
-    public JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger, ModelConfig modelConfig)
+    public JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger)
         : base(logger)
     {
         _logger = logger;
@@ -57,9 +57,9 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
         }
     }
 
-    private IEnumerable<IProperty> GetEnumProperties(Class classe)
+    private List<IProperty> GetEnumProperties(Class classe)
     {
-        List<IProperty> result = new();
+        List<IProperty> result = [];
         if (classe.EnumKey != null && Config.CanClassUseEnums(classe, prop: classe.EnumKey) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey)))
         {
             result.Add(classe.EnumKey);
@@ -115,20 +115,20 @@ public class JpaEnumValuesGenerator : GeneratorBase<JpaConfig>
             }
 
             i++;
-            var isLast = i == refs.Count();
+            var isLast = i == refs.Count;
             if (classe.DefaultProperty != null)
             {
                 fw.WriteDocStart(1, $"{refValue.Value[classe.DefaultProperty]}");
                 fw.WriteDocEnd(1);
             }
 
-            List<string> enumAsString = [$"{refValue.Value[classe.EnumKey].ToConstantCase()}("];
+            List<string> enumAsString = [$"{refValue.Value[classe.EnumKey!].ToConstantCase()}("];
             foreach (var prop in classe.Properties.Where(p => p != classe.EnumKey))
             {
                 var isString = Config.GetType(prop) == "String";
                 var isInt = Config.GetType(prop) == "int";
                 var isBoolean = Config.GetType(prop) == "Boolean";
-                var value = refValue.Value.ContainsKey(prop) ? refValue.Value[prop] : "null";
+                var value = refValue.Value.TryGetValue(prop, out var v) ? v : "null";
 
                 if (prop is AssociationProperty ap && ap.Association.Values.Any(r => r.Value.ContainsKey(ap.Property) && r.Value[ap.Property] == value))
                 {

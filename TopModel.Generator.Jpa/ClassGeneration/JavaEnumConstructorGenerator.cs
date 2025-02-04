@@ -1,7 +1,7 @@
 ﻿using TopModel.Core;
 using TopModel.Generator.Core;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.

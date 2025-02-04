@@ -3,7 +3,7 @@ using TopModel.Core;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.

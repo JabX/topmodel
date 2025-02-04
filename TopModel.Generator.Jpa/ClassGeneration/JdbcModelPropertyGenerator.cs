@@ -1,6 +1,6 @@
 ﻿using TopModel.Core;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
@@ -21,7 +21,7 @@ public class JdbcModelPropertyGenerator(JpaConfig config, IEnumerable<Class> cla
 
     public override string GetPropertyType(IProperty property)
     {
-        return _config.GetType(property, _classes, false);
+        return Config.GetType(property, Classes, false);
     }
 
     public override void WriteProperties(JavaWriter fw, Class classe, string tag)
@@ -42,7 +42,7 @@ public class JdbcModelPropertyGenerator(JpaConfig config, IEnumerable<Class> cla
 
         yield return GetColumnAnnotation(property);
 
-        if (property.Required && !property.PrimaryKey && (!property.Class.IsPersistent || _config.UseJdbc))
+        if (property.Required && !property.PrimaryKey && (!property.Class.IsPersistent || Config.UseJdbc))
         {
             yield return NotNullAnnotation;
         }
