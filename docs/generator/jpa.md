@@ -202,7 +202,7 @@ public enum TypeDroitCode {
 
 En ajoutant la propriété `enumsAsEnums: true` à la configuration, le traitement des enums diffère en ces points :
 
-- Une enum java `[NomDeLaClasse][NomDeLaPropriété]` est créée, dont les valeurs sont les valeurs possibles définies dans le modèle, et contenant toutes les valeurs des propriétés de la classe. Cette enum est générée avec le chemin contenu dans la propriété `enumsPath` de la config, sauf si la variable `enumsValuesPath` est définie.
+- Une enum java `[NomDeLaClasse]` est créée, dont les valeurs sont les valeurs possibles définies dans le modèle, et contenant toutes les valeurs des propriétés de la classe. Cette enum est générée avec le chemin contenu dans la propriété `enumsPath` de la config, sauf si la variable `enumsValuesPath` est définie.
 - Cette enum n'est donc pas une entité
 - Les associations vers cette classe ne sont donc plus des associations au sens JPA, mais des colonnes classiques. Elles portent donc l'annotation `Column`, et puisqu'elles sont de type `enum`, elles portent également l'annotation `@Enumerated(EnumType.STRING)`
 - Les noms de propriétés restent identiques au mode par défaut, ce qui permet de garder la compatibilité avec les autres générateurs
