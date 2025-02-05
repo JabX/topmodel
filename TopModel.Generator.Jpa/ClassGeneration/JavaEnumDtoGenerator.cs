@@ -15,7 +15,7 @@ public class JavaEnumDtoGenerator : JavaDtoGenerator
     {
     }
 
-    public override string Name => "JpaEnumDtoGen";
+    public override string Name => "JavaEnumDtoGen";
 
     protected override JavaEnumConstructorGenerator ConstructorGenerator
     {

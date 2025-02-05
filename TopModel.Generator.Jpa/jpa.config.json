@@ -45,14 +45,22 @@
       "items": {
         "type": "string",
         "enum": [
-          "JpaModelGen",
-          "JpaInterfaceGen",
-          "JpaMapperGenerator",
+          "JavaDtoGen",
+          "JpaEnumDtoGen",
+          "JdbcEntityGen",
           "JpaDaoGen",
-          "JpaEnumGenerator",
-          "JpaResourceGen",
+          "JpaEntityGen",
+          "JpaEnumEntityGen",
+          "JpaEnumGen",
+          "JpaEnumValuesGen",
+          "JpaInterfaceGen",
+          "SpringDataFlowGen",
+          "FeignClientApiGen",
+          "SpringApiClientGen",
+          "SpringRestTemplateGen",
           "SpringApiServerGen",
-          "SpringApiClientGen"
+          "JpaMapperGenerator",
+          "JpaResourceGen"
         ]
       }
     },
