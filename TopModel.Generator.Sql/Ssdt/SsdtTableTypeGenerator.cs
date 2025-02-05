@@ -9,7 +9,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// <summary>
 /// Scripter permettant d'écrire les scripts de création d'un type de table SQL.
 /// </summary>
-public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, GeneratedFileWriterProvider writerProvider)
+public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtTableTypeGen";
@@ -47,7 +47,7 @@ public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logge
     /// Ecrit le pied du script.
     /// </summary>
     /// <param name="writer">Flux.</param>
-    private static void WriteCreateTableClosing(GeneratedFileWriter writer)
+    private static void WriteCreateTableClosing(IFileWriter writer)
     {
         writer.WriteLine(")");
         writer.WriteLine("go");
@@ -59,7 +59,7 @@ public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logge
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    private static void WriteCreateTableOpening(GeneratedFileWriter writer, Class table)
+    private static void WriteCreateTableOpening(IFileWriter writer, Class table)
     {
         writer.WriteLine("Create type [" + table.GetTableTypeName() + "] as Table (");
     }
@@ -69,7 +69,7 @@ public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logge
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="tableName">Nom de la table.</param>
-    private static void WriteHeader(GeneratedFileWriter writer, string tableName)
+    private static void WriteHeader(IFileWriter writer, string tableName)
     {
         writer.WriteLine("-- ===========================================================================================");
         writer.WriteLine("--   Description		:	Création du type de table " + tableName + ".");
@@ -103,7 +103,7 @@ public class SsdtTableTypeGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logge
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    private void WriteInsideInstructions(GeneratedFileWriter writer, Class table)
+    private void WriteInsideInstructions(IFileWriter writer, Class table)
     {
         // Construction d'une liste de toutes les instructions.
         var definitions = new List<string>();

@@ -9,9 +9,9 @@ public class TmdWriter : IDisposable
 {
     private readonly TmdFile _file;
     private readonly string _modelRoot;
-    private readonly GeneratedFileWriter _writer;
+    private readonly IFileWriter _writer;
 
-    public TmdWriter(GeneratedFileWriter writer, TmdFile file, string modelRoot)
+    public TmdWriter(IFileWriter writer, TmdFile file, string modelRoot)
     {
         _file = file;
         _writer = writer;

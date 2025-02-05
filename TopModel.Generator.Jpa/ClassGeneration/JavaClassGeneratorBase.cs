@@ -8,7 +8,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> logger, GeneratedFileWriterProvider writerProvider)
+public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<JpaConfig>(logger, writerProvider)
 {
     private JavaConstructorGenerator? _jpaModelConstructorGenerator;

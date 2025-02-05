@@ -7,7 +7,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.DataflowGeneration;
 
-public class SpringDataFlowGenerator(ILogger<SpringDataFlowGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class SpringDataFlowGenerator(ILogger<SpringDataFlowGenerator> logger, IFileWriterProvider writerProvider)
     : GeneratorBase<JpaConfig>(logger, writerProvider)
 {
     public override IEnumerable<string> GeneratedFiles =>

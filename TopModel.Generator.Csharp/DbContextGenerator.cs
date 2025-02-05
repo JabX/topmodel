@@ -5,7 +5,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class DbContextGenerator(ILogger<DbContextGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class DbContextGenerator(ILogger<DbContextGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGroupGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpDbContextGen";

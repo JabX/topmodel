@@ -10,14 +10,14 @@ public abstract class TranslationGeneratorBase<T> : GeneratorBase<T>
 {
     private readonly TranslationStore _translationStore;
 
-    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     public TranslationGeneratorBase(ILogger<TranslationGeneratorBase<T>> logger, TranslationStore translationStore)
         : base(logger)
     {
         _translationStore = translationStore;
     }
 
-    public TranslationGeneratorBase(ILogger<TranslationGeneratorBase<T>> logger, TranslationStore translationStore, GeneratedFileWriterProvider writerProvider)
+    public TranslationGeneratorBase(ILogger<TranslationGeneratorBase<T>> logger, TranslationStore translationStore, IFileWriterProvider writerProvider)
         : base(logger, writerProvider)
     {
         _translationStore = translationStore;

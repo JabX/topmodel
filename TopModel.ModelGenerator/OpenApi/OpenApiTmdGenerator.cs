@@ -11,13 +11,13 @@ public class OpenApiTmdGenerator : ModelGenerator
 {
     private readonly OpenApiConfig _config;
     private readonly ILogger<OpenApiTmdGenerator> _logger;
-    private readonly GeneratedFileWriterProvider _writerProvider;
+    private readonly IFileWriterProvider _writerProvider;
 
 #nullable disable
     private OpenApiDocument _model;
 #nullable enable
 
-    public OpenApiTmdGenerator(ILogger<OpenApiTmdGenerator> logger, OpenApiConfig config, GeneratedFileWriterProvider writerProvider)
+    public OpenApiTmdGenerator(ILogger<OpenApiTmdGenerator> logger, OpenApiConfig config, IFileWriterProvider writerProvider)
         : base(logger)
     {
         _config = config;

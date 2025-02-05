@@ -9,7 +9,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, IFileWriterProvider writerProvider)
     : JavaClassGeneratorBase(logger, writerProvider)
 {
     public override string Name => "JpaEntityGen";

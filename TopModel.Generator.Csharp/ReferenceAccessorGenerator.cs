@@ -5,7 +5,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGroupGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpRefAccessGen";

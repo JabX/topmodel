@@ -7,7 +7,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpClassGenerator(ILogger<CSharpClassGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class CSharpClassGenerator(ILogger<CSharpClassGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpClassGen";

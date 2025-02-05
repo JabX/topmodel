@@ -6,7 +6,7 @@ namespace TopModel.Generator.Jpa;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du CJava
 /// </summary>
-public class JavaWriter(GeneratedFileWriter writer, string packageName) : IDisposable
+public class JavaWriter(IFileWriter writer, string packageName) : IDisposable
 {
     private readonly List<WriterLine> _toWrite = [];
 

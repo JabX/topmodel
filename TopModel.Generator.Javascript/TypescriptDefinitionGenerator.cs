@@ -10,7 +10,7 @@ using static JavascriptUtils;
 /// <summary>
 /// Générateur de définitions Typescript.
 /// </summary>
-public class TypescriptDefinitionGenerator(ILogger<TypescriptDefinitionGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class TypescriptDefinitionGenerator(ILogger<TypescriptDefinitionGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
     public override string Name => "JSDefinitionGen";

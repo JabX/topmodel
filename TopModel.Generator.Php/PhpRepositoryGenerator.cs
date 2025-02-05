@@ -8,7 +8,7 @@ namespace TopModel.Generator.Php;
 /// <summary>
 /// Générateur de Repository Php.
 /// </summary>
-public class PhpRepositoryGenerator(ILogger<PhpRepositoryGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class PhpRepositoryGenerator(ILogger<PhpRepositoryGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<PhpConfig>(logger, writerProvider)
 {
     public override string Name => "PhpRepositoryGen";

@@ -9,7 +9,7 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JavascriptApiClientGenerator(ILogger<JavascriptApiClientGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JavascriptApiClientGenerator(ILogger<JavascriptApiClientGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
     public override string Name => "JSApiClientGen";

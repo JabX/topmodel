@@ -9,7 +9,7 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class NuxtApiClientGenerator(ILogger<NuxtApiClientGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class NuxtApiClientGenerator(ILogger<NuxtApiClientGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
     public override string Name => "JSApiClientGen";

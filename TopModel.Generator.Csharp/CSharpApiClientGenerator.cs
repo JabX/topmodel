@@ -7,7 +7,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpApiClientGenerator(ILogger<CSharpApiClientGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class CSharpApiClientGenerator(ILogger<CSharpApiClientGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpApiClientGen";

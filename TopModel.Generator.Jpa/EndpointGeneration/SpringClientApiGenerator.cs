@@ -9,7 +9,7 @@ namespace TopModel.Generator.Jpa.EndpointGeneration;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class SpringClientApiGenerator(ILogger<SpringClientApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class SpringClientApiGenerator(ILogger<SpringClientApiGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<JpaConfig>(logger, writerProvider)
 {
     public override string Name => "SpringApiClientGen";

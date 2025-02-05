@@ -9,7 +9,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JpaEnumValuesGenerator(ILogger<JpaEnumValuesGenerator> logger, IFileWriterProvider writerProvider)
     : GeneratorBase<JpaConfig>(logger, writerProvider)
 {
     public override string Name => "JpaEnumValuesGen";

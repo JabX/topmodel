@@ -8,7 +8,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// <summary>
 /// Scripter écrivant un script qui ordonnance l'appel aux scripts d'insertions de valeurs de listes de références.
 /// </summary>
-public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlConfig>> logger, GeneratedFileWriterProvider writerProvider)
+public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
     : ClassGroupGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtMainRefListGen";
@@ -44,7 +44,7 @@ public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlC
     /// Ecrit l'entête du fichier.
     /// </summary>
     /// <param name="writer">Flux.</param>
-    private static void WriteHeader(GeneratedFileWriter writer)
+    private static void WriteHeader(IFileWriter writer)
     {
         writer.WriteLine("-- ===========================================================================================");
         writer.WriteLine("--   Description		:	Insertion des valeurs de listes statiques.");
@@ -57,7 +57,7 @@ public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlC
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="classSet">Ensemble des listes de référence.</param>
-    private static void WriteScriptCalls(GeneratedFileWriter writer, IEnumerable<Class> classSet)
+    private static void WriteScriptCalls(IFileWriter writer, IEnumerable<Class> classSet)
     {
         foreach (var classe in classSet)
         {

@@ -10,7 +10,7 @@ using static JavascriptUtils;
 /// <summary>
 /// Générateur de définitions Typescript.
 /// </summary>
-public class TypescriptReferenceGenerator(ILogger<TypescriptReferenceGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class TypescriptReferenceGenerator(ILogger<TypescriptReferenceGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGroupGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
     public override string Name => "JSReferenceGen";
@@ -154,7 +154,7 @@ public class TypescriptReferenceGenerator(ILogger<TypescriptReferenceGenerator> 
         }
     }
 
-    private void WriteReferenceValues(GeneratedFileWriter fw, Class reference)
+    private void WriteReferenceValues(IFileWriter fw, Class reference)
     {
         fw.Write("export const ");
         fw.Write(reference.NameCamel);

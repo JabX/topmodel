@@ -8,13 +8,13 @@ namespace TopModel.Generator.Core;
 public abstract class ClassGeneratorBase<T> : GeneratorBase<T>
     where T : GeneratorConfigBase
 {
-    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     public ClassGeneratorBase(ILogger<ClassGeneratorBase<T>> logger)
         : base(logger)
     {
     }
 
-    public ClassGeneratorBase(ILogger<ClassGeneratorBase<T>> logger, GeneratedFileWriterProvider writerProvider)
+    public ClassGeneratorBase(ILogger<ClassGeneratorBase<T>> logger, IFileWriterProvider writerProvider)
         : base(logger, writerProvider)
     {
     }

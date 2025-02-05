@@ -8,7 +8,7 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> logger, TranslationStore translationStore, ModelConfig modelConfig, GeneratedFileWriterProvider writerProvider)
+public class JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> logger, TranslationStore translationStore, ModelConfig modelConfig, IFileWriterProvider writerProvider)
     : TranslationGeneratorBase<JavascriptConfig>(logger, translationStore, writerProvider)
 {
     private readonly TranslationStore _translationStore = translationStore;
@@ -122,7 +122,7 @@ public class JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> lo
         return Config.ResourceMode == ResourceMode.JS ? name : $@"""{name}""";
     }
 
-    private void WriteClasseNode(GeneratedFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, bool isComment, bool isLast, string lang, int indentLevel, bool onlyProperties = false)
+    private void WriteClasseNode(IFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, bool isComment, bool isLast, string lang, int indentLevel, bool onlyProperties = false)
     {
         if (!onlyProperties)
         {
@@ -170,7 +170,7 @@ public class JavascriptResourceGenerator(ILogger<JavascriptResourceGenerator> lo
         }
     }
 
-    private void WriteSubModule(GeneratedFileWriter fw, string lang, IEnumerable<IProperty> properties, bool isComment, int level)
+    private void WriteSubModule(IFileWriter fw, string lang, IEnumerable<IProperty> properties, bool isComment, int level)
     {
         var classes = properties.GroupBy(prop => prop.Parent);
         var modules = classes

@@ -8,7 +8,7 @@ namespace TopModel.Generator.Jpa.EndpointGeneration;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class FeignClientApiGenerator(ILogger<FeignClientApiGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class FeignClientApiGenerator(ILogger<FeignClientApiGenerator> logger, IFileWriterProvider writerProvider)
     : SpringServerApiGenerator(logger, writerProvider)
 {
     public override string Name => "FeignClientApiGen";

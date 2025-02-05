@@ -23,7 +23,7 @@ public static class ScriptUtils
             : classe.SqlName + "_TABLE_TYPE";
     }
 
-    public static GeneratedFileWriter OpenSqlFileWriter(this GeneratorBase<SqlConfig> generator, string fileName)
+    public static IFileWriter OpenSqlFileWriter(this GeneratorBase<SqlConfig> generator, string fileName)
     {
         var fw = generator.OpenFileWriter(fileName);
         fw.StartCommentToken = "----";

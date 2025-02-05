@@ -8,7 +8,7 @@ namespace TopModel.Generator.Translation;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class TranslationOutGenerator(ILogger<TranslationOutGenerator> logger, ModelConfig modelConfig, TranslationStore translationStore, GeneratedFileWriterProvider writerProvider)
+public class TranslationOutGenerator(ILogger<TranslationOutGenerator> logger, ModelConfig modelConfig, TranslationStore translationStore, IFileWriterProvider writerProvider)
     : TranslationGeneratorBase<TranslationConfig>(logger, translationStore, writerProvider)
 {
     private readonly ModelConfig _modelConfig = modelConfig;
@@ -60,7 +60,7 @@ public class TranslationOutGenerator(ILogger<TranslationOutGenerator> logger, Mo
             && langDict.ContainsKey(key);
     }
 
-    private void WriteClasse(GeneratedFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
+    private void WriteClasse(IFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
     {
         foreach (var property in container)
         {

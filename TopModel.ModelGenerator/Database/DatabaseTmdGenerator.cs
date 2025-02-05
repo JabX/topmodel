@@ -6,7 +6,7 @@ using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.Database;
 
-public abstract class DatabaseTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, GeneratedFileWriterProvider writerProvider)
+public abstract class DatabaseTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, IFileWriterProvider writerProvider)
     : ModelGenerator(logger), IDisposable
 {
     private readonly Dictionary<string, TmdClass> _classes = [];

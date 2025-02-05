@@ -5,7 +5,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class MapperGenerator(ILogger<MapperGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class MapperGenerator(ILogger<MapperGenerator> logger, IFileWriterProvider writerProvider)
     : MapperGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpMapperGen";

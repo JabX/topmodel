@@ -8,7 +8,7 @@ namespace TopModel.Generator.Php;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class PhpModelGenerator(ILogger<PhpModelGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class PhpModelGenerator(ILogger<PhpModelGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<PhpConfig>(logger, writerProvider)
 {
     private PhpModelPropertyGenerator? _phpModelPropertyGenerator;

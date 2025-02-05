@@ -6,7 +6,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa;
 
-public class JpaMapperGenerator(ILogger<JpaMapperGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JpaMapperGenerator(ILogger<JpaMapperGenerator> logger, IFileWriterProvider writerProvider)
     : MapperGeneratorBase<JpaConfig>(logger, writerProvider)
 {
     private readonly ILogger<JpaMapperGenerator> _logger = logger;

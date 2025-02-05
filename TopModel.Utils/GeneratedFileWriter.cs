@@ -5,9 +5,9 @@ using Microsoft.Extensions.Logging;
 namespace TopModel.Utils;
 
 /// <summary>
-/// Classe de base pour l'écriture des fichiers générés.
+/// Implémentation par défaut de IFileWriter.
 /// </summary>
-public class GeneratedFileWriter : IDisposable
+public class GeneratedFileWriter : IFileWriter
 {
     /// <summary>
     /// Nombre de lignes d'en-tête à ignorer dans le calcul de checksum.
@@ -33,35 +33,22 @@ public class GeneratedFileWriter : IDisposable
         _sb = new StringBuilder();
     }
 
-    /// <summary>
-    /// Nom du fichier à écrire.
-    /// </summary>
-    public string FileName { get; }
-
-    /// <summary>
-    /// Active la lecture et l'écriture d'un entête avec un hash du fichier.
-    /// </summary>
+    /// <inheritdoc />
     public bool EnableHeader { get; set; } = true;
 
-    /// <summary>
-    /// Message à mettre dans le header.
-    /// </summary>
+    /// <inheritdoc />
+    public string FileName { get; }
+
+    /// <inheritdoc />
     public string HeaderMessage { get; set; } = "ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !";
 
-    /// <summary>
-    /// Renvoie le token de début de ligne de commentaire dans le langage du fichier.
-    /// </summary>
-    /// <returns>Token de début de ligne de commentaire.</returns>
-    public string StartCommentToken { get; set; } = "////";
-
-    /// <summary>
-    /// Indentation.
-    /// </summary>
+    /// <inheritdoc />
     public string IndentValue { get; set; } = "    ";
 
-    /// <summary>
-    /// Libère les ressources.
-    /// </summary>
+    /// <inheritdoc />
+    public string StartCommentToken { get; set; } = "////";
+
+    /// <inheritdoc />
     public void Dispose()
     {
         if (Marshal.GetExceptionPointers() != IntPtr.Zero)
@@ -115,64 +102,9 @@ public class GeneratedFileWriter : IDisposable
         _logger.LogInformation($"{(fileExists ? "Modifié:  " : "Créé:     ")}{FileName.ToRelative()}");
     }
 
-    /// <summary>
-    /// Ecrit un caractère dans le stream.
-    /// </summary>
-    /// <param name="value">Caractère.</param>
-    public void Write(char value)
-    {
-        _sb.Append(value);
-    }
-
-    /// <summary>
-    /// Ecrit un string dans le stream.
-    /// </summary>
-    /// <param name="value">Chaîne de caractère.</param>
+    /// <inheritdoc cref="IFileWriter.Write" />
     public void Write(string? value)
     {
         _sb.Append(value);
-    }
-
-    /// <summary>
-    /// Ecrit un caractère dans le stream.
-    /// </summary>
-    /// <param name="indentationLevel">Indentation.</param>
-    /// <param name="value">Caractère.</param>
-    public void Write(int indentationLevel, string value)
-    {
-        var indentValue = string.Empty;
-        for (var i = 0; i < indentationLevel; ++i)
-        {
-            indentValue += IndentValue;
-        }
-
-        value = value.Replace("\n", "\n" + indentValue);
-        Write(indentValue + value);
-    }
-
-    /// <summary>
-    /// Ecrit un ligne dans le stream.
-    /// </summary>
-    /// <param name="value">Chaîne de caractère.</param>
-    public void WriteLine(string? value = null)
-    {
-        _sb.Append((value ?? string.Empty) + Environment.NewLine);
-    }
-
-    /// <summary>
-    /// Ecrit la chaine avec le niveau indenté.
-    /// </summary>
-    /// <param name="indentationLevel">Niveau d'indentation.</param>
-    /// <param name="value">Valeur à écrire dans le flux.</param>
-    public void WriteLine(int indentationLevel, string value)
-    {
-        var indentValue = string.Empty;
-        for (var i = 0; i < indentationLevel; ++i)
-        {
-            indentValue += IndentValue;
-        }
-
-        value = value.Replace("\n", "\n" + indentValue);
-        WriteLine(indentValue + value);
     }
 }

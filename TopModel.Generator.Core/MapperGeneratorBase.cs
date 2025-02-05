@@ -8,13 +8,13 @@ namespace TopModel.Generator.Core;
 public abstract class MapperGeneratorBase<T> : GeneratorBase<T>
     where T : GeneratorConfigBase
 {
-    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     public MapperGeneratorBase(ILogger<MapperGeneratorBase<T>> logger)
         : base(logger)
     {
     }
 
-    public MapperGeneratorBase(ILogger<MapperGeneratorBase<T>> logger, GeneratedFileWriterProvider writerProvider)
+    public MapperGeneratorBase(ILogger<MapperGeneratorBase<T>> logger, IFileWriterProvider writerProvider)
         : base(logger, writerProvider)
     {
     }

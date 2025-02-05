@@ -154,12 +154,12 @@ async Task StartGeneration(string filePath, string directoryName, int i)
 
     var services = new ServiceCollection()
         .AddLogging(builder => builder.AddProvider(loggerProvider))
-        .AddSingleton(new GeneratedFileWriterProvider(config));
+        .AddSingleton<IFileWriterProvider>(new GeneratedFileWriterProvider(config));
 
     foreach (var conf in config.OpenApi)
     {
         ModelUtils.TrimSlashes(conf, c => c.OutputDirectory);
-        services.AddSingleton<ModelGenerator>(p => new OpenApiTmdGenerator(p.GetRequiredService<ILogger<OpenApiTmdGenerator>>(), conf, p.GetRequiredService<GeneratedFileWriterProvider>())
+        services.AddSingleton<ModelGenerator>(p => new OpenApiTmdGenerator(p.GetRequiredService<ILogger<OpenApiTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
         {
             DirectoryName = directoryName,
             ModelRoot = config.ModelRoot,
@@ -172,7 +172,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         ModelUtils.TrimSlashes(conf, c => c.OutputDirectory);
         if (conf.Source.DbType == DbType.ORACLE)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabaseOraTmdGenerator(p.GetRequiredService<ILogger<DatabaseOraTmdGenerator>>(), conf, p.GetRequiredService<GeneratedFileWriterProvider>())
+            services.AddSingleton<ModelGenerator>(p => new DatabaseOraTmdGenerator(p.GetRequiredService<ILogger<DatabaseOraTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,
@@ -182,7 +182,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         }
         else if (conf.Source.DbType == DbType.POSTGRESQL)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabasePgTmdGenerator(p.GetRequiredService<ILogger<DatabasePgTmdGenerator>>(), conf, p.GetRequiredService<GeneratedFileWriterProvider>())
+            services.AddSingleton<ModelGenerator>(p => new DatabasePgTmdGenerator(p.GetRequiredService<ILogger<DatabasePgTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,
@@ -192,7 +192,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         }
         else if (conf.Source.DbType == DbType.MYSQL)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabaseMySqlTmdGenerator(p.GetRequiredService<ILogger<DatabaseMySqlTmdGenerator>>(), conf, p.GetRequiredService<GeneratedFileWriterProvider>())
+            services.AddSingleton<ModelGenerator>(p => new DatabaseMySqlTmdGenerator(p.GetRequiredService<ILogger<DatabaseMySqlTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,

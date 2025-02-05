@@ -7,7 +7,7 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class DataFlowGenerator(ILogger<DataFlowGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class DataFlowGenerator(ILogger<DataFlowGenerator> logger, IFileWriterProvider writerProvider)
     : GeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override IEnumerable<string> GeneratedFiles => Files.Values.SelectMany(f => f.DataFlows)

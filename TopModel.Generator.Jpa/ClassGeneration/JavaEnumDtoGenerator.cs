@@ -7,7 +7,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JavaEnumDtoGenerator(ILogger<JavaEnumDtoGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JavaEnumDtoGenerator(ILogger<JavaEnumDtoGenerator> logger, IFileWriterProvider writerProvider)
     : JavaDtoGenerator(logger, writerProvider)
 {
     private JavaEnumConstructorGenerator? _jpaModelConstructorGenerator;

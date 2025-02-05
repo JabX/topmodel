@@ -11,7 +11,7 @@ using static Microsoft.CodeAnalysis.CSharp.SyntaxFactory;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpApiServerGenerator(ILogger<CSharpApiServerGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class CSharpApiServerGenerator(ILogger<CSharpApiServerGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
     public override string Name => "CSharpApiServerGen";

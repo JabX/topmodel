@@ -10,15 +10,15 @@ public abstract class GeneratorBase<T> : IModelWatcher
     where T : GeneratorConfigBase
 {
     private readonly ILogger _logger;
-    private readonly GeneratedFileWriterProvider? _writerProvider;
+    private readonly IFileWriterProvider? _writerProvider;
 
-    [Obsolete("Utiliser la surcharge avec le GeneratedFileWriterProvider")]
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     protected GeneratorBase(ILogger logger)
     {
         _logger = logger;
     }
 
-    protected GeneratorBase(ILogger logger, GeneratedFileWriterProvider writerProvider)
+    protected GeneratorBase(ILogger logger, IFileWriterProvider writerProvider)
     {
         _logger = logger;
         _writerProvider = writerProvider;
@@ -80,7 +80,7 @@ public abstract class GeneratorBase<T> : IModelWatcher
         HandleFiles(handledFiles);
     }
 
-    public GeneratedFileWriter OpenFileWriter(string fileName, bool encoderShouldEmitUTF8Identifier = true)
+    public IFileWriter OpenFileWriter(string fileName, bool encoderShouldEmitUTF8Identifier = true)
     {
         if (_writerProvider == null)
         {
@@ -90,7 +90,7 @@ public abstract class GeneratorBase<T> : IModelWatcher
         return _writerProvider.OpenFileWriter(Path.Combine(Config.OutputDirectory, fileName).Replace("\\", "/"), _logger, encoderShouldEmitUTF8Identifier);
     }
 
-    public GeneratedFileWriter OpenFileWriter(string fileName, Encoding encoding)
+    public IFileWriter OpenFileWriter(string fileName, Encoding encoding)
     {
         if (_writerProvider == null)
         {

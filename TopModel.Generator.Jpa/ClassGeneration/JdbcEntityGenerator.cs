@@ -8,7 +8,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JdbcEntityGenerator(ILogger<JdbcEntityGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JdbcEntityGenerator(ILogger<JdbcEntityGenerator> logger, IFileWriterProvider writerProvider)
     : JavaClassGeneratorBase(logger, writerProvider)
 {
     private JavaEnumConstructorGenerator? _javaEnumConstructorGenerator;

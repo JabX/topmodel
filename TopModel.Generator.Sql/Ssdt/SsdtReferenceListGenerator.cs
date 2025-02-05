@@ -9,7 +9,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// <summary>
 /// Scripter permettant d'écrire les scripts d'initialisation des valeurs de listes de référence.
 /// </summary>
-public class SsdtReferenceListGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, GeneratedFileWriterProvider writerProvider)
+public class SsdtReferenceListGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtRefListGen";
@@ -46,7 +46,7 @@ public class SsdtReferenceListGenerator(ILogger<ClassGeneratorBase<SqlConfig>> l
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="tableName">Nom de la table.</param>
-    private static void WriteHeader(GeneratedFileWriter writer, string tableName)
+    private static void WriteHeader(IFileWriter writer, string tableName)
     {
         writer.WriteLine("-- ===========================================================================================");
         writer.WriteLine("--   Description		:	Insertion des valeurs de la table " + tableName + ".");
@@ -112,7 +112,7 @@ public class SsdtReferenceListGenerator(ILogger<ClassGeneratorBase<SqlConfig>> l
     /// Ecrit le pied du fichier.
     /// </summary>
     /// <param name="writer">Flux.</param>
-    private void WriteFooter(GeneratedFileWriter writer)
+    private void WriteFooter(IFileWriter writer)
     {
         if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
@@ -125,7 +125,7 @@ public class SsdtReferenceListGenerator(ILogger<ClassGeneratorBase<SqlConfig>> l
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="item">Liste de références.</param>
-    private void WriteInsertLines(GeneratedFileWriter writer, Class item)
+    private void WriteInsertLines(IFileWriter writer, Class item)
     {
         foreach (var initItem in item.Values)
         {

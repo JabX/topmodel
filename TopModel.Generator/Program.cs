@@ -597,7 +597,7 @@ for (var i = 0; i < configs.Count; i++)
         .AddTransient(typeof(ILogger<>), typeof(Logger<>))
         .AddTransient<ILoggerFactory, LoggerFactory>()
         .AddSingleton<ILoggerProvider>(loggerProvider)
-        .AddSingleton(new GeneratedFileWriterProvider(config))
+        .AddSingleton<IFileWriterProvider>(new GeneratedFileWriterProvider(config))
         .AddModelStore(fileChecker, config);
 
     var hasError = false;

@@ -8,7 +8,7 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de DAOs JPA.
 /// </summary>
-public class JpaModelInterfaceGenerator(ILogger<JpaModelInterfaceGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class JpaModelInterfaceGenerator(ILogger<JpaModelInterfaceGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<JpaConfig>(logger, writerProvider)
 {
     public override string Name => "JpaInterfaceGen";

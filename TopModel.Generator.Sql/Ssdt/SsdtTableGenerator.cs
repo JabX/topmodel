@@ -15,7 +15,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// - ses indexes FK
 /// - ses contraintes d'unicité sur colonne unique.
 /// </summary>
-public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, GeneratedFileWriterProvider writerProvider)
+public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtTableGen";
@@ -111,7 +111,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="tableName">Nom de la table.</param>
-    private static void WriteHeader(GeneratedFileWriter writer, string tableName)
+    private static void WriteHeader(IFileWriter writer, string tableName)
     {
         writer.WriteLine("-- ===========================================================================================");
         writer.WriteLine("--   Description		:	Création de la table " + tableName + ".");
@@ -124,7 +124,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// </summary>
     /// <param name="writer">Writer.</param>
     /// <param name="classe">Classe de la table.</param>
-    private static void WriteTableDescriptionProperty(GeneratedFileWriter writer, Class classe)
+    private static void WriteTableDescriptionProperty(IFileWriter writer, Class classe)
     {
         writer.WriteLine("/* Description property. */");
         writer.WriteLine("EXECUTE sp_addextendedproperty 'Description', '" + classe.Label?.Replace("'", "''") + "', 'SCHEMA', 'dbo', 'TABLE', '" + classe.SqlName + "';");
@@ -136,7 +136,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// <param name="writer">Flux d'écriture.</param>
     /// <param name="tableName">Nom de la table.</param>
     /// <param name="properties">Champs.</param>
-    private void GenerateIndexForeignKey(GeneratedFileWriter writer, string tableName, IList<IProperty> properties)
+    private void GenerateIndexForeignKey(IFileWriter writer, string tableName, IList<IProperty> properties)
     {
         var fkList = properties.OfType<AssociationProperty>().ToList();
         foreach (var property in fkList)
@@ -252,7 +252,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// <param name="writer">Flux.</param>
     /// <param name="classe">Classe de la table.</param>
     /// <param name="useCompression">Indique si on utilise la compression.</param>
-    private void WriteCreateTableClosing(GeneratedFileWriter writer, Class classe, bool useCompression)
+    private void WriteCreateTableClosing(IFileWriter writer, Class classe, bool useCompression)
     {
         ArgumentNullException.ThrowIfNull(writer);
         ArgumentNullException.ThrowIfNull(classe);
@@ -273,7 +273,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    private void WriteCreateTableOpening(GeneratedFileWriter writer, Class table)
+    private void WriteCreateTableOpening(IFileWriter writer, Class table)
     {
         if (Config.TargetDBMS == TargetDBMS.Sqlserver)
         {
@@ -290,7 +290,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, G
     /// </summary>
     /// <param name="writer">Flux.</param>
     /// <param name="table">Table.</param>
-    private List<IProperty> WriteInsideInstructions(GeneratedFileWriter writer, Class table)
+    private List<IProperty> WriteInsideInstructions(IFileWriter writer, Class table)
     {
         // Construction d'une liste de toutes les instructions.
         var definitions = new List<string>();

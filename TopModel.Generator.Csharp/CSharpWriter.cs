@@ -6,7 +6,7 @@ namespace TopModel.Generator.Csharp;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du C#.
 /// </summary>
-public class CSharpWriter(GeneratedFileWriter writer) : IDisposable
+public class CSharpWriter(IFileWriter writer) : IDisposable
 {
     public bool EnableHeader
     {

@@ -9,7 +9,7 @@ namespace TopModel.Generator.Jpa;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JpaResourceGenerator(ILogger<JpaResourceGenerator> logger, TranslationStore translationStore, GeneratedFileWriterProvider writerProvider)
+public class JpaResourceGenerator(ILogger<JpaResourceGenerator> logger, TranslationStore translationStore, IFileWriterProvider writerProvider)
     : TranslationGeneratorBase<JpaConfig>(logger, translationStore, writerProvider)
 {
     private readonly TranslationStore _translationStore = translationStore;
@@ -58,7 +58,7 @@ public class JpaResourceGenerator(ILogger<JpaResourceGenerator> logger, Translat
     /// <param name="fw">Flux de sortie.</param>
     /// <param name="container">Classe.</param>
     /// <param name="lang">Langue de traduction.</param>
-    protected virtual void WriteClasse(GeneratedFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
+    protected virtual void WriteClasse(IFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
     {
         if (Config.TranslateProperties == true)
         {

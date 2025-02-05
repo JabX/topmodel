@@ -9,7 +9,7 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger, GeneratedFileWriterProvider writerProvider)
+public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger, IFileWriterProvider writerProvider)
     : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
     public override string Name => "JSNGApiClientGen";
@@ -86,7 +86,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
         fw.WriteLine("}");
     }
 
-    private void WriteEndpoint(Endpoint endpoint, GeneratedFileWriter fw)
+    private void WriteEndpoint(Endpoint endpoint, IFileWriter fw)
     {
         fw.WriteLine();
         fw.WriteLine(1, "/**");

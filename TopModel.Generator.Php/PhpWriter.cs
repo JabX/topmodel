@@ -6,7 +6,7 @@ namespace TopModel.Generator.Php;
 /// <summary>
 /// FileWriter avec des méthodes spécialisées pour écrire du CPhp
 /// </summary>
-public class PhpWriter(GeneratedFileWriter writer, string packageName) : IDisposable
+public class PhpWriter(IFileWriter writer, string packageName) : IDisposable
 {
     private readonly List<WriterLine> _toWrite = [];
 
