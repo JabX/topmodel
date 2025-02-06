@@ -127,7 +127,7 @@ public class OpenApiTmdGenerator : ModelGenerator
 
                 if (!string.IsNullOrEmpty(schema.Value.Description?.Trim(' ')))
                 {
-                    classe.Comment = @$"{schema.Value.Description.Format()}";
+                    classe.Comment = schema.Value.Description.Format();
                 }
 
                 var classeProperties = classe.Properties;
@@ -433,17 +433,19 @@ public class OpenApiTmdGenerator : ModelGenerator
                 yield return reference;
             }
 
-            var response = operation.Value.Responses.FirstOrDefault(r => r.Key == "200" || r.Key == "201").Value;
-            if (response != null && response.Content.Any())
+            foreach (var response in operation.Value.Responses.Where(r => r.Key == "200" || r.Key == "201").Select(r => r.Value))
             {
-                foreach (var reference in GetSchemaReferences(response.Content.First().Value.Schema, visited))
+                if (response != null && response.Content.Any())
                 {
-                    yield return reference;
-                }
+                    foreach (var reference in GetSchemaReferences(response.Content.First().Value.Schema, visited))
+                    {
+                        yield return reference;
+                    }
 
-                if (response.Reference != null)
-                {
-                    yield return response.Reference;
+                    if (response.Reference != null)
+                    {
+                        yield return response.Reference;
+                    }
                 }
             }
         }
