@@ -34,6 +34,7 @@ var server = await LanguageServer.From(options =>
         .WithHandler<ReferencesHandler>()
         .WithHandler<CodeLensHandler>()
         .WithHandler<RenameHandler>()
+        .WithHandler<DocumentLinkHandler>()
         .AddHandler<MermaidHandler>("mermaid")
         .OnInitialize((server, _, __) =>
         {

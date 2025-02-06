@@ -642,18 +642,4 @@ public class CompletionHandler : CompletionHandlerBase
 
         return 0;
     }
-
-    private string[] GetYaml(CompletionParams request)
-    {
-        var text = _fileCache.GetFile(request.TextDocument.Uri.GetFileSystemPath());
-        var start = request.Position.Line;
-        var currentLine = text.ElementAtOrDefault(request.Position.Line) ?? string.Empty;
-        while (!currentLine.StartsWith("---") && start > 0)
-        {
-            start--;
-            currentLine = text.ElementAtOrDefault(start) ?? string.Empty;
-        }
-
-        return text[start..request.Position.Line];
-    }
 }
