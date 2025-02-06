@@ -1,4 +1,4 @@
-using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
+﻿using OmniSharp.Extensions.LanguageServer.Protocol.Client.Capabilities;
 using OmniSharp.Extensions.LanguageServer.Protocol.Document;
 using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
@@ -15,19 +15,18 @@ public class DocumentLinkHandler(ModelStore modelStore, ILanguageServerFacade fa
 
     public override Task<DocumentLink> Handle(DocumentLink request, CancellationToken cancellationToken)
     {
-        Console.Error.WriteLine("DocumentLink");
-        return Task.FromResult<DocumentLink>(request);
+        return Task.FromResult(request);
     }
 
-    public override Task<DocumentLinkContainer?> Handle(DocumentLinkParams request, CancellationToken cancellationToken)
+    public override async Task<DocumentLinkContainer?> Handle(DocumentLinkParams request, CancellationToken cancellationToken)
     {
         var lockFile = new FileInfo(Path.Combine(_config.ConfigRoot, _config.LockFileName));
         using var file = lockFile.OpenText();
-        var text = file.ReadToEnd().Split('\n').ToList();
+        var text = (await file.ReadToEndAsync()).Split('\n').ToList();
         var indexOfGeneratedFiles = text.IndexOf(text.First(l => l.StartsWith("generatedFiles:")));
         var end = text.Count();
         List<DocumentLink> documentLinks = [];
-        var lockFileDir = Path.GetFullPath(Path.GetDirectoryName(request.TextDocument.Uri.Path).Trim(Path.DirectorySeparatorChar));
+        var lockFileDir = Path.GetFullPath(Path.GetDirectoryName(request.TextDocument.Uri.Path)!.Trim(Path.DirectorySeparatorChar));
 
         for (var i = indexOfGeneratedFiles + 1; i < end - 1; i++)
         {
@@ -39,7 +38,7 @@ public class DocumentLinkHandler(ModelStore modelStore, ILanguageServerFacade fa
             });
         }
 
-        return Task.FromResult(new DocumentLinkContainer(documentLinks));
+        return new DocumentLinkContainer(documentLinks);
     }
 
     protected override DocumentLinkRegistrationOptions CreateRegistrationOptions(DocumentLinkCapability capability, ClientCapabilities clientCapabilities)
