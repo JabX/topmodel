@@ -28,11 +28,6 @@ public abstract class ClassGeneratorBase<T> : GeneratorBase<T>
         return true;
     }
 
-    protected virtual IEnumerable<Class> GetExtraClasses(ModelFile file)
-    {
-        return [];
-    }
-
     protected abstract string GetFileName(Class classe, string tag);
 
     protected abstract void HandleClass(string fileName, Class classe, string tag);

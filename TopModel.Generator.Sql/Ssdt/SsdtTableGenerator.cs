@@ -15,7 +15,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// - ses indexes FK
 /// - ses contraintes d'unicité sur colonne unique.
 /// </summary>
-public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
+public class SsdtTableGenerator(ILogger<SsdtTableGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtTableGen";
@@ -29,47 +29,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, I
 
     protected override IEnumerable<Class> GetExtraClasses(ModelFile file)
     {
-        var manyToManyProperties = file.Classes.Where(FilterClass).SelectMany(cl => cl.Properties).OfType<AssociationProperty>().Where(ap => ap.Type == AssociationType.ManyToMany);
-        foreach (var ap in manyToManyProperties)
-        {
-            var traClass = new Class
-            {
-                Comment = ap.Comment,
-                Label = ap.Label,
-                SqlName = $"{ap.Class.SqlName}_{ap.Association.SqlName}{(ap.Role != null ? $"_{ap.Role.ToConstantCase()}" : string.Empty)}",
-                ModelFile = file
-            };
-
-            traClass.Properties.Add(new AssociationProperty
-            {
-                Association = ap.Class,
-                Class = traClass,
-                Comment = ap.Comment,
-                Type = AssociationType.ManyToOne,
-                PrimaryKey = true,
-                Required = true,
-                Role = ap.Role,
-                DefaultValue = ap.DefaultValue,
-                Label = ap.Label,
-                Trigram = ap.Class.PrimaryKey.Single().Trigram
-            });
-
-            traClass.Properties.Add(new AssociationProperty
-            {
-                Association = ap.Association,
-                Class = traClass,
-                Comment = ap.Comment,
-                Type = AssociationType.ManyToOne,
-                PrimaryKey = true,
-                Required = true,
-                Role = ap.Role,
-                DefaultValue = ap.DefaultValue,
-                Label = ap.Label,
-                Trigram = ap.Trigram ?? ap.Property.Trigram ?? ap.Association.Trigram
-            });
-
-            yield return traClass;
-        }
+        return file.GetExtraClasses();
     }
 
     protected override string GetFileName(Class classe, string tag)
@@ -79,7 +39,7 @@ public class SsdtTableGenerator(ILogger<ClassGeneratorBase<SqlConfig>> logger, I
 
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
-        using var writer = this.OpenSqlFileWriter(fileName);
+        using var writer = this.OpenFileWriter(fileName);
 
         // TODO : rendre paramétrable.
         var useCompression = false;

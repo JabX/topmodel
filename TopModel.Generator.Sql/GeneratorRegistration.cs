@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using TopModel.Generator.Core;
 using TopModel.Generator.Sql.Procedural;
+using TopModel.Generator.Sql.Procedural.Oracle;
+using TopModel.Generator.Sql.Procedural.Postgres;
+using TopModel.Generator.Sql.Procedural.SqlServer;
 using TopModel.Generator.Sql.Ssdt;
 
 using static TopModel.Utils.ModelUtils;
@@ -51,7 +54,69 @@ public class GeneratorRegistration : IGeneratorRegistration<SqlConfig>
             CombinePath(config.OutputDirectory, config.Procedural, c => c.CommentFile);
             CombinePath(config.OutputDirectory, config.Procedural, c => c.ResourceFile);
 
-            services.AddGenerator<ProceduralSqlGenerator, SqlConfig>(config, number);
+            if (config.TargetDBMS == TargetDBMS.Oracle)
+            {
+                if (config.Procedural.CrebasFile != null)
+                {
+                    services.AddGenerator<OracleCrebasGenerator, SqlConfig>(config, number);
+                }
+
+                if (config.Procedural.InitListFile != null)
+                {
+                    services.AddGenerator<OracleReferenceListGenerator, SqlConfig>(config, number);
+                }
+            }
+
+            if (config.TargetDBMS == TargetDBMS.Postgre)
+            {
+                if (config.Procedural.CrebasFile != null)
+                {
+                    services.AddGenerator<PostgresCrebasGenerator, SqlConfig>(config, number);
+                }
+
+                if (config.Procedural.InitListFile != null)
+                {
+                    services.AddGenerator<PostgresReferenceListGenerator, SqlConfig>(config, number);
+                }
+            }
+
+            if (config.TargetDBMS == TargetDBMS.Sqlserver)
+            {
+                if (config.Procedural.CrebasFile != null)
+                {
+                    services.AddGenerator<SqlServerCrebasGenerator, SqlConfig>(config, number);
+                }
+
+                if (config.Procedural.TypeFile != null)
+                {
+                    services.AddGenerator<SqlServerTypeGenerator, SqlConfig>(config, number);
+                }
+
+                if (config.Procedural.InitListFile != null)
+                {
+                    services.AddGenerator<SqlServerReferenceListGenerator, SqlConfig>(config, number);
+                }
+            }
+
+            if (config.Procedural.CommentFile != null)
+            {
+                services.AddGenerator<SqlCommentGenerator, SqlConfig>(config, number);
+            }
+
+            if (config.Procedural.IndexFKFile != null)
+            {
+                services.AddGenerator<SqlIndexFkGenerator, SqlConfig>(config, number);
+            }
+
+            if (config.Procedural.ResourceFile != null)
+            {
+                services.AddGenerator<SqlResourceGenerator, SqlConfig>(config, number);
+            }
+
+            if (config.Procedural.UniqueKeysFile != null)
+            {
+                services.AddGenerator<SqlUkGenerator, SqlConfig>(config, number);
+            }
         }
     }
 }

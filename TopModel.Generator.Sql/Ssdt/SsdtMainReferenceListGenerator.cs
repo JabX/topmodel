@@ -8,7 +8,7 @@ namespace TopModel.Generator.Sql.Ssdt;
 /// <summary>
 /// Scripter écrivant un script qui ordonnance l'appel aux scripts d'insertions de valeurs de listes de références.
 /// </summary>
-public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlConfig>> logger, IFileWriterProvider writerProvider)
+public class SsdtMainReferenceListGenerator(ILogger<SsdtMainReferenceListGenerator> logger, IFileWriterProvider writerProvider)
     : ClassGroupGeneratorBase<SqlConfig>(logger, writerProvider)
 {
     public override string Name => "SsdtMainRefListGen";
@@ -25,7 +25,7 @@ public class SsdtMainReferenceListGenerator(ILogger<ClassGroupGeneratorBase<SqlC
 
     protected override void HandleFile(string fileType, string fileName, string tag, IEnumerable<Class> classes)
     {
-        using var writer = this.OpenSqlFileWriter(fileName);
+        using var writer = this.OpenFileWriter(fileName);
 
         // Entête du fichier.
         WriteHeader(writer);
