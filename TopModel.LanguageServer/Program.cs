@@ -16,9 +16,7 @@ var server = await LanguageServer.From(options =>
         {
             var fileChecker = new FileChecker();
             var configFile = new FileInfo(args.Length > 0 ? args[0] : "topmodel.config");
-            var config = fileChecker.Deserialize<ModelConfig>(configFile.OpenText().ReadToEnd());
-            var dn = configFile.DirectoryName;
-            config.FixConfig(dn!);
+            var config = fileChecker.Deserialize<ModelConfig>(configFile.OpenText().ReadToEnd()).Init(configFile.DirectoryName!);
 
             services
                 .AddModelStore(fileChecker, config)

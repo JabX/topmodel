@@ -113,6 +113,9 @@ public class FileChecker
                         config.CustomGenerators.Add(parser.Consume<Scalar>().Value);
                     });
                     break;
+                case "ignoredFiles":
+                    config.IgnoredFiles = _deserializer.Deserialize<IList<IgnoredFile>>(parser);
+                    break;
                 default:
                     config.Generators.Add(prop.Value, _deserializer.Deserialize<IEnumerable<IDictionary<string, object>>>(parser));
                     break;

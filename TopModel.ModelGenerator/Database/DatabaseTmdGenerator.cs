@@ -514,8 +514,7 @@ public abstract class DatabaseTmdGenerator(ILogger<DatabaseTmdGenerator> logger,
             var fileName = Path.Combine(ModelRoot, $"{file.Path}.tmd");
             yield return fileName;
 
-            using var fileWriter = writerProvider.OpenFileWriter(fileName, logger);
-            using var tmdFileWriter = new TmdWriter(fileWriter, file, ModelRoot);
+            using var tmdFileWriter = new TmdWriter(writerProvider.OpenFileWriter(fileName, logger), file, ModelRoot);
         }
     }
 }

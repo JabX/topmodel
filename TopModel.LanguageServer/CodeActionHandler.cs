@@ -5,6 +5,7 @@ using OmniSharp.Extensions.LanguageServer.Protocol.Models;
 using OmniSharp.Extensions.LanguageServer.Protocol.Server;
 using TopModel.Core;
 using TopModel.Core.FileModel;
+using TopModel.Utils;
 using Range = OmniSharp.Extensions.LanguageServer.Protocol.Models.Range;
 
 namespace TopModel.LanguageServer;

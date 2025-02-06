@@ -1,4 +1,4 @@
-﻿namespace TopModel.Core;
+﻿namespace TopModel.Utils;
 
 public enum ModelErrorType
 {
@@ -221,6 +221,16 @@ public enum ModelErrorType
     /// Le flux de données est introuvable dans le fichier ou l'une de ses références.
     /// </summary>
     TMD2000,
+
+    /// <summary>
+    /// Le fichier '{relativePath}' ne sera pas regénéré pour le motif : '{motif}'
+    /// </summary>
+    TMD8000,
+
+    /// <summary>
+    /// Le fichier '{ignoredFile}' dans `ignoredFiles` est introuvable.
+    /// </summary>
+    TMD8001,
 
     /// <summary>
     /// L'import {} n'est pas utilisé.

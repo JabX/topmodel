@@ -8,8 +8,6 @@ public class ModelConfig : ConfigBase
 {
     public string App { get; set; }
 
-    public IList<ModelErrorType> NoWarn { get; set; } = new List<ModelErrorType>();
-
     public bool PluralizeTableNames { get; set; }
 
     public bool UseLegacyRoleNames { get; set; }
@@ -18,9 +16,9 @@ public class ModelConfig : ConfigBase
 
     public I18nConfig I18n { get; set; } = new();
 
-    public Dictionary<string, IEnumerable<IDictionary<string, object>>> Generators { get; } = new();
+    public Dictionary<string, IEnumerable<IDictionary<string, object>>> Generators { get; } = [];
 
-    public List<string> CustomGenerators { get; set; } = new();
+    public List<string> CustomGenerators { get; set; } = [];
 
     public string GetFileName(string filePath)
     {

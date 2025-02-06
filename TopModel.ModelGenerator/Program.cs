@@ -148,6 +148,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
     using var stream = configFile.OpenRead();
     var config = serializer.Deserialize<ModelGeneratorConfig>(stream)!;
 
+    config.ConfigRoot = directoryName;
     config.ModelRoot ??= "./";
     config.LockFileName ??= "tmdgen.lock";
     ModelUtils.CombinePath(directoryName, config, c => c.ModelRoot);
