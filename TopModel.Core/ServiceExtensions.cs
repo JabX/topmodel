@@ -27,12 +27,14 @@ public static class ServiceExtensions
         return services;
     }
 
-    public static void FixConfig(this ModelConfig config, string rootDir)
+    public static ModelConfig Init(this ModelConfig config, string rootDir)
     {
+        config.ConfigRoot = rootDir;
         config.ModelRoot ??= string.Empty;
         config.LockFileName ??= "topmodel.lock";
         ModelUtils.TrimSlashes(config, c => c.ModelRoot);
         ModelUtils.CombinePath(rootDir, config, c => c.ModelRoot);
         ModelUtils.CombinePath(rootDir, config.I18n, c => c.RootPath);
+        return config;
     }
 }

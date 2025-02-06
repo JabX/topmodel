@@ -16,9 +16,7 @@ public class Program
            {
                var fileChecker = new FileChecker();
                var configFile = new FileInfo(args[0]);
-               var config = fileChecker.Deserialize<ModelConfig>(configFile.OpenText().ReadToEnd());
-               var dn = configFile.DirectoryName;
-               config.FixConfig(dn!);
+               var config = fileChecker.Deserialize<ModelConfig>(configFile.OpenText().ReadToEnd()).Init(configFile.DirectoryName!);
 
                services
                    .AddModelStore(fileChecker, config)

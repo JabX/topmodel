@@ -19,7 +19,7 @@ using TopModel.Utils;
 
 var fileChecker = new FileChecker("schema.config.json");
 
-var configs = new List<(ModelConfig Config, string FullPath, string DirectoryName)>();
+var configs = new Dictionary<string, ModelConfig>();
 var excludedTags = Array.Empty<string>();
 var watchMode = false;
 var checkMode = false;
@@ -59,7 +59,8 @@ command.SetHandler(
                 fileChecker.CheckConfigFile(file.FullName);
                 using var textToRead = file.OpenText();
                 var text = textToRead.ReadToEnd();
-                configs.Add((fileChecker.DeserializeConfig(text), file.FullName, file.DirectoryName!));
+                var config = fileChecker.DeserializeConfig(text).Init(file.DirectoryName!);
+                configs.Add(file.FullName, config);
             }
             catch (ModelException me)
             {
@@ -213,7 +214,7 @@ Console.WriteLine("Fichiers de configuration trouvés :");
 
 for (var i = 0; i < configs.Count; i++)
 {
-    var (_, fullName, _) = configs[i];
+    var fullName = configs.ElementAt(i).Key;
     Console.ForegroundColor = colors[i % colors.Length];
     Console.Write($"#{i + 1} - ");
     Console.WriteLine(Path.GetRelativePath(Directory.GetCurrentDirectory(), fullName));
@@ -239,9 +240,7 @@ var modgenAssemblies = AppDomain.CurrentDomain.GetAssemblies().Select(a => a.Man
 
 for (var i = 0; i < configs.Count; i++)
 {
-    var (config, fullName, dn) = configs[i];
-
-    config.FixConfig(dn);
+    var (fullName, config) = configs.ElementAt(i);
 
     var storeConfig = new LoggingScope(i + 1, colors[i % colors.Length]);
     var logger = loggerProvider.CreateLogger("TopModel.Generator");
@@ -581,13 +580,13 @@ for (var i = 0; i < configs.Count; i++)
             schema["properties"]!.AsObject().Add(configName, configSchema);
         }
 
-        File.WriteAllText(configs[i].FullPath + ".schema.json", schema.Root.ToJsonString(new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true }));
+        File.WriteAllText(fullName + ".schema.json", schema.Root.ToJsonString(new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping, WriteIndented = true }));
         var configFile = File.ReadAllText(fullName);
         if (!configFile.StartsWith("# yaml-language-server"))
         {
-            var relativePath = configs[i].FullPath.ToRelative(configs[i].DirectoryName);
+            var relativePath = fullName.ToRelative(config.ConfigRoot);
             configFile = $"# yaml-language-server: $schema={relativePath}.schema.json \n" + configFile;
-            File.WriteAllText(configs[i].FullPath, configFile);
+            File.WriteAllText(fullName, configFile);
         }
 
         logger.LogInformation("Schéma de configuration généré avec succès.");
@@ -624,7 +623,7 @@ for (var i = 0; i < configs.Count; i++)
                     genConfig.TranslateProperties ??= config.I18n.TranslateProperties;
 
                     ModelUtils.TrimSlashes(genConfig, c => c.OutputDirectory);
-                    ModelUtils.CombinePath(dn, genConfig, c => c.OutputDirectory);
+                    ModelUtils.CombinePath(config.ConfigRoot, genConfig, c => c.OutputDirectory);
 
                     var instance = Activator.CreateInstance(generator);
                     instance!.GetType().GetMethod("Register")!

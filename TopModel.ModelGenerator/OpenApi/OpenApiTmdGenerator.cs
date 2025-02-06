@@ -72,8 +72,7 @@ public class OpenApiTmdGenerator : ModelGenerator
         };
         var fileName = Path.Combine(rootPath, tmdFile.Name + ".tmd");
 
-        using var fileWriter = _writerProvider.OpenFileWriter(modelFileName, _logger);
-        using var tmdFileWriter = new TmdWriter(fileWriter, tmdFile, Path.GetFullPath(ModelRoot));
+        using var tmdFileWriter = new TmdWriter(_writerProvider.OpenFileWriter(modelFileName, _logger), tmdFile, Path.GetFullPath(ModelRoot));
 
         var references = new HashSet<string>(referenceMap.SelectMany(r => r.Value).Select(r => r.Id).Distinct());
 
@@ -193,8 +192,7 @@ public class OpenApiTmdGenerator : ModelGenerator
                 Path = Path.Combine(_config.OutputDirectory, module.Key)
             };
 
-            using var endpointFileWriter = _writerProvider.OpenFileWriter(endpointFileName, _logger);
-            using var tmdEndpointFileWriter = new TmdWriter(endpointFileWriter, tmdFileEnpoint, ModelRoot);
+            using var tmdEndpointFileWriter = new TmdWriter(_writerProvider.OpenFileWriter(endpointFileName, _logger), tmdFileEnpoint, ModelRoot);
 
             if (referenceMap[module.Key].Any())
             {

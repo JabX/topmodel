@@ -16,8 +16,10 @@
       "description": "Liste des warnings à ignorer.",
       "items": {
         "type": "string",
-        "description": "Code du warning (TMD9XXX) à ignorer ",
+        "description": "Code du warning (TMDXXXX) à ignorer ",
         "enum": [
+          "TMD8000",
+          "TMD8001",
           "TMD9001",
           "TMD9002",
           "TMD9003",
@@ -87,6 +89,28 @@
       "description": "Chemins vers des projets C# contenant des générateurs personnalisés",
       "items": {
         "type": "string"
+      }
+    },
+    "ignoredFiles": {
+      "type": "array",
+      "description": "Liste des fichiers à ignorer après première génération (relatif au fichier de config).",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "comment"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "Chemin du fichier à ignorer, relatif au fichier de config."
+          },
+          "comment": {
+            "type": "string",
+            "description": "Motif."
+          }
+        }
       }
     },
     "csharp": {

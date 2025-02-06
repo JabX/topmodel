@@ -152,7 +152,7 @@ public class ModelStore
             {
                 var referenceErrors = new List<ModelError>();
 
-                var affectedFiles = _pendingUpdates.Select(pu => _modelFiles.TryGetValue(pu, out var mf) ? mf : null).Any(mf => (mf?.Domains.Any() ?? false) || (mf?.Converters.Any() ?? false))
+                var affectedFiles = _pendingUpdates.Select(pu => _modelFiles.TryGetValue(pu, out var mf) ? mf : null).Any(mf => mf?.Domains.Count > 0 || mf?.Converters.Count > 0)
                     ? _modelFiles.Values
                     : GetAffectedFiles(_pendingUpdates).Distinct();
 
