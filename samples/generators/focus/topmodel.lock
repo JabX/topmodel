@@ -1,0 +1,20 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Javascript: 5a281b0c7608bad36d741d598fbbcd04
+generatedFiles:
+  - ./src/locale/common.ts
+  - ./src/locale/securite.ts
+  - ./src/model/securite/profil/profil-item.ts
+  - ./src/model/securite/profil/profil-read.ts
+  - ./src/model/securite/profil/profil-write.ts
+  - ./src/model/securite/profil/references.ts
+  - ./src/model/securite/utilisateur/references.ts
+  - ./src/model/securite/utilisateur/utilisateur-item.ts
+  - ./src/model/securite/utilisateur/utilisateur-read.ts
+  - ./src/model/securite/utilisateur/utilisateur-write.ts
+  - ./src/services/securite/profil/profil.ts
+  - ./src/services/securite/utilisateur/utilisateur.ts

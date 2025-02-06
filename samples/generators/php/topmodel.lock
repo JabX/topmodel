@@ -1,0 +1,22 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Php: a0763845ae6a0fbf8d30b034ce99da37
+generatedFiles:
+  - ./src/Entity/Securite/Profil/Droit.php
+  - ./src/Entity/Securite/Profil/Profil.php
+  - ./src/Entity/Securite/Profil/TypeDroit.php
+  - ./src/Entity/Securite/Utilisateur/TypeUtilisateur.php
+  - ./src/Entity/Securite/Utilisateur/Utilisateur.php
+  - ./src/Model/Securite/Profil/ProfilRead.php
+  - ./src/Model/Securite/Profil/ProfilWrite.php
+  - ./src/Model/Securite/Utilisateur/UtilisateurRead.php
+  - ./src/Model/Securite/Utilisateur/UtilisateurWrite.php
+  - ./src/Repository/Securite/Profil/DroitRepository.php
+  - ./src/Repository/Securite/Profil/ProfilRepository.php
+  - ./src/Repository/Securite/Profil/TypeDroitRepository.php
+  - ./src/Repository/Securite/Utilisateur/TypeUtilisateurRepository.php
+  - ./src/Repository/Securite/Utilisateur/UtilisateurRepository.php

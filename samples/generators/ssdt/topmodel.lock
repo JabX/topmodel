@@ -1,0 +1,18 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Sql: a83434d9d51145ebcc63335138053a97
+generatedFiles:
+  - ./src/init/DROIT.insert.sql
+  - ./src/init/main.sql
+  - ./src/init/TYPE_DROIT.insert.sql
+  - ./src/init/TYPE_UTILISATEUR.insert.sql
+  - ./src/tables/DROIT.sql
+  - ./src/tables/PROFIL_DROIT.sql
+  - ./src/tables/PROFIL.sql
+  - ./src/tables/TYPE_DROIT.sql
+  - ./src/tables/TYPE_UTILISATEUR.sql
+  - ./src/tables/UTILISATEUR.sql

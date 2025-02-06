@@ -1,0 +1,32 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Jpa: 0e20afb40ac75c66b465d9ab118ce5c4
+generatedFiles:
+  - ./src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/profil/ProfilClient.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/api/client/securite/utilisateur/UtilisateurClient.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/api/server/securite/profil/ProfilController.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/api/server/securite/utilisateur/UtilisateurController.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/daos/securite/profil/AbstractProfilDAO.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/daos/securite/utilisateur/AbstractUtilisateurDAO.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/profil/ProfilItem.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/profil/ProfilRead.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/profil/ProfilWrite.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/utilisateur/UtilisateurItem.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/utilisateur/UtilisateurRead.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/dtos/securite/utilisateur/UtilisateurWrite.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/profil/Droit.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/profil/Profil.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/profil/SecuriteProfilMappers.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/profil/TypeDroit.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/utilisateur/SecuriteUtilisateurMappers.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/utilisateur/TypeUtilisateur.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/entities/securite/utilisateur/Utilisateur.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/DroitCode.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/enums/securite/profil/TypeDroitCode.java
+  - ./src/main/javagen/topmodel/jpa/sample/demo/enums/securite/utilisateur/TypeUtilisateurCode.java
+  - ./src/main/resources/i18n/model/common.properties
+  - ./src/main/resources/i18n/model/securite.properties

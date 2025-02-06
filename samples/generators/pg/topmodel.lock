@@ -1,0 +1,14 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Sql: a83434d9d51145ebcc63335138053a97
+generatedFiles:
+  - ./src/01_tables.sql
+  - ./src/02_fk_indexes.sql
+  - ./src/03_unique_keys.sql
+  - ./src/04_references.sql
+  - ./src/05_comments.sql
+  - ./src/06_resources.sql

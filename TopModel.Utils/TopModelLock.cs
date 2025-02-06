@@ -27,7 +27,7 @@ public class TopModelLock : TopModelLockFile
         _config = config;
         _logger = logger;
 
-        var lockFile = new FileInfo(Path.Combine(_config.ModelRoot, _config.LockFileName));
+        var lockFile = new FileInfo(Path.Combine(_config.ConfigRoot, _config.LockFileName));
 
         if (lockFile.Exists)
         {
@@ -65,7 +65,7 @@ public class TopModelLock : TopModelLockFile
         generatedFiles = generatedFiles.Select(g => g.Replace("\\", "/"));
 
         var generatedFilesList = generatedFiles
-            .Select(f => f.ToRelative(_config.ModelRoot))
+            .Select(f => f.ToRelative(_config.ConfigRoot))
             .Distinct()
             .OrderBy(f => f)
             .ToList();
@@ -74,7 +74,7 @@ public class TopModelLock : TopModelLockFile
         var filesToPrune = GeneratedFiles
             .Select(f => f.Replace("\\", "/"))
             .Where(f => !generatedFilesList.Select(gf => isWindows ? gf.ToLowerInvariant() : gf).Contains(isWindows ? f.ToLowerInvariant() : f))
-            .Select(f => Path.Combine(_config.ModelRoot, f));
+            .Select(f => Path.Combine(_config.ConfigRoot, f));
 
         Parallel.ForEach(filesToPrune.Where(File.Exists), fileToPrune =>
         {
@@ -99,7 +99,7 @@ public class TopModelLock : TopModelLockFile
     {
         if (Modules.Count > 0 || GeneratedFiles.Count > 0)
         {
-            using var fw = new GeneratedFileWriter(_config, Path.Combine(_config.ModelRoot, _config.LockFileName), _logger, true)
+            using var fw = new GeneratedFileWriter(_config, Path.Combine(_config.ConfigRoot, _config.LockFileName), _logger, true)
             {
                 StartCommentToken = "#"
             };

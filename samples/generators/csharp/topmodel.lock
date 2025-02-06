@@ -1,0 +1,31 @@
+﻿#
+# ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
+#
+
+version: 2.3.5
+custom:
+  ../../../TopModel.Generator.Csharp: 8e40f7cf89c1bf2ca5a80be19bfd3168
+generatedFiles:
+  - ./src/Clients/CSharp.Clients.Db/generated/CSharpDbContext.comments.cs
+  - ./src/Clients/CSharp.Clients.Db/generated/CSharpDbContext.cs
+  - ./src/Clients/CSharp.Clients.Db/Models/Securite/Profil/generated/Profil.cs
+  - ./src/Clients/CSharp.Clients.Db/Models/Securite/Profil/generated/SecuriteProfilMappers.cs
+  - ./src/Clients/CSharp.Clients.Db/Models/Securite/Utilisateur/generated/SecuriteUtilisateurMappers.cs
+  - ./src/Clients/CSharp.Clients.Db/Models/Securite/Utilisateur/generated/Utilisateur.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/ISecuriteProfilReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/ISecuriteUtilisateurReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/SecuriteProfilReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/SecuriteUtilisateurReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.External/Securite/Profil/generated/ProfilClient.cs
+  - ./src/Clients/CSharp.Clients.External/Securite/Utilisateur/generated/UtilisateurClient.cs
+  - ./src/CSharp.Api/Controllers/Securite/Profil/ProfilController.cs
+  - ./src/CSharp.Api/Controllers/Securite/Utilisateur/UtilisateurController.cs
+  - ./src/Models/CSharp.Securite/Profil.Models/generated/Droit.cs
+  - ./src/Models/CSharp.Securite/Profil.Models/generated/IProfilItem.cs
+  - ./src/Models/CSharp.Securite/Profil.Models/generated/ProfilRead.cs
+  - ./src/Models/CSharp.Securite/Profil.Models/generated/ProfilWrite.cs
+  - ./src/Models/CSharp.Securite/Profil.Models/generated/TypeDroit.cs
+  - ./src/Models/CSharp.Securite/Utilisateur.Models/generated/IUtilisateurItem.cs
+  - ./src/Models/CSharp.Securite/Utilisateur.Models/generated/TypeUtilisateur.cs
+  - ./src/Models/CSharp.Securite/Utilisateur.Models/generated/UtilisateurRead.cs
+  - ./src/Models/CSharp.Securite/Utilisateur.Models/generated/UtilisateurWrite.cs
