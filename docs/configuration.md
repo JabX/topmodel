@@ -107,3 +107,25 @@ Les variables globales sont résolues en premier (une fois que celles qui devaie
 ### Intersection de tags
 
 Nous nous plaçons dans le cadre de la génération du tag `tag-a` d'une classe `A`, si cette classe a besoin d'importer une classe `B` qui n'est générée qu'avec le tag `tag-b` ce qui a un impact sur l'import à ajouter à A. Dans ce cas, le tag utilisé pour la résolution des variables par tag dans l'écriture de l'import de `B` dans `A` est `tag-b`.
+
+## Autres propriétés de configuration globales
+
+- **`modelRoot`**
+
+  Permet de définir une autre racine pour le modèle que l'emplacement du fichier de configuration. A utiliser si vous voulez séparer l'emplacement du fichier de config du reste du modèle. (Attention : tous les chemins de fichiers dans les `uses` sont relatifs au `modelRoot`, et tous les fichiers `.tmd` doivent être dedans.)
+
+- **`lockFileName`**
+
+  Permet de surcharger le lockfile (`topmodel.lock` par défaut).
+
+- **`ignoredFiles`**
+
+  Permet de lister des chemins de fichiers générés qu'il ne faudra pas regénérer lors de générations successives. A utiliser avec parcimonie, pour contourner un manquement du générateur utilisé, en attendant un correctif du générateur ou de trouver une meilleure solution. Un fichier ignoré enregistrera un warning lors de la génération, et il est obligatoire de spécifier un commentaire pour chaque exclusion pour la justifier.
+
+- **`noWarn`**
+
+  Permet de désactiver les warnings listés. A utiliser avec parcimonie également, en général ces warnings ne sont pas là pour rien 😉.
+
+- **`pluralizeTableNames`**
+
+  Permet de renseigner le `sqlName` des classes par défaut avec leur `pluralName`, au lieu d'utiliser le `name`.
