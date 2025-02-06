@@ -8,10 +8,21 @@ Changelogs des modules :
 - [`sql`](./TopModel.Generator.Sql/CHANGELOG.md)
 - [`translation`](./TopModel.Generator.Translation/CHANGELOG.md)
 
+## 2.4.0
+
+- [`#435`](https://github.com/klee-contrib/topmodel/pull/435) / [`#436`](https://github.com/klee-contrib/topmodel/pull/436) - `ignoredFiles`
+
+  Il est désormais possible de "débrancher" la génération de certains fichiers par TopModel après leur première génération, en renseignant la propriété `ignoredFiles` dans la configuration avec le chemin vers les fichiers générés à ignorer. Cette fonctionnalité est **à utiliser avec parcimonie**, pour contourner un manquement du générateur utilisé, **en attendant** un correctif du générateur ou de trouver une meilleure solution. Un fichier ignoré enregistrera un warning lors de la génération, et il est obligatoire de spécifier un commentaire pour chaque exclusion pour la justifier.
+
+  Cette évolution a été rendue possible par des évolutions structurantes sur la génération de fichiers au sein des générateurs TopModel. Par conséquent, **cette fonctionnalité ne sera disponible qu'avec les dernières versions des générateurs** (à ce jour). Si vous utilisez un générateur personnalisé, il devra également être mis à jour pour bénéficier de la fonctionnalité (et peut être d'autres nouvelles fonctionnalités dans le futur). En revanche, et comme promis, TopModel 2.4 reste 100% rétro-compatible avec des générateurs existants, donc si vous avez bloqué une version de générateur pour n'importe quelle raison, vous pouvez quand même faire cette mise à jour.
+
+- [`df49cc8`](https://github.com/klee-contrib/topmodel/commit/df49cc8ff4ec6d5a3588664c3bb8048e8e7f16e5) - topmodel.lock à la racine de la config au lieu de la racine du modèle
+
+  Il s'agit théoriquement d'un breaking change, mais il n'affectera que les utilisateurs qui ont spécifié un `modelRoot` explicite différent de `""` ou `"/"` dans leur configuration, et cela va simplement déplacer le lockfile. Il est toujours possible de le renommer.
+
 ## 2.3.4
 
 - [`60efcc60efcc60fe4bb8e9f743e5577f5b0f0848392594'](https://github.com/klee-contrib/topmodel/commit/60efcc60fe4bb8e9f743e5577f5b0f0848392594) [Core] Correction recopie `domainParameters`
-
 
 ## 2.3.3
 

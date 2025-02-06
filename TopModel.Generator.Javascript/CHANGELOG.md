@@ -1,3 +1,7 @@
+## 1.2.0
+
+Compatibilité avec `ignoredFiles` de TopModel 2.4
+
 ## 1.1.7
 
 - [`8f9b253`](https://github.com/klee-contrib/topmodel/commit/8f9b2535d25ca7918176e7f0c3b62c441612a877) - [JS] Config javascript entityTypesPath ne créée pas des imports relatifs : Fix #426

@@ -1,3 +1,7 @@
+## 1.4.0
+
+Compatibilité avec `ignoredFiles` de TopModel 2.4
+
 ## 1.3.0
 
 - [#434](https://github.com/klee-contrib/topmodel/pull/434) - Enumérations représentant totalement l'entité. Ajout du mode `enumsAsEnums`

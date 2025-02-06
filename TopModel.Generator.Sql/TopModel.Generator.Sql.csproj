@@ -9,7 +9,7 @@
   
   <PropertyGroup>
     <PackageOutputPath>../.nupkg</PackageOutputPath>
-    <Version>1.0.4</Version>
+    <Version>1.1.0</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Authors>JabX;gideruette</Authors>
     <Description>Générateurs SQL pour TopModel</Description>
