@@ -13,7 +13,7 @@
     <PackAsTool>true</PackAsTool>
     <PackageOutputPath>../.nupkg</PackageOutputPath>
     <ToolCommandName>tmdgen</ToolCommandName>
-    <Version>1.10.0</Version>
+    <Version>1.10.1</Version>
     <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <Authors>JabX;gideruette</Authors>
     <Description>Générateur de modèle TopModel à partir de sources externes (OpenAPI, Postgresql, Oracle...).</Description>
