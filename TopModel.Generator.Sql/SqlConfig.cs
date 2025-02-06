@@ -62,7 +62,29 @@ public class SqlConfig : GeneratorConfigBase
     /// </summary>
     public TargetDBMS TargetDBMS { get; set; } = TargetDBMS.Postgre;
 
+    /// <summary>
+    /// Indique si le SGBD gère les tablespaces.
+    /// </summary>
+    public bool AllowTablespace => TargetDBMS != TargetDBMS.Sqlserver;
+
+    public string BatchSeparator => TargetDBMS switch
+    {
+        TargetDBMS.Oracle => $"{Environment.NewLine}/",
+        TargetDBMS.Sqlserver => $"{Environment.NewLine}go",
+        _ => ";"
+    };
+
     protected override bool UseNamedEnums => false;
+
+    public static bool IsBoolean(IProperty property)
+    {
+        var domain = property.Domain;
+        /* Pour savoir si un domaine est booléen, on regarde grossièrement le mot bool dans le nom du domaine, le label du domaine, un type d'implémeentation de domaine. */
+        return
+            domain.Name.Value.Contains("bool", StringComparison.InvariantCultureIgnoreCase) ||
+            domain.Label.Contains("bool", StringComparison.InvariantCultureIgnoreCase) ||
+            domain.Implementations.Values.Any(di => di.Type?.Contains("bool", StringComparison.InvariantCultureIgnoreCase) ?? false);
+    }
 
     public override bool CanClassUseEnums(Class classe, IEnumerable<Class>? availableClasses = null, IProperty? prop = null)
     {
@@ -79,6 +101,21 @@ public class SqlConfig : GeneratorConfigBase
                 [nameof(trigram)] = trigram,
                 [nameof(columnName)] = columnName,
             });
+    }
+
+    /// <summary>
+    /// Calcule le nom de la séquence associée à une table.
+    /// </summary>
+    /// <param name="classe">Classe.</param>
+    /// <returns>Nom de la séquence.</returns>
+    public string GetSequenceName(Class classe)
+    {
+        return TargetDBMS switch
+        {
+            TargetDBMS.Oracle => $"{classe.Trigram}_SEQ",
+            TargetDBMS.Postgre => $"SEQ_{classe.SqlName}",
+            var t => throw new NotImplementedException($"Sequence declaration is not implemented with {t}")
+        };
     }
 
     public string GetUniqueConstraintName(string tableName, string columnNames, string propertyNames)
@@ -115,16 +152,6 @@ public class SqlConfig : GeneratorConfigBase
         }
 
         return base.GetValue(property, availableClasses, value);
-    }
-
-    public bool IsBoolean(IProperty property)
-    {
-        var domain = property.Domain;
-        /* Pour savoir si un domaine est booléen, on regarde grossièrement le mot bool dans le nom du domaine, le label du domaine, un type d'implémeentation de domaine. */
-        return
-            domain.Name.Value.ToLowerInvariant().Contains("bool") ||
-            domain.Label.ToLowerInvariant().Contains("bool") ||
-            domain.Implementations.Values.Any(di => di.Type?.ToLowerInvariant().Contains("bool") ?? false);
     }
 
     public override bool ShouldQuoteValue(IProperty prop)

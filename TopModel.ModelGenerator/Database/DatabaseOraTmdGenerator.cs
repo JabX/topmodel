@@ -1,21 +1,15 @@
 ﻿using System.Data.Common;
 using Microsoft.Extensions.Logging;
 using Oracle.ManagedDataAccess.Client;
+using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.Database;
 
-public class DatabaseOraTmdGenerator : DatabaseTmdGenerator
+public class DatabaseOraTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, IFileWriterProvider writerProvider)
+    : DatabaseTmdGenerator(logger, config, writerProvider)
 {
-    private readonly DatabaseConfig _config;
+    private readonly DatabaseConfig _config = config;
 
-#pragma warning disable CS8618
-    public DatabaseOraTmdGenerator(ILogger<DatabaseOraTmdGenerator> logger, DatabaseConfig config)
-        : base(logger, config)
-    {
-        _config = config;
-    }
-
-#pragma warning restore CS8618
     public override string Name => "DatabaseOraGen";
 
     protected override string GetColumnsQuery()

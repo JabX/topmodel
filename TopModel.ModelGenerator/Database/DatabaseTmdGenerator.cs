@@ -6,27 +6,16 @@ using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.Database;
 
-public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
+public abstract class DatabaseTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, IFileWriterProvider writerProvider)
+    : ModelGenerator(logger), IDisposable
 {
-    private readonly Dictionary<string, TmdClass> _classes = new();
-    private readonly DatabaseConfig _config;
-    private readonly ILogger<DatabaseTmdGenerator> _logger;
-
-    private DbConnection _connection;
+    private readonly Dictionary<string, TmdClass> _classes = [];
+    private DbConnection? _connection;
 
     private int _fileIndice = 10;
     private int _moduleIndice = 0;
 
-#pragma warning disable CS8618
-    public DatabaseTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config)
-        : base(logger)
-    {
-        _config = config;
-        _logger = logger;
-    }
-
-    public Dictionary<string, string> Passwords { get; init; }
-#pragma warning restore CS8618
+    public required Dictionary<string, string> Passwords { get; init; }
 
     public override string Name => "DatabaseGen";
 
@@ -44,14 +33,14 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
     /// <inheritdoc cref="IDisposable.Dispose" />
     public void Dispose()
     {
-        _connection.Dispose();
+        _connection?.Dispose();
     }
 
     protected override async IAsyncEnumerable<string> GenerateCore()
     {
         InitConnection();
-        _logger.LogInformation($"Connexion à la base de données {_config.Source.DbName} réussie !");
-        _logger.LogInformation($"Génération en cours, veuillez patienter...");
+        logger.LogInformation($"Connexion à la base de données {config.Source.DbName} réussie !");
+        logger.LogInformation($"Génération en cours, veuillez patienter...");
         var columns = await GetColumns();
         var classGroups = columns.GroupBy(c => c.TableName);
 
@@ -136,19 +125,18 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
 
     private TmdProperty ColumnToProperty(TmdClass classe, DbColumn column, string trigram, ConstraintKey? primaryKeyConstraint, ConstraintKey? foreignConstraint)
     {
-        var domain = TmdGenUtils.GetDomainString(_config.Domains, name: column.ColumnName, scale: column.Scale, precision: column.Precision);
+        var domain = TmdGenUtils.GetDomainString(config.Domains, name: column.ColumnName, scale: column.Scale, precision: column.Precision);
         if (domain == column.ColumnName)
         {
-            domain = TmdGenUtils.GetDomainString(_config.Domains, type: column.DataType, scale: column.Scale, precision: column.Precision);
+            domain = TmdGenUtils.GetDomainString(config.Domains, type: column.DataType, scale: column.Scale, precision: column.Precision);
         }
 
         var columnName = column.ColumnName;
 
         TmdRegularProperty tmdProperty;
-        if (foreignConstraint != null && _classes.ContainsKey(foreignConstraint.ForeignTableName))
+        if (foreignConstraint != null && _classes.TryGetValue(foreignConstraint.ForeignTableName, out var foreignClass))
         {
             tmdProperty = new TmdAssociationProperty();
-            var foreignClass = _classes[foreignConstraint.ForeignTableName];
             ((TmdAssociationProperty)tmdProperty).Association = foreignClass;
         }
         else
@@ -191,7 +179,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
             var file = new TmdFile()
             {
                 Name = $"{_fileIndice++}_Model",
-                Tags = _config.Tags
+                Tags = config.Tags
             };
             var rootClass = _classes.Where(c => c.Value.File == null).First();
             var stack = new Queue<TmdClass>();
@@ -267,7 +255,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
                 var file = new TmdFile()
                 {
                     Name = $"{_fileIndice++}_Model",
-                    Tags = _config.Tags
+                    Tags = config.Tags
                 };
                 classe.Value.File = file;
                 file.Classes.Add(classe.Value);
@@ -278,7 +266,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
     private void CreateUserModules()
     {
         // Recherche des modules forcés par la configuration
-        foreach (var module in _config.Modules)
+        foreach (var module in config.Modules)
         {
             var moduleName = $"{ModuleIndice}_{module.Name}";
             foreach (var mainClass in module.Classes.Select(c => _classes.Where(cl => cl.Value.Name == c).FirstOrDefault()))
@@ -286,12 +274,12 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
                 if (mainClass.Value != null)
                 {
                     mainClass.Value.File!.Module = moduleName;
-                    mainClass.Value.File!.Tags = _config.Tags.Concat(module.Tags ?? []).ToList();
+                    mainClass.Value.File!.Tags = config.Tags.Concat(module.Tags ?? []).ToList();
                 }
             }
         }
 
-        foreach (var module in _config.Modules)
+        foreach (var module in config.Modules)
         {
             foreach (var mainClass in module.Classes.Select(c => _classes.Where(cl => cl.Value.Name == c).FirstOrDefault()))
             {
@@ -325,18 +313,16 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
     private async Task<IEnumerable<DbColumn>> GetColumns()
     {
         // Récupération des colonnes
-        var columns = await _connection
-            .QueryAsync<DbColumn>(GetColumnsQuery());
-        return columns.Where(c => !_config.Exclude.Select(e => e.ToLower()).Contains(c.TableName.ToLower()));
+        var columns = await _connection!.QueryAsync<DbColumn>(GetColumnsQuery());
+        return columns.Where(c => !config.Exclude.Select(e => e.ToLower()).Contains(c.TableName.ToLower()));
     }
 
     private async Task<IEnumerable<ConstraintKey>> GetConstraintKeys(string query)
     {
         // Récupération des contraintes
-        var keys = await _connection
-            .QueryAsync<ConstraintKey>(query);
+        var keys = await _connection!.QueryAsync<ConstraintKey>(query);
 
-        return keys.Where(c => !_config.Exclude.Contains(c.TableName));
+        return keys.Where(c => !config.Exclude.Contains(c.TableName));
     }
 
     private Task<IEnumerable<ConstraintKey>> GetForeignKeys()
@@ -374,7 +360,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
                             c.File = file;
                         }
 
-                        f.Classes = new();
+                        f.Classes = [];
                         break;
                     }
                 }
@@ -397,7 +383,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
                 className = group.Key;
             }
 
-            if (_config.ClassNameOverrides.TryGetValue(className, out var classNameOverride))
+            if (config.ClassNameOverrides.TryGetValue(className, out var classNameOverride))
             {
                 className = classNameOverride;
             }
@@ -408,21 +394,21 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
 
     private void InitConnection()
     {
-        if (Passwords.TryGetValue(_config.Source.DbName, out var password))
+        if (Passwords.TryGetValue(config.Source.DbName, out var password))
         {
-            _config.Source.Password = password;
+            config.Source.Password = password;
         }
 
         try
         {
             _connection = GetConnection();
-            _logger.LogInformation($"Connexion à la base de données {_config.Source.DbName}...");
+            logger.LogInformation($"Connexion à la base de données {config.Source.DbName}...");
             _connection.Open();
         }
         catch (Exception)
         {
-            _logger.LogInformation($"Mot de passe{(password != null ? " erroné" : string.Empty)} pour l'utilisateur {_config.Source.User}:  ");
-            Passwords.Remove(_config.Source.DbName);
+            logger.LogInformation($"Mot de passe{(password != null ? " erroné" : string.Empty)} pour l'utilisateur {config.Source.User}:  ");
+            Passwords.Remove(config.Source.DbName);
             while (true)
             {
                 var key = Console.ReadKey(true);
@@ -434,7 +420,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
                 password += key.KeyChar;
             }
 
-            _config.Source.Password = password;
+            config.Source.Password = password;
             InitConnection();
         }
     }
@@ -477,9 +463,9 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
     private async Task ReadValues()
     {
         // Extraction des valeurs pour les tables paramétrées
-        foreach (var classe in _config.ExtractValues.Select(classe => _classes.FirstOrDefault(c => classe == c.Value.Name)).Where(c => c.Value != null))
+        foreach (var classe in config.ExtractValues.Select(classe => _classes.FirstOrDefault(c => classe == c.Value.Name)).Where(c => c.Value != null))
         {
-            var values = await _connection.QueryAsync(@$"select * from {classe.Key}");
+            var values = await _connection!.QueryAsync(@$"select * from {classe.Key}");
             classe.Value.Values.AddRange(values.Select(r =>
             {
                 var d = new Dictionary<string, string?>();
@@ -503,7 +489,7 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
             {
                 var mainClass = file.Classes.OrderByDescending(cl => cl.Dependencies.Count + _classes.SelectMany(c => c.Value.Dependencies).Where(c => c == cl).Count()).First();
                 file.Name = (indice < 10 ? "0" : string.Empty) + indice++ + "_" + mainClass.Name;
-                file.Path = Path.Combine(_config.OutputDirectory, file.Module!, file.Name);
+                file.Path = Path.Combine(config.OutputDirectory, file.Module!, file.Name);
             }
         }
     }
@@ -528,7 +514,8 @@ public abstract class DatabaseTmdGenerator : ModelGenerator, IDisposable
             var fileName = Path.Combine(ModelRoot, $"{file.Path}.tmd");
             yield return fileName;
 
-            using var tmdFileWriter = new TmdWriter(fileName, file!, _logger, ModelRoot);
+            using var fileWriter = writerProvider.OpenFileWriter(fileName, logger);
+            using var tmdFileWriter = new TmdWriter(fileWriter, file, ModelRoot);
         }
     }
 }

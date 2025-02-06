@@ -1,20 +1,14 @@
 ﻿using System.Data.Common;
 using Microsoft.Extensions.Logging;
 using MySqlConnector;
+using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.Database;
 
-public class DatabaseMySqlTmdGenerator : DatabaseTmdGenerator, IDisposable
+public class DatabaseMySqlTmdGenerator(ILogger<DatabaseTmdGenerator> logger, DatabaseConfig config, IFileWriterProvider writerProvider)
+    : DatabaseTmdGenerator(logger, config, writerProvider), IDisposable
 {
-    private readonly DatabaseConfig _config;
-
-#pragma warning disable CS8618
-    public DatabaseMySqlTmdGenerator(ILogger<DatabaseMySqlTmdGenerator> logger, DatabaseConfig config)
-        : base(logger, config)
-    {
-        _config = config;
-    }
-#pragma warning restore CS8618
+    private readonly DatabaseConfig _config = config;
 
     public override string Name => "DatabaseMySqlGen";
 

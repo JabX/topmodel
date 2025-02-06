@@ -7,16 +7,9 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class DataFlowGenerator : GeneratorBase<CsharpConfig>
+public class DataFlowGenerator(ILogger<DataFlowGenerator> logger, IFileWriterProvider writerProvider)
+    : GeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<DataFlowGenerator> _logger;
-
-    public DataFlowGenerator(ILogger<DataFlowGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override IEnumerable<string> GeneratedFiles => Files.Values.SelectMany(f => f.DataFlows)
         .SelectMany(df => Config.Tags.Intersect(df.ModelFile.Tags)
             .SelectMany(tag => new[] { Config.GetDataFlowFilePath(df, tag), Config.GetDataFlowRegistrationFilePath(df, tag) }))
@@ -36,7 +29,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
             return $"_{source.Source.ToCamelCase()}Connection{GetSourceNumber(source)}";
         }
 
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         var usings = new List<string>()
         {
@@ -84,7 +77,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
         w.WriteLine();
         w.WriteLine(1, $"protected override string TargetName => \"{dataFlow.Target.ToCamelCase()}\";");
 
-        if (dataFlow.DependsOn.Any())
+        if (dataFlow.DependsOn.Count > 0)
         {
             w.WriteLine();
             w.WriteLine(1, $"public override string[] DependsOn => new[] {{ {string.Join(", ", dataFlow.DependsOn.Select(d => $"\"{d.Name.ToPascalCase()}\""))} }};");
@@ -142,7 +135,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
         }
         else if (dataFlow.Sources.Count > 1)
         {
-            if (dataFlow.Sources.All(source => !source.JoinProperties.Any()))
+            if (dataFlow.Sources.All(source => source.JoinProperties.Count == 0))
             {
                 w.WriteLine();
                 w.WriteLine(2, "return (await Task.WhenAll(");
@@ -161,7 +154,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
 
                 w.WriteLine(2, $".SelectMany(s => s){(hasCreateMapper ? string.Empty : ";")}");
             }
-            else if (dataFlow.Sources.All(source => source.JoinProperties.Any()))
+            else if (dataFlow.Sources.All(source => source.JoinProperties.Count > 0))
             {
                 string GetVarName(DataFlowSource source)
                 {
@@ -279,7 +272,8 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
             return;
         }
 
-        using var w = new CSharpWriter(fileName, _logger) { EnableHeader = false };
+        using var w = this.OpenCSharpWriter(fileName);
+        w.EnableHeader = false;
 
         w.WriteUsings(new[] { "Kinetix.Etl" }.Concat(dataFlow.Sources.Select(source => Config.GetNamespace(source.Class, GetBestClassTag(source.Class, tag)))).ToArray());
         w.WriteLine();
@@ -308,7 +302,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
         var partialSources = dataFlow.Sources.Where(d => d.Mode == DataFlowSourceMode.Partial).OrderBy(s => s.Source);
         foreach (var source in partialSources)
         {
-            if (dataFlow.Hooks.Any() || partialSources.ToList().IndexOf(source) > 0)
+            if (dataFlow.Hooks.Count > 0 || partialSources.ToList().IndexOf(source) > 0)
             {
                 w.WriteLine();
             }
@@ -349,7 +343,7 @@ public class DataFlowGenerator : GeneratorBase<CsharpConfig>
     protected virtual void HandleRegistrationFile(string fileName, IEnumerable<DataFlow> flows, string tag)
     {
         var firstFlow = flows.First();
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         w.WriteUsings("Kinetix.Etl", "Microsoft.Extensions.DependencyInjection");
         w.WriteLine();

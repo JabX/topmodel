@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Text;
+using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Utils;
@@ -9,10 +10,18 @@ public abstract class GeneratorBase<T> : IModelWatcher
     where T : GeneratorConfigBase
 {
     private readonly ILogger _logger;
+    private readonly IFileWriterProvider? _writerProvider;
 
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     protected GeneratorBase(ILogger logger)
     {
         _logger = logger;
+    }
+
+    protected GeneratorBase(ILogger logger, IFileWriterProvider writerProvider)
+    {
+        _logger = logger;
+        _writerProvider = writerProvider;
     }
 
     public abstract string Name { get; }
@@ -23,14 +32,14 @@ public abstract class GeneratorBase<T> : IModelWatcher
 
     public int Number { get; internal set; }
 
-    public virtual IEnumerable<string> GeneratedFiles => new List<string>();
+    public virtual IEnumerable<string> GeneratedFiles => [];
 
     public bool Disabled => Config.Disable?.Contains(Name) ?? false;
 
-    protected Dictionary<string, ModelFile> Files { get; } = new();
+    protected Dictionary<string, ModelFile> Files { get; } = [];
 
     protected IEnumerable<Class> Classes => Files
-        .SelectMany(f => f.Value.Classes.Where(c => Config.Tags.Intersect(c.Tags).Any()))
+        .SelectMany(f => f.Value.Classes.Where(c => Config.Tags.Intersect(c.Tags).Any()).Concat(GetExtraClasses(f.Value)))
         .Distinct();
 
     protected virtual bool PersistentOnly => false;
@@ -53,7 +62,7 @@ public abstract class GeneratorBase<T> : IModelWatcher
         if (!NoLanguage)
         {
             var missingDomains = handledFiles.SelectMany(f => f.Properties).Where(fp => !PersistentOnly || (fp.Class?.IsPersistent ?? false)).Select(fp => fp.Domain)
-                .Concat(PersistentOnly ? Array.Empty<Domain>() : handledFiles.SelectMany(f => f.Properties).OfType<CompositionProperty>().Select(fp => fp.Domain!))
+                .Concat(PersistentOnly ? [] : handledFiles.SelectMany(f => f.Properties).OfType<CompositionProperty>().Select(fp => fp.Domain!))
                 .Where(domain => domain != null && Config.GetImplementation(domain) == null)
                 .Distinct();
 
@@ -69,6 +78,26 @@ public abstract class GeneratorBase<T> : IModelWatcher
         }
 
         HandleFiles(handledFiles);
+    }
+
+    public IFileWriter OpenFileWriter(string fileName, bool encoderShouldEmitUTF8Identifier = true)
+    {
+        if (_writerProvider == null)
+        {
+            throw new NotImplementedException();
+        }
+
+        return _writerProvider.OpenFileWriter(Path.Combine(Config.OutputDirectory, fileName).Replace("\\", "/"), _logger, encoderShouldEmitUTF8Identifier);
+    }
+
+    public IFileWriter OpenFileWriter(string fileName, Encoding encoding)
+    {
+        if (_writerProvider == null)
+        {
+            throw new NotImplementedException();
+        }
+
+        return _writerProvider.OpenFileWriter(Path.Combine(Config.OutputDirectory, fileName).Replace("\\", "/"), _logger, encoding);
     }
 
     protected IEnumerable<ClassValue> GetAllValues(Class classe)
@@ -90,6 +119,11 @@ public abstract class GeneratorBase<T> : IModelWatcher
     protected string GetBestClassTag(Class classe, string tag)
     {
         return classe.Tags.Contains(tag) ? tag : classe.Tags.Intersect(Config.Tags).FirstOrDefault() ?? tag;
+    }
+
+    protected virtual IEnumerable<Class> GetExtraClasses(ModelFile file)
+    {
+        return [];
     }
 
     protected abstract void HandleFiles(IEnumerable<ModelFile> files);

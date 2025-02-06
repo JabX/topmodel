@@ -8,6 +8,7 @@ namespace TopModel.Utils;
 /// <summary>
 /// Classe de base pour l'écriture des fichiers générés.
 /// </summary>
+[Obsolete("Utiliser GeneretedFileWriter via OpenFileWriter() à la place.")]
 public class FileWriter : TextWriter
 {
     /// <summary>

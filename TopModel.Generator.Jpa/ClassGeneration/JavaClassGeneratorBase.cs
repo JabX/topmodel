@@ -8,15 +8,11 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public abstract class JavaClassGeneratorBase : ClassGeneratorBase<JpaConfig>
+public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> logger, IFileWriterProvider writerProvider)
+    : ClassGeneratorBase<JpaConfig>(logger, writerProvider)
 {
     private JavaConstructorGenerator? _jpaModelConstructorGenerator;
     private JpaModelPropertyGenerator? _jpaModelPropertyGenerator;
-
-    public JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> logger)
-        : base(logger)
-    {
-    }
 
     protected static Dictionary<string, string> NewableTypes => new()
     {
@@ -57,7 +53,7 @@ public abstract class JavaClassGeneratorBase : ClassGeneratorBase<JpaConfig>
         fw.AddImports(Config.GetDecoratorImports(classe, tag).ToList());
         foreach (var a in Config.GetDecoratorAnnotations(classe, tag))
         {
-            fw.WriteLine($"{(a.StartsWith("@") ? string.Empty : "@")}{a}");
+            fw.WriteLine($"{(a.StartsWith('@') ? string.Empty : "@")}{a}");
         }
     }
 

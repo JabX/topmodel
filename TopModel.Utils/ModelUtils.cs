@@ -187,4 +187,50 @@ public static class ModelUtils
             property.SetValue(classe, ((string)property.GetValue(classe)!).Trim('/'));
         }
     }
+
+    /// <summary>
+    /// Ecrit un caractère dans le stream.
+    /// </summary>
+    /// <param name="fw">IFileWriter.</param>
+    /// <param name="indentationLevel">Indentation.</param>
+    /// <param name="value">Caractère.</para
+    public static void Write(this IFileWriter fw, int indentationLevel, string value)
+    {
+        var indentValue = string.Empty;
+        for (var i = 0; i < indentationLevel; ++i)
+        {
+            indentValue += fw.IndentValue;
+        }
+
+        value = value.Replace("\n", "\n" + indentValue);
+        fw.Write(indentValue + value);
+    }
+
+    /// <summary>
+    /// Ecrit un ligne dans le stream.
+    /// </summary>
+    /// <param name="fw">IFileWriter.</param>
+    /// <param name="value">Chaîne de caractère.</param>
+    public static void WriteLine(this IFileWriter fw, string? value = null)
+    {
+        fw.Write((value ?? string.Empty) + Environment.NewLine);
+    }
+
+    /// <summary>
+    /// Ecrit la chaine avec le niveau indenté.
+    /// </summary>
+    /// <param name="fw">IFileWriter.</param>
+    /// <param name="indentationLevel">Niveau d'indentation.</param>
+    /// <param name="value">Valeur à écrire dans le flux.</param>
+    public static void WriteLine(this IFileWriter fw, int indentationLevel, string value)
+    {
+        var indentValue = string.Empty;
+        for (var i = 0; i < indentationLevel; ++i)
+        {
+            indentValue += fw.IndentValue;
+        }
+
+        value = value.Replace("\n", "\n" + indentValue);
+        fw.WriteLine(indentValue + value);
+    }
 }

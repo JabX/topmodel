@@ -6,13 +6,9 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JavaEnumConstructorGenerator : JavaConstructorGenerator
+public class JavaEnumConstructorGenerator(JpaConfig config)
+    : JavaConstructorGenerator(config)
 {
-    public JavaEnumConstructorGenerator(JpaConfig config)
-    : base(config)
-    {
-    }
-
     public void WriteEnumConstructor(JavaWriter fw, Class classe, IEnumerable<Class> availableClasses, string tag)
     {
         var codeProperty = classe.EnumKey!;
@@ -37,7 +33,7 @@ public class JavaEnumConstructorGenerator : JavaConstructorGenerator
                 foreach (var prop in classe.GetProperties(availableClasses).Where(p => p != codeProperty))
                 {
                     var isString = Config.GetType(prop) == "String";
-                    var value = refValue.Value.ContainsKey(prop) ? refValue.Value[prop] : "null";
+                    var value = refValue.Value.TryGetValue(prop, out var v) ? v : "null";
                     if (value == "null")
                     {
                         isString = false;

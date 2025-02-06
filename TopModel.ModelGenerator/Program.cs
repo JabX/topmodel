@@ -14,7 +14,7 @@ var command = new RootCommand("Lance le générateur de fichiers tmd.") { Name =
 var watchMode = false;
 var checkMode = false;
 var regularCommand = false;
-var configs = new List<(ModelGeneratorConfig Config, string FullPath, string DirectoryName)>();
+var configs = new List<(string FullPath, string DirectoryName)>();
 var serializer = new Serializer(new() { NamingConvention = new CamelCaseNamingConvention() });
 
 var fileOption = new Option<IEnumerable<FileInfo>>(["-f", "--file"], "Chemin vers un fichier de config.");
@@ -32,8 +32,7 @@ command.SetHandler(
 
         void HandleFile(FileInfo file)
         {
-            using var stream = file.OpenRead();
-            configs.Add((serializer.Deserialize<ModelGeneratorConfig>(stream)!, file.FullName, file.DirectoryName!));
+            configs.Add((file.FullName, file.DirectoryName!));
         }
 
         if (files.Any())
@@ -129,7 +128,7 @@ Console.WriteLine("Fichiers de configuration trouvés :");
 
 for (var p = 0; p < configs.Count; p++)
 {
-    var (_, fullName, _) = configs[p];
+    var (fullName, _) = configs[p];
     Console.ForegroundColor = colors[p % colors.Length];
     Console.Write($"#{p + 1} - ");
     Console.WriteLine(Path.GetRelativePath(Directory.GetCurrentDirectory(), fullName));
@@ -149,15 +148,18 @@ async Task StartGeneration(string filePath, string directoryName, int i)
     using var stream = configFile.OpenRead();
     var config = serializer.Deserialize<ModelGeneratorConfig>(stream)!;
 
+    config.ModelRoot ??= "./";
+    config.LockFileName ??= "tmdgen.lock";
     ModelUtils.CombinePath(directoryName, config, c => c.ModelRoot);
 
     var services = new ServiceCollection()
-        .AddLogging(builder => builder.AddProvider(loggerProvider));
+        .AddLogging(builder => builder.AddProvider(loggerProvider))
+        .AddSingleton<IFileWriterProvider>(new GeneratedFileWriterProvider(config));
 
     foreach (var conf in config.OpenApi)
     {
         ModelUtils.TrimSlashes(conf, c => c.OutputDirectory);
-        services.AddSingleton<ModelGenerator>(p => new OpenApiTmdGenerator(p.GetRequiredService<ILogger<OpenApiTmdGenerator>>(), conf)
+        services.AddSingleton<ModelGenerator>(p => new OpenApiTmdGenerator(p.GetRequiredService<ILogger<OpenApiTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
         {
             DirectoryName = directoryName,
             ModelRoot = config.ModelRoot,
@@ -170,7 +172,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         ModelUtils.TrimSlashes(conf, c => c.OutputDirectory);
         if (conf.Source.DbType == DbType.ORACLE)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabaseOraTmdGenerator(p.GetRequiredService<ILogger<DatabaseOraTmdGenerator>>(), conf)
+            services.AddSingleton<ModelGenerator>(p => new DatabaseOraTmdGenerator(p.GetRequiredService<ILogger<DatabaseOraTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,
@@ -180,7 +182,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         }
         else if (conf.Source.DbType == DbType.POSTGRESQL)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabasePgTmdGenerator(p.GetRequiredService<ILogger<DatabasePgTmdGenerator>>(), conf)
+            services.AddSingleton<ModelGenerator>(p => new DatabasePgTmdGenerator(p.GetRequiredService<ILogger<DatabasePgTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,
@@ -190,7 +192,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
         }
         else if (conf.Source.DbType == DbType.MYSQL)
         {
-            services.AddSingleton<ModelGenerator>(p => new DatabaseMySqlTmdGenerator(p.GetRequiredService<ILogger<DatabaseMySqlTmdGenerator>>(), conf)
+            services.AddSingleton<ModelGenerator>(p => new DatabaseMySqlTmdGenerator(p.GetRequiredService<ILogger<DatabaseMySqlTmdGenerator>>(), conf, p.GetRequiredService<IFileWriterProvider>())
             {
                 DirectoryName = directoryName,
                 ModelRoot = config.ModelRoot,
@@ -210,7 +212,7 @@ async Task StartGeneration(string filePath, string directoryName, int i)
 
     mainLogger.LogInformation($"Générateurs enregistrés :\n                          {string.Join("\n                          ", generators.Select(g => $"- {g.Name}@{{{g.Number}}}"))}");
 
-    var tmdLock = new TopModelLock(mainLogger, config.ModelRoot, config.LockFileName);
+    var tmdLock = new TopModelLock(config, mainLogger);
     var generatedFiles = new List<string>();
 
     foreach (var generator in generators)
@@ -225,8 +227,6 @@ async Task StartGeneration(string filePath, string directoryName, int i)
 
 foreach (var config in configs)
 {
-    ModelUtils.CombinePath(config.DirectoryName, config.Config, c => c.ModelRoot);
-
     await StartGeneration(config.FullPath, config.DirectoryName, configs.IndexOf(config));
 
     if (watchMode)

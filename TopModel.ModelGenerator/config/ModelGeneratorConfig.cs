@@ -1,15 +1,12 @@
 ﻿using TopModel.ModelGenerator.Database;
 using TopModel.ModelGenerator.OpenApi;
+using TopModel.Utils;
 
 namespace TopModel.ModelGenerator;
 
-internal class ModelGeneratorConfig
+internal class ModelGeneratorConfig : ConfigBase
 {
-    public string ModelRoot { get; set; } = "./";
+    public List<OpenApiConfig> OpenApi { get; set; } = [];
 
-    public string LockFileName { get; set; } = "tmdgen.lock";
-
-    public List<OpenApiConfig> OpenApi { get; set; } = new();
-
-    public List<DatabaseConfig> Database { get; set; } = new();
+    public List<DatabaseConfig> Database { get; set; } = [];
 }

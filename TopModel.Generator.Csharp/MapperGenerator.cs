@@ -1,19 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class MapperGenerator : MapperGeneratorBase<CsharpConfig>
+public class MapperGenerator(ILogger<MapperGenerator> logger, IFileWriterProvider writerProvider)
+    : MapperGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<MapperGenerator> _logger;
-
-    public MapperGenerator(ILogger<MapperGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpMapperGen";
 
     protected override string GetFileName((Class Classe, FromMapper Mapper) mapper, string tag)
@@ -40,7 +34,7 @@ public class MapperGenerator : MapperGeneratorBase<CsharpConfig>
 
     protected override void HandleFile(string fileName, string tag, IList<(Class Classe, FromMapper Mapper)> fromMappers, IList<(Class Classe, ClassMappings Mapper)> toMappers)
     {
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         var sampleFromMapper = fromMappers.FirstOrDefault();
         var sampleToMapper = toMappers.FirstOrDefault();
@@ -339,7 +333,7 @@ public class MapperGenerator : MapperGeneratorBase<CsharpConfig>
             w.WriteReturns(1, $"Une nouvelle instance de '{mapper.Class.NamePascal}'");
 
             var extraParams = string.Empty;
-            if (missingRequiredProperties.Any())
+            if (missingRequiredProperties.Count > 0)
             {
                 extraParams = $", {string.Join(", ", missingRequiredProperties.Select(mrp => $"{Config.GetType(mrp, Classes, nonNullable: rrnTarget)} {mrp.NameCamel.Verbatim()}{(!rrnTarget ? " = null" : string.Empty)}"))}";
             }
@@ -428,7 +422,7 @@ public class MapperGenerator : MapperGeneratorBase<CsharpConfig>
                     w.Write(3, $"{mapping.Value.NamePascal} = {value}");
                 }
 
-                if (mappings.IndexOf(mapping) < mappings.Count - 1 || missingRequiredProperties.Any())
+                if (mappings.IndexOf(mapping) < mappings.Count - 1 || missingRequiredProperties.Count > 0)
                 {
                     w.WriteLine(",");
                 }

@@ -1,19 +1,13 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class DbContextGenerator : ClassGroupGeneratorBase<CsharpConfig>
+public class DbContextGenerator(ILogger<DbContextGenerator> logger, IFileWriterProvider writerProvider)
+    : ClassGroupGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<DbContextGenerator> _logger;
-
-    public DbContextGenerator(ILogger<DbContextGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpDbContextGen";
 
     protected virtual IEnumerable<(IProperty Property, AssociationProperty AssociationProperty)> GetAssociationProperties(IEnumerable<Class> classes, string tag)
@@ -48,7 +42,7 @@ public class DbContextGenerator : ClassGroupGeneratorBase<CsharpConfig>
 
     protected virtual void HandleCommentsFile(string fileName, string tag, string dbContextName, string contextNs, IList<string> usings, IList<Class> classes)
     {
-        using var cw = new CSharpWriter(fileName, _logger);
+        using var cw = this.OpenCSharpWriter(fileName);
 
         cw.WriteUsings([.. usings]);
 
@@ -109,7 +103,7 @@ public class DbContextGenerator : ClassGroupGeneratorBase<CsharpConfig>
 
     protected virtual void HandleMainFile(string fileName, string tag, string dbContextName, string contextNs, List<string> usings, List<Class> classes)
     {
-        using var w = new CSharpWriter(fileName, _logger);
+        using var w = this.OpenCSharpWriter(fileName);
 
         foreach (var value in classes.SelectMany(c => c.Values.SelectMany(v => v.Value)))
         {

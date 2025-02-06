@@ -5,29 +5,22 @@ using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
 using TopModel.Utils;
 
-namespace TopModel.Generator.Jpa;
+namespace TopModel.Generator.Jpa.DataflowGeneration;
 
-public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
+public class SpringDataFlowGenerator(ILogger<SpringDataFlowGenerator> logger, IFileWriterProvider writerProvider)
+    : GeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<SpringDataFlowGenerator> _logger;
-
-    public SpringDataFlowGenerator(ILogger<SpringDataFlowGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override IEnumerable<string> GeneratedFiles =>
-    Files.Values.SelectMany(f => f.DataFlows)
-        .SelectMany(df => Config.Tags.Intersect(df.ModelFile.Tags)
-            .SelectMany(tag => new[] { Config.GetDataFlowFilePath(df, tag) }))
-        .Distinct()
-        .Concat(Files.Values.Where(f => f.DataFlows.Any()).Select(f => Config.GetDataFlowConfigFilePath(f.Namespace.Module)))
-        .Concat(
         Files.Values.SelectMany(f => f.DataFlows)
-            .Where(df => df.Hooks.Any() || df.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
             .SelectMany(df => Config.Tags.Intersect(df.ModelFile.Tags)
-            .SelectMany(tag => new[] { Config.GetDataFlowPartialFilePath(df, tag) })));
+                .SelectMany(tag => new[] { Config.GetDataFlowFilePath(df, tag) }))
+            .Distinct()
+            .Concat(Files.Values.Where(f => f.DataFlows.Count > 0).Select(f => Config.GetDataFlowConfigFilePath(f.Namespace.Module)))
+            .Concat(
+            Files.Values.SelectMany(f => f.DataFlows)
+                .Where(df => df.Hooks.Count > 0 || df.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
+                .SelectMany(df => Config.Tags.Intersect(df.ModelFile.Tags)
+                .SelectMany(tag => new[] { Config.GetDataFlowPartialFilePath(df, tag) })));
 
     public override string Name => "SpringDataFlowGen";
 
@@ -151,7 +144,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
             }
         }
 
-        foreach (var module in files.Where(f => f.DataFlows.Any()).Select(f => f.Namespace.Module))
+        foreach (var module in files.Where(f => f.DataFlows.Count > 0).Select(f => f.Namespace.Module))
         {
             WriteModuleConfig(module, files.Where(f => f.Namespace.Module == module).SelectMany(f => f.DataFlows));
         }
@@ -258,11 +251,11 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
             processors.Add($"{dataFlow.Name.ToCamelCase()}PartialFlow.{GetProcessorName(dataFlow, FlowHook.BeforeTarget, i++).ToCamelCase()}()");
         }
 
-        if (processors.Count() == 1)
+        if (processors.Count == 1)
         {
             fw.WriteLine(3, $".processor({processors[0]}) //");
         }
-        else if (processors.Count() > 1)
+        else if (processors.Count > 1)
         {
             fw.AddImport("org.springframework.batch.item.support.CompositeItemProcessor");
             fw.WriteLine(3, $".processor(new CompositeItemProcessor<>({string.Join(", ", processors)})) //");
@@ -301,7 +294,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
             tag,
             module: dataFlow.ModelFile.Namespace.Module).ToPackageName();
 
-        using var fw = new JavaWriter(fileName, _logger, packageName);
+        using var fw = this.OpenJavaWriter(fileName, packageName);
         fw.AddImport("org.springframework.context.annotation.Configuration");
         fw.WriteLine();
         fw.WriteLine("@Configuration");
@@ -340,7 +333,7 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
         var packageName = Config.ResolveVariables(
             Config.DataFlowsPath!,
             module: module).ToPackageName();
-        using var fw = new JavaWriter(configFilePath, _logger, packageName);
+        using var fw = this.OpenJavaWriter(configFilePath, packageName);
         fw.AddImports([
             "org.springframework.context.annotation.Configuration",
             "org.springframework.context.annotation.Bean",
@@ -390,14 +383,14 @@ public class SpringDataFlowGenerator : GeneratorBase<JpaConfig>
 
     protected virtual void WritePartialInterface(DataFlow dataFlow, string tag)
     {
-        if (dataFlow.Hooks.Any() || dataFlow.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
+        if (dataFlow.Hooks.Count > 0 || dataFlow.Sources.Any(source => source.Mode == DataFlowSourceMode.Partial))
         {
             var packageName = Config.ResolveVariables(
                 Config.DataFlowsPath!,
                 tag,
                 module: dataFlow.ModelFile.Namespace.Module).ToPackageName();
             var fileName = Config.GetDataFlowPartialFilePath(dataFlow, tag);
-            using var fw = new JavaWriter($"{fileName}", _logger, packageName, null);
+            using var fw = this.OpenJavaWriter($"{fileName}", packageName, null);
             fw.WriteLine();
             fw.WriteLine(@$"public interface {dataFlow.Name.ToPascalCase()}PartialFlow {{");
             foreach (var source in dataFlow.Sources.Where(s => s.Mode == DataFlowSourceMode.Partial))

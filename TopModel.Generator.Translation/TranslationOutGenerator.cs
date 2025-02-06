@@ -8,19 +8,11 @@ namespace TopModel.Generator.Translation;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class TranslationOutGenerator : TranslationGeneratorBase<TranslationConfig>
+public class TranslationOutGenerator(ILogger<TranslationOutGenerator> logger, ModelConfig modelConfig, TranslationStore translationStore, IFileWriterProvider writerProvider)
+    : TranslationGeneratorBase<TranslationConfig>(logger, translationStore, writerProvider)
 {
-    private readonly ILogger<TranslationOutGenerator> _logger;
-    private readonly ModelConfig _modelConfig;
-    private readonly TranslationStore _translationStore;
-
-    public TranslationOutGenerator(ILogger<TranslationOutGenerator> logger, ModelConfig modelConfig, TranslationStore translationStore)
-        : base(logger, translationStore)
-    {
-        _logger = logger;
-        _modelConfig = modelConfig;
-        _translationStore = translationStore;
-    }
+    private readonly ModelConfig _modelConfig = modelConfig;
+    private readonly TranslationStore _translationStore = translationStore;
 
     public override string Name => "TranslationOutGen";
 
@@ -51,7 +43,9 @@ public class TranslationOutGenerator : TranslationGeneratorBase<TranslationConfi
 
     protected override void HandleResourceFile(string filePath, string lang, IEnumerable<IProperty> properties)
     {
-        using var fw = new FileWriter(filePath, _logger) { EnableHeader = false };
+        using var fw = OpenFileWriter(filePath);
+        fw.EnableHeader = false;
+
         var containers = properties.GroupBy(prop => prop.Parent);
 
         foreach (var container in containers.OrderBy(c => c.Key.NameCamel))
@@ -66,7 +60,7 @@ public class TranslationOutGenerator : TranslationGeneratorBase<TranslationConfi
             && langDict.ContainsKey(key);
     }
 
-    private void WriteClasse(FileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
+    private void WriteClasse(IFileWriter fw, IGrouping<IPropertyContainer, IProperty> container, string lang)
     {
         foreach (var property in container)
         {

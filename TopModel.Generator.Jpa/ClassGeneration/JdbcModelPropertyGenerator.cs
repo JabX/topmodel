@@ -5,9 +5,10 @@ namespace TopModel.Generator.Jpa.ClassGeneration;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JdbcModelPropertyGenerator(JpaConfig config, IEnumerable<Class> classes, Dictionary<string, string> newableTypes) : JpaModelPropertyGenerator(config, classes, newableTypes)
+public class JdbcModelPropertyGenerator(JpaConfig config, IEnumerable<Class> classes, Dictionary<string, string> newableTypes)
+    : JpaModelPropertyGenerator(config, classes, newableTypes)
 {
-    private JavaAnnotation IdAnnotation => new JavaAnnotation("Id", imports: "org.springframework.data.annotation.Id");
+    private static JavaAnnotation IdAnnotation => new("Id", imports: "org.springframework.data.annotation.Id");
 
     public override JavaAnnotation GetColumnAnnotation(IProperty property)
     {

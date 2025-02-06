@@ -1,19 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JavaEnumDtoGenerator : JavaDtoGenerator
+public class JavaEnumDtoGenerator(ILogger<JavaEnumDtoGenerator> logger, IFileWriterProvider writerProvider)
+    : JavaDtoGenerator(logger, writerProvider)
 {
     private JavaEnumConstructorGenerator? _jpaModelConstructorGenerator;
-
-    public JavaEnumDtoGenerator(ILogger<JavaEnumDtoGenerator> logger)
-        : base(logger)
-    {
-    }
 
     public override string Name => "JavaEnumDtoGen";
 

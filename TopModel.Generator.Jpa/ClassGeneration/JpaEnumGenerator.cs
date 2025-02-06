@@ -2,22 +2,16 @@
 using TopModel.Core;
 using TopModel.Core.FileModel;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Jpa.ClassGeneration;
 
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class JpaEnumGenerator : GeneratorBase<JpaConfig>
+public class JpaEnumGenerator(ILogger<JpaEnumGenerator> logger, IFileWriterProvider writerProvider)
+    : GeneratorBase<JpaConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JpaEnumGenerator> _logger;
-
-    public JpaEnumGenerator(ILogger<JpaEnumGenerator> logger, ModelConfig modelConfig)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JpaEnumGen";
 
     public override IEnumerable<string> GeneratedFiles => Files.Values.SelectMany(f => f.Classes.Where(FilterClass))
@@ -30,7 +24,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
 
     protected IEnumerable<IProperty> GetEnumProperties(Class classe)
     {
-        List<IProperty> result = new();
+        List<IProperty> result = [];
         if (classe.EnumKey != null && Config.CanClassUseEnums(classe, prop: classe.EnumKey) && !(classe.Extends != null && Config.CanClassUseEnums(classe.Extends, Classes, prop: classe.EnumKey)))
         {
             result.Add(classe.EnumKey);
@@ -71,7 +65,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
     protected virtual void WriteEnum(IProperty property, Class classe, string tag)
     {
         var packageName = Config.GetEnumPackageName(classe, tag);
-        using var fw = new JavaWriter(Config.GetEnumFileName(property, classe, tag), _logger, packageName, null);
+        using var fw = this.OpenJavaWriter(Config.GetEnumFileName(property, classe, tag), packageName, null);
         fw.WriteLine();
         var codeProperty = classe.EnumKey!;
         fw.WriteDocStart(0, $"Enumération des valeurs possibles de la propriété {codeProperty.NamePascal} de la classe {classe.NamePascal}");
@@ -86,7 +80,7 @@ public class JpaEnumGenerator : GeneratorBase<JpaConfig>
         foreach (var value in refs)
         {
             i++;
-            var isLast = i == refs.Count();
+            var isLast = i == refs.Count;
             if (classe.DefaultProperty != null)
             {
                 fw.WriteDocStart(1, $"{value.Value[classe.DefaultProperty]}");

@@ -7,16 +7,9 @@ using TopModel.Utils;
 
 namespace TopModel.Generator.Csharp;
 
-public class CSharpApiClientGenerator : EndpointsGeneratorBase<CsharpConfig>
+public class CSharpApiClientGenerator(ILogger<CSharpApiClientGenerator> logger, IFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<CsharpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<CSharpApiClientGenerator> _logger;
-
-    public CSharpApiClientGenerator(ILogger<CSharpApiClientGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "CSharpApiClientGen";
 
     protected override bool FilterTag(string tag)
@@ -41,7 +34,7 @@ public class CSharpApiClientGenerator : EndpointsGeneratorBase<CsharpConfig>
 
         HandleFilePartial(filePath.Replace($"{Path.DirectorySeparatorChar}generated", string.Empty).Replace(".cs", ".partial.cs"), className, ns);
 
-        using var fw = new CSharpWriter(filePath, _logger);
+        using var fw = this.OpenCSharpWriter(filePath);
 
         var hasBody = endpoints.Any(e => e.GetJsonBodyParam() != null);
         var hasReturn = endpoints.Any(e => e.Returns != null && !new[] { "string", "byte[]" }.Contains(Config.GetType(e.Returns)?.TrimEnd('?')));
@@ -308,7 +301,8 @@ public class CSharpApiClientGenerator : EndpointsGeneratorBase<CsharpConfig>
             return;
         }
 
-        using var w = new CSharpWriter(filePath, _logger) { EnableHeader = false };
+        using var w = this.OpenCSharpWriter(filePath);
+        w.EnableHeader = false;
 
         w.WriteNamespace(ns);
 

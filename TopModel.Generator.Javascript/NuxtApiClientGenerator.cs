@@ -9,16 +9,9 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class NuxtApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig>
+public class NuxtApiClientGenerator(ILogger<NuxtApiClientGenerator> logger, IFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
-    private readonly ILogger<NuxtApiClientGenerator> _logger;
-
-    public NuxtApiClientGenerator(ILogger<NuxtApiClientGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JSApiClientGen";
 
     protected override string GetFilePath(ModelFile file, string tag)
@@ -28,7 +21,7 @@ public class NuxtApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig>
 
     protected override void HandleFile(string filePath, string fileName, string tag, IList<Endpoint> endpoints)
     {
-        using var fw = new FileWriter(filePath, _logger, false);
+        using var fw = OpenFileWriter(filePath, false);
 
         fw.WriteLine($@"import {{AsyncData, AsyncDataOptions}} from ""nuxt/app"";");
 

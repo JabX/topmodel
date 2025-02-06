@@ -9,16 +9,9 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class AngularApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig>
+public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger, IFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
-    private readonly ILogger<AngularApiClientGenerator> _logger;
-
-    public AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JSNGApiClientGen";
 
     protected override string GetFilePath(ModelFile file, string tag)
@@ -28,14 +21,13 @@ public class AngularApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig
 
     protected override void HandleFile(string filePath, string fileName, string tag, IList<Endpoint> endpoints)
     {
-        using var fw = new FileWriter(filePath, _logger, false);
+        using var fw = OpenFileWriter(filePath, false);
         var imports = Config.GetEndpointImports(filePath, endpoints, tag, Classes);
 
-        imports.AddRange(new List<(string Import, string Path)>
-        {
+        imports.AddRange([
             (Import: "Injectable", Path: "@angular/core"),
             (Import: "HttpClient", Path: "@angular/common/http"),
-        });
+        ]);
 
         if (Config.ApiMode == TargetFramework.ANGULAR)
         {
@@ -53,7 +45,7 @@ public class AngularApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig
 
         imports = imports.GroupAndSort();
 
-        if (imports.Any())
+        if (imports.Count > 0)
         {
             fw.WriteLine();
 
@@ -94,7 +86,7 @@ public class AngularApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig
         fw.WriteLine("}");
     }
 
-    private void WriteEndpoint(Endpoint endpoint, FileWriter fw)
+    private void WriteEndpoint(Endpoint endpoint, IFileWriter fw)
     {
         fw.WriteLine();
         fw.WriteLine(1, "/**");

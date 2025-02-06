@@ -10,18 +10,9 @@ using static JavascriptUtils;
 /// <summary>
 /// Générateur de définitions Typescript.
 /// </summary>
-public class TypescriptReferenceGenerator : ClassGroupGeneratorBase<JavascriptConfig>
+public class TypescriptReferenceGenerator(ILogger<TypescriptReferenceGenerator> logger, IFileWriterProvider writerProvider)
+    : ClassGroupGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
-    private readonly ILogger<TypescriptReferenceGenerator> _logger;
-    private readonly ModelConfig _modelConfig;
-
-    public TypescriptReferenceGenerator(ILogger<TypescriptReferenceGenerator> logger, ModelConfig modelConfig)
-        : base(logger)
-    {
-        _logger = logger;
-        _modelConfig = modelConfig;
-    }
-
     public override string Name => "JSReferenceGen";
 
     protected override IEnumerable<(string FileType, string FileName)> GetFileNames(Class classe, string tag)
@@ -42,7 +33,7 @@ public class TypescriptReferenceGenerator : ClassGroupGeneratorBase<JavascriptCo
     /// </summary>
     private void GenerateReferenceFile(string fileName, IEnumerable<Class> references, string tag)
     {
-        using var fw = new FileWriter(fileName, _logger, false);
+        using var fw = OpenFileWriter(fileName, false);
 
         var imports = references
             .SelectMany(r => r.ClassDependencies)
@@ -67,7 +58,7 @@ public class TypescriptReferenceGenerator : ClassGroupGeneratorBase<JavascriptCo
             fw.Write("\";\r\n");
         }
 
-        if (imports.Any())
+        if (imports.Count > 0)
         {
             fw.Write("\r\n");
         }
@@ -163,7 +154,7 @@ public class TypescriptReferenceGenerator : ClassGroupGeneratorBase<JavascriptCo
         }
     }
 
-    private void WriteReferenceValues(FileWriter fw, Class reference)
+    private void WriteReferenceValues(IFileWriter fw, Class reference)
     {
         fw.Write("export const ");
         fw.Write(reference.NameCamel);

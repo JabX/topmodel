@@ -1,18 +1,25 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Core.FileModel;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Core;
 
 public abstract class ClassGeneratorBase<T> : GeneratorBase<T>
     where T : GeneratorConfigBase
 {
+    [Obsolete("Utiliser la surcharge avec le IFileWriterProvider")]
     public ClassGeneratorBase(ILogger<ClassGeneratorBase<T>> logger)
         : base(logger)
     {
     }
 
-    public override IEnumerable<string> GeneratedFiles => Files.Values.SelectMany(f => f.Classes.Where(FilterClass))
+    public ClassGeneratorBase(ILogger<ClassGeneratorBase<T>> logger, IFileWriterProvider writerProvider)
+        : base(logger, writerProvider)
+    {
+    }
+
+    public override IEnumerable<string> GeneratedFiles => Files.Values.SelectMany(f => f.Classes.Where(FilterClass).Concat(GetExtraClasses(f)))
         .SelectMany(c => Config.Tags.Intersect(c.Tags).Select(tag => GetFileName(c, tag)))
         .Distinct();
 
@@ -28,7 +35,7 @@ public abstract class ClassGeneratorBase<T> : GeneratorBase<T>
     protected override void HandleFiles(IEnumerable<ModelFile> files)
     {
         Parallel.ForEach(files, file =>
-            Parallel.ForEach(file.Classes.Where(FilterClass), classe =>
+            Parallel.ForEach(file.Classes.Where(FilterClass).Concat(GetExtraClasses(file)), classe =>
                 Parallel.ForEach(
                     Config.Tags.Intersect(classe.Tags)
                          .Select(tag => (tag, fileName: GetFileName(classe, tag)))

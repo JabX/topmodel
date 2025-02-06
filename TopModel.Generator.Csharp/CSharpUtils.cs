@@ -1,12 +1,14 @@
-﻿namespace TopModel.Generator.Csharp;
+﻿using TopModel.Generator.Core;
+
+namespace TopModel.Generator.Csharp;
 
 /// <summary>
 /// Classe utilitaire destinée à la génération de C#.
 /// </summary>
 public static class CSharpUtils
 {
-    private static readonly HashSet<string> _reservedKeywords = new(new[]
-    {
+    private static readonly HashSet<string> _reservedKeywords = new(
+    [
         "abstract",
         "as",
         "base",
@@ -85,7 +87,12 @@ public static class CSharpUtils
         "void",
         "volatile",
         "while"
-    });
+    ]);
+
+    public static CSharpWriter OpenCSharpWriter(this GeneratorBase<CsharpConfig> generator, string fileName)
+    {
+        return new CSharpWriter(generator.OpenFileWriter(fileName));
+    }
 
     public static string ToFilePath(this string path)
     {

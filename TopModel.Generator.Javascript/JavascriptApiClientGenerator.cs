@@ -9,16 +9,9 @@ namespace TopModel.Generator.Javascript;
 /// <summary>
 /// Générateur des objets de traduction javascripts.
 /// </summary>
-public class JavascriptApiClientGenerator : EndpointsGeneratorBase<JavascriptConfig>
+public class JavascriptApiClientGenerator(ILogger<JavascriptApiClientGenerator> logger, IFileWriterProvider writerProvider)
+    : EndpointsGeneratorBase<JavascriptConfig>(logger, writerProvider)
 {
-    private readonly ILogger<JavascriptApiClientGenerator> _logger;
-
-    public JavascriptApiClientGenerator(ILogger<JavascriptApiClientGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "JSApiClientGen";
 
     protected override string GetFilePath(ModelFile file, string tag)
@@ -33,7 +26,7 @@ public class JavascriptApiClientGenerator : EndpointsGeneratorBase<JavascriptCon
             ? Config.FetchPath
             : Path.GetRelativePath(string.Join('/', filePath.Split('/').SkipLast(1)), Path.Combine(Config.OutputDirectory, Config.ResolveVariables(Config.FetchPath, tag))).Replace("\\", "/");
 
-        using var fw = new FileWriter(filePath, _logger, false);
+        using var fw = OpenFileWriter(filePath, false);
 
         fw.WriteLine($@"import {{{fetch}}} from ""{fetchImport}"";");
 

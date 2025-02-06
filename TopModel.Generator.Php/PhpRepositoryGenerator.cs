@@ -1,22 +1,16 @@
 ﻿using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
+using TopModel.Utils;
 
 namespace TopModel.Generator.Php;
 
 /// <summary>
 /// Générateur de Repository Php.
 /// </summary>
-public class PhpRepositoryGenerator : ClassGeneratorBase<PhpConfig>
+public class PhpRepositoryGenerator(ILogger<PhpRepositoryGenerator> logger, IFileWriterProvider writerProvider)
+    : ClassGeneratorBase<PhpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<PhpRepositoryGenerator> _logger;
-
-    public PhpRepositoryGenerator(ILogger<PhpRepositoryGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
-
     public override string Name => "PhpRepositoryGen";
 
     protected override bool FilterClass(Class classe)
@@ -45,7 +39,7 @@ public class PhpRepositoryGenerator : ClassGeneratorBase<PhpConfig>
             tag,
             module: classe.Namespace.Module).ToPackageName();
 
-        using var fw = new PhpWriter(fileName, _logger, nameSpace, null);
+        using var fw = this.OpenPhpWriter(fileName, nameSpace, null);
         fw.WriteDocStart(0, $"@extends ServiceEntityRepository<{classe.NamePascal}>");
         fw.WriteDocEnd(0);
         fw.AddImport(@"Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository");

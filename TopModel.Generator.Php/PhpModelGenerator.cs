@@ -8,17 +8,10 @@ namespace TopModel.Generator.Php;
 /// <summary>
 /// Générateur de fichiers de modèles JPA.
 /// </summary>
-public class PhpModelGenerator : ClassGeneratorBase<PhpConfig>
+public class PhpModelGenerator(ILogger<PhpModelGenerator> logger, IFileWriterProvider writerProvider)
+    : ClassGeneratorBase<PhpConfig>(logger, writerProvider)
 {
-    private readonly ILogger<PhpModelGenerator> _logger;
-
     private PhpModelPropertyGenerator? _phpModelPropertyGenerator;
-
-    public PhpModelGenerator(ILogger<PhpModelGenerator> logger)
-        : base(logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "PhpModelGen";
 
@@ -44,7 +37,7 @@ public class PhpModelGenerator : ClassGeneratorBase<PhpConfig>
     protected override void HandleClass(string fileName, Class classe, string tag)
     {
         var packageName = Config.GetPackageName(classe, tag);
-        using var fw = new PhpWriter(fileName, _logger, packageName, null);
+        using var fw = this.OpenPhpWriter(fileName, packageName, null);
 
         WriteAttributes(fw, classe, tag);
 
