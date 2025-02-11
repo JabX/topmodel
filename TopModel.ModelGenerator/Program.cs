@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 using SharpYaml.Serialization;
+using Spectre.Console;
 using TopModel.ModelGenerator;
 using TopModel.ModelGenerator.Database;
 using TopModel.ModelGenerator.OpenApi;
@@ -41,8 +42,7 @@ command.SetHandler(
             {
                 if (!file.Exists)
                 {
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine($"Le fichier '{file.FullName}' est introuvable.");
+                    AnsiConsole.MarkupLine($"[red]Le fichier '{file.FullName}' est introuvable.[/]");
                 }
                 else
                 {
@@ -94,44 +94,34 @@ if (!regularCommand)
 
 if (!configs.Any())
 {
-    Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine("Aucun fichier de config trouvé.");
+    AnsiConsole.MarkupLine($"[red]Aucun fichier de configuration trouvé.[/]");
     return 1;
 }
 
 var fullVersion = Assembly.GetEntryAssembly()!.GetName().Version!;
 var version = $"{fullVersion.Major}.{fullVersion.Minor}.{fullVersion.Build}";
-var colors = new[] { ConsoleColor.DarkCyan, ConsoleColor.DarkYellow, ConsoleColor.Cyan, ConsoleColor.Yellow };
+var colors = new[] { "teal", "olive", "yellow", "aqua" };
 
-Console.WriteLine($"======= TopModel.ModelGenerator v{version} =======");
-Console.WriteLine();
+AnsiConsole.MarkupLine($"========= TopModel.ModelGenerator v{version} =========");
+AnsiConsole.WriteLine();
 
 if (watchMode)
 {
-    Console.Write("Mode");
-    Console.ForegroundColor = ConsoleColor.DarkCyan;
-    Console.Write(" watch ");
-    Console.ForegroundColor = ConsoleColor.Gray;
-    Console.WriteLine("activé.");
+    AnsiConsole.MarkupLine("Mode [darkcyan]watch[/] activé.");
 }
 
 if (checkMode)
 {
-    Console.Write("Mode");
-    Console.ForegroundColor = ConsoleColor.DarkCyan;
-    Console.Write(" check ");
-    Console.ForegroundColor = ConsoleColor.Gray;
-    Console.WriteLine("activé.");
+    AnsiConsole.MarkupLine("Mode [darkcyan]check[/] activé.");
 }
 
-Console.WriteLine("Fichiers de configuration trouvés :");
+AnsiConsole.WriteLine("Fichiers de configuration trouvés :");
 
-for (var p = 0; p < configs.Count; p++)
+for (var i = 0; i < configs.Count; i++)
 {
-    var (fullName, _) = configs[p];
-    Console.ForegroundColor = colors[p % colors.Length];
-    Console.Write($"#{p + 1} - ");
-    Console.WriteLine(Path.GetRelativePath(Directory.GetCurrentDirectory(), fullName));
+    var (fullName, _) = configs[i];
+    var color = colors[i % colors.Length];
+    AnsiConsole.MarkupLine($"[{color}]#{i + 1} - {Path.GetRelativePath(Directory.GetCurrentDirectory(), fullName)}[/]");
 }
 
 var disposables = new List<IDisposable>();
@@ -142,7 +132,7 @@ Dictionary<string, string> passwords = [];
 
 async Task StartGeneration(string filePath, string directoryName, int i)
 {
-    Console.WriteLine();
+    AnsiConsole.WriteLine();
 
     var configFile = new FileInfo(filePath);
     using var stream = configFile.OpenRead();
@@ -272,17 +262,15 @@ if (watchMode)
 if (checkMode && loggerProvider.Changes > 0)
 {
     Console.ForegroundColor = ConsoleColor.Red;
-    Console.WriteLine();
+    AnsiConsole.WriteLine();
     if (loggerProvider.Changes == 1)
     {
-        Console.WriteLine($"1 fichier généré a été modifié ou supprimé. Le code généré n'était pas à jour.");
+        AnsiConsole.MarkupLine($"[red]1 fichier généré a été modifié ou supprimé. Le code généré n'était pas à jour.[/]");
     }
     else
     {
-        Console.WriteLine($"{loggerProvider.Changes} fichiers générés ont été modifiés ou supprimés. Le code généré n'était pas à jour.");
+        AnsiConsole.MarkupLine($"[red]{loggerProvider.Changes} fichiers générés ont été modifiés ou supprimés. Le code généré n'était pas à jour.[/]");
     }
-
-    Console.ForegroundColor = ConsoleColor.Gray;
 
     return 1;
 }

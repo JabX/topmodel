@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
+using Spectre.Console;
 
 namespace TopModel.Utils;
 
@@ -23,7 +24,7 @@ public class LoggerProvider : ILoggerProvider
         private readonly string _categoryName;
         private readonly Action _registerChange;
         private string? _generatorName;
-        private ConsoleColor? _storeColor;
+        private string? _storeColor;
         private int? _storeNumber;
 
         public ConsoleLogger(string categoryName, Action registerChange)
@@ -69,78 +70,65 @@ public class LoggerProvider : ILoggerProvider
 
                 if (message == string.Empty)
                 {
-                    Console.WriteLine();
+                    AnsiConsole.WriteLine();
                     return;
                 }
 
                 if (_storeNumber != null && _storeColor != null)
                 {
-                    Console.ForegroundColor = _storeColor.Value;
-                    Console.Write($"#{_storeNumber.Value} ");
+                    AnsiConsole.Markup($"[{_storeColor}]#{_storeNumber.Value} [/]");
                 }
 
                 var name = ((_generatorName ?? _categoryName) + " ").PadRight(22, '-');
                 var split = name.Split(" ");
-                Console.ForegroundColor = _generatorName != null ? ConsoleColor.Magenta : ConsoleColor.DarkGray;
-                Console.Write(split[0]);
-                Console.ForegroundColor = ConsoleColor.DarkGray;
-                Console.Write($" {split[1]} ");
-                Console.ForegroundColor = logLevel switch
-                {
-                    LogLevel.Error => ConsoleColor.Red,
-                    LogLevel.Warning => ConsoleColor.Yellow,
-                    _ => ConsoleColor.Gray
-                };
+                var fColor = _generatorName != null ? "fuchsia" : "grey";
+                AnsiConsole.Markup($"[{fColor}]{split[0]}[/]");
+                AnsiConsole.Markup($" {split[1]} ");
 
-                message = WriteAction(message, "Supprimé", ConsoleColor.DarkRed);
-                message = WriteAction(message, "Créé", ConsoleColor.DarkGreen);
-                message = WriteAction(message, "Modifié", ConsoleColor.DarkCyan);
+                message = WriteAction(message, "Supprimé", "maroon");
+                message = WriteAction(message, "Créé", "green");
+                message = WriteAction(message, "Modifié", "teal");
 
                 if (logLevel != LogLevel.Error && logLevel != LogLevel.Warning)
                 {
                     var split2 = message.Split('/');
+                    var color = "white";
                     if (split2.Length > 1)
                     {
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.Write($"{string.Join('/', split2[0..^1])}/");
-                        Console.ForegroundColor = ConsoleColor.Blue;
+                        AnsiConsole.Markup($"[white]{string.Join('/', split2[0..^1])}/[/]");
+                        color = "blue";
                     }
 
                     var split3 = split2[^1].Split('\'');
                     if (split3.Length == 2)
                     {
-                        Console.Write(split3[0]);
-                        Console.ForegroundColor = ConsoleColor.Gray;
-                        Console.WriteLine($"'{split3[1]}");
+                        AnsiConsole.Markup($"{split3[0]}");
+                        AnsiConsole.MarkupLine($"'{split3[1]}");
                     }
                     else
                     {
-                        Console.WriteLine(split2[^1]);
+                        AnsiConsole.MarkupLine($"[{color}]{split2[^1]}[/]");
                     }
                 }
                 else
                 {
-                    Console.WriteLine(message);
+                    AnsiConsole.MarkupLine(message);
                 }
 
                 if (exception is not null and not LegitException)
                 {
-                    Console.WriteLine(exception.StackTrace);
+                    AnsiConsole.MarkupLine(exception.Message);
                 }
-
-                Console.ForegroundColor = ConsoleColor.Gray;
             }
         }
 
-        public string WriteAction(string message, string action, ConsoleColor color)
+        public string WriteAction(string message, string action, string color)
         {
             if (message.LastIndexOf(action) >= 0)
             {
-                Console.ForegroundColor = color;
-                message = message.Split(action)[1];
-                Console.Write(action);
-                Console.ForegroundColor = ConsoleColor.DarkGray;
                 _registerChange();
+                AnsiConsole.Markup($"[{color}]{action}[/]");
+                return message.Split(action)[1];
             }
 
             return message;

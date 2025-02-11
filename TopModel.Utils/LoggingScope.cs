@@ -1,3 +1,3 @@
 ﻿namespace TopModel.Utils;
 
-public record LoggingScope(int Number, ConsoleColor Color);
+public record LoggingScope(int Number, string Color);

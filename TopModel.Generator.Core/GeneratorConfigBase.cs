@@ -1,4 +1,5 @@
 ﻿using System.Text.RegularExpressions;
+using Spectre.Console;
 using TopModel.Core;
 using TopModel.Core.Model.Implementation;
 using TopModel.Utils;
@@ -493,9 +494,7 @@ public abstract class GeneratorConfigBase
                         if (!supportedProperties.Contains(property.Name))
                         {
                             hasMissingVar = true;
-                            Console.ForegroundColor = ConsoleColor.Yellow;
-                            Console.WriteLine($"/!\\ {{{GetType().Name}[{number}].{property.Name}}} - La variable '{{{varName}}}' n'est pas supportée par cette propriété.");
-                            Console.ForegroundColor = ConsoleColor.Gray;
+                            AnsiConsole.MarkupLine($"[yellow]{Emoji.Known.Warning} {{{GetType().Name}[[{number}]].{property.Name}}} - La variable '{{{varName}}}' n'est pas supportée par cette propriété.[/]");
                         }
 
                         continue;
@@ -506,16 +505,12 @@ public abstract class GeneratorConfigBase
                     if (!hasTagSupport)
                     {
                         hasMissingVar = true;
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"/!\\ {{{GetType().Name}[{number}].{property.Name}}} - La variable globale '{{{varName}}}' n'est pas définie pour ce générateur.");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        AnsiConsole.MarkupLine($"[yellow]{Emoji.Known.Warning} {{{GetType().Name}[[{number}]].{property.Name}}} - La variable globale '{{{varName}}}' n'est pas définie pour ce générateur.[/]");
                     }
                     else if (!TagVariableNames.Contains(varName))
                     {
                         hasMissingVar = true;
-                        Console.ForegroundColor = ConsoleColor.Yellow;
-                        Console.WriteLine($"/!\\ {{{GetType().Name}[{number}].{property.Name}}} - La variable '{{{varName}}}' n'est pas définie pour ce générateur.");
-                        Console.ForegroundColor = ConsoleColor.Gray;
+                        AnsiConsole.MarkupLine($"[yellow]{Emoji.Known.Warning}  {{{GetType().Name}[[{number}]].{property.Name}}} - La variable '{{{varName}}}' n'est pas définie pour ce générateur.[/]");
                     }
                 }
             }
@@ -534,7 +529,7 @@ public abstract class GeneratorConfigBase
 
         if (hasMissingVar)
         {
-            Console.WriteLine();
+            AnsiConsole.WriteLine();
         }
     }
 
