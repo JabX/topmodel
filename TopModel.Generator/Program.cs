@@ -16,6 +16,10 @@ using TopModel.Core.Loaders;
 using TopModel.Generator;
 using TopModel.Generator.Core;
 using TopModel.Utils;
+using System;
+using System.CommandLine;
+using System.CommandLine.Invocation;
+using System.Threading.Tasks;
 
 var fileChecker = new FileChecker("schema.config.json");
 
@@ -42,6 +46,15 @@ command.AddOption(watchOption);
 command.AddOption(checkOption);
 command.AddOption(updateOption);
 command.AddOption(schemaOption);
+
+// Crée la sous-commande 'init'
+var initCommand = new Command("init", "Initialise le générateur topmodel.")
+{
+    Handler = new InitCommandHandler()
+};
+
+command.AddCommand(initCommand);
+
 command.SetHandler(
     (files, excludes, watch, update, check, schema) =>
     {
