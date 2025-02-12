@@ -92,10 +92,10 @@ public class LoggerProvider : ILoggerProvider
                 if (logLevel != LogLevel.Error && logLevel != LogLevel.Warning)
                 {
                     var split2 = message.Split('/');
-                    var color = "white";
+                    var color = "silver";
                     if (split2.Length > 1)
                     {
-                        AnsiConsole.Markup($"[white]{string.Join('/', split2[0..^1])}/[/]");
+                        AnsiConsole.Markup($"{string.Join('/', split2[0..^1])}/");
                         color = "blue";
                     }
 
