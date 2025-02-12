@@ -5,6 +5,11 @@ namespace TopModel.Utils;
 
 public class LoggerProvider : ILoggerProvider
 {
+    static LoggerProvider()
+    {
+        AnsiConsole.Profile.Width = int.MaxValue;
+    }
+
     public int Changes { get; private set; }
 
     /// <inheritdoc cref="ILoggerProvider.CreateLogger" />
@@ -110,14 +115,18 @@ public class LoggerProvider : ILoggerProvider
                         AnsiConsole.MarkupLine($"[{color}]{split2[^1]}[/]");
                     }
                 }
-                else
+                else if (logLevel == LogLevel.Warning)
                 {
-                    AnsiConsole.MarkupLine(message);
+                    AnsiConsole.MarkupLine($"[yellow]{message}[/]");
+                }
+                else if (logLevel == LogLevel.Error)
+                {
+                    AnsiConsole.MarkupLine($"[red]{message}[/]");
                 }
 
                 if (exception is not null and not LegitException)
                 {
-                    AnsiConsole.MarkupLine(exception.Message);
+                    AnsiConsole.MarkupLine($"[red]{exception.StackTrace.EscapeMarkup()}[/]");
                 }
             }
         }
