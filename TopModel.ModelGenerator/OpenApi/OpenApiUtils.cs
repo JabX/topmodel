@@ -1,5 +1,5 @@
 ﻿using Microsoft.OpenApi.Models;
-using NuGet.Packaging;
+using TopModel.Utils;
 
 namespace TopModel.ModelGenerator.OpenApi;
 
@@ -28,6 +28,26 @@ public static class OpenApiUtils
         }
     }
 
+    public static (string? Kind, string? Name) GetComposition(this OpenApiDocument model, OpenApiSchema schema)
+    {
+        if (schema.AnyOf.Any() || schema.OneOf.Any())
+        {
+            return ("object", schema.Reference.Id);
+        }
+
+        return schema.Items?.Reference != null
+            ? ("list", schema.Items.Reference.Id)
+            : schema.Reference != null && model.GetSchemas().Any(s => s.Value.Reference == schema.Reference)
+            ? model.GetSchemas().First(s => s.Value.Reference == schema.Reference).Value.Type == "array"
+                ? ("list", schema.Reference.Id.Unplurialize())
+                : ("object", schema.Reference.Id)
+            : schema.Type == "object" && schema.AdditionalProperties?.Reference != null
+            ? ("map", schema.AdditionalProperties.Reference.Id)
+            : schema.Type == "object" && schema.AdditionalProperties?.Items?.Reference != null
+            ? ("list-map", schema.AdditionalProperties.Items.Reference.Id)
+            : (null, null);
+    }
+
     public static string GetDomain(this OpenApiConfig config, string name, OpenApiSchema schema)
     {
         var resolvedDomain = TmdGenUtils.GetDomainString(config.Domains, name: name);
@@ -37,6 +57,53 @@ public static class OpenApiUtils
         }
 
         return resolvedDomain;
+    }
+
+    public static string GetOperationId(this OpenApiDocument model, KeyValuePair<OperationType, OpenApiOperation> operation)
+    {
+        if (operation.Value.OperationId != null)
+        {
+            return operation.Value.OperationId;
+        }
+
+        var path = model.GetOperationPath(operation.Value).Replace("api/", string.Empty).Trim('/');
+
+        if (!path.Contains('/'))
+        {
+            return path.ToPascalCase();
+        }
+
+        var id = operation.Key.ToString().ToPascalCase();
+
+        if (operation.Key == OperationType.Get || operation.Key == OperationType.Head)
+        {
+            var responseSchema = model.GetResponseSchema(operation.Value);
+            if (responseSchema.Key != null)
+            {
+                id += responseSchema.Key;
+            }
+        }
+        else
+        {
+            var bodySchema = operation.Value.GetRequestBodySchema();
+            if (bodySchema != null)
+            {
+                var (kind, name) = model.GetComposition(bodySchema);
+                id += name;
+
+                if (kind != null && kind != "object")
+                {
+                    id += kind.ToPascalCase();
+                }
+            }
+        }
+
+        return id;
+    }
+
+    public static string GetOperationPath(this OpenApiDocument model, OpenApiOperation operation)
+    {
+        return model.Paths.Single(p => p.Value.Operations.Any(o => o.Value == operation)).Key[1..];
     }
 
     public static IDictionary<string, OpenApiSchema> GetProperties(this OpenApiSchema schema)
@@ -62,16 +129,24 @@ public static class OpenApiUtils
         return schema;
     }
 
+    public static KeyValuePair<string, OpenApiSchema> GetResponseSchema(this OpenApiDocument model, OpenApiOperation operation)
+    {
+        var response = operation.Responses.FirstOrDefault(r => r.Key == "200" || r.Key == "201").Value;
+        if (response != null && response.Content.Any())
+        {
+            return new(model.Components.Schemas.FirstOrDefault(s => s.Value == response.Content.First().Value.Schema).Key, response.Content.First().Value.Schema);
+        }
+
+        return default;
+    }
+
     public static IDictionary<string, OpenApiSchema> GetSchemas(this OpenApiDocument model, HashSet<string>? references = null)
     {
         var schemas = model.Components.Schemas;
         foreach (var s in model.Components.RequestBodies.ToDictionary(r => r.Key, r =>
         {
             var schema = r.Value.Content.First().Value.Schema;
-            if (schema.Reference == null)
-            {
-                schema.Reference = r.Value.Reference;
-            }
+            schema.Reference ??= r.Value.Reference;
 
             return schema;
         }))
@@ -85,10 +160,7 @@ public static class OpenApiUtils
         foreach (var s in model.Components.Responses.Where(r => r.Value.Content.Any()).ToDictionary(r => r.Key, r =>
         {
             var schema = r.Value.Content.First().Value.Schema;
-            if (schema.Reference == null)
-            {
-                schema.Reference = r.Value.Reference;
-            }
+            schema.Reference ??= r.Value.Reference;
 
             return schema;
         }))
@@ -101,9 +173,8 @@ public static class OpenApiUtils
 
         foreach (var s in model.Paths
             .SelectMany(p => p.Value.Operations.Where(o => o.Value.Tags.Any()))
-            .Select(o => o.Value)
-            .Where(o => o.RequestBody != null)
-            .ToDictionary(r => $"{r.OperationId}Body", r => r.RequestBody.Content.First().Value.Schema))
+            .Where(o => o.Value.RequestBody != null)
+            .ToDictionary(r => $"{r.Key}{model.GetOperationId(r)}Body", r => r.Value.RequestBody.Content.First().Value.Schema))
         {
             if (!schemas.ContainsKey(s.Key))
             {

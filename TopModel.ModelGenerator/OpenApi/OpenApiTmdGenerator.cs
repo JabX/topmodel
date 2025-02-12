@@ -205,7 +205,7 @@ public class OpenApiTmdGenerator : ModelGenerator
 
             foreach (var operation in module.OrderBy(o => GetEndpointName(o)))
             {
-                var path = GetOperationPath(operation.Value);
+                var path = _model.GetOperationPath(operation.Value);
                 var endPoint = new TmdEndpoint()
                 {
                     Name = GetEndpointName(operation),
@@ -282,7 +282,7 @@ public class OpenApiTmdGenerator : ModelGenerator
                     }
                 }
 
-                var responseSchema = GetResponseSchema(operation.Value).Value;
+                var responseSchema = _model.GetResponseSchema(operation.Value).Value;
                 if (responseSchema != null)
                 {
                     var returns = WriteProperty(_config, new("Result", responseSchema), tmdFile);
@@ -345,31 +345,58 @@ public class OpenApiTmdGenerator : ModelGenerator
         }
     }
 
-    private (string? Kind, string? Name) GetComposition(OpenApiSchema schema)
+    private static IEnumerable<OpenApiReference> GetSchemaReferences(OpenApiSchema schema, HashSet<OpenApiSchema> visited)
     {
-        if (schema.AnyOf.Any() || schema.OneOf.Any())
+        visited.Add(schema);
+
+        if (schema.Reference != null)
         {
-            return ("object", schema.Reference.Id);
+            yield return schema.Reference;
         }
 
-        return schema.Items?.Reference != null
-            ? ("list", schema.Items.Reference.Id)
-            : schema.Reference != null && _model.GetSchemas().Any(s => s.Value.Reference == schema.Reference)
-            ? _model.GetSchemas().First(s => s.Value.Reference == schema.Reference).Value.Type == "array"
-                ? ("list", schema.Reference.Id.Unplurialize())
-                : ("object", schema.Reference.Id)
-            : schema.Type == "object" && schema.AdditionalProperties?.Reference != null
-            ? ("map", schema.AdditionalProperties.Reference.Id)
-            : schema.Type == "object" && schema.AdditionalProperties?.Items?.Reference != null
-            ? ("list-map", schema.AdditionalProperties.Items.Reference.Id)
-            : (null, null);
+        if (schema.Items != null && !visited.Contains(schema.Items))
+        {
+            foreach (var reference in GetSchemaReferences(schema.Items, visited))
+            {
+                yield return reference;
+            }
+        }
+
+        foreach (var reference in schema.GetProperties().Values.Where(p => !visited.Contains(p)).SelectMany(p => GetSchemaReferences(p, visited)))
+        {
+            yield return reference;
+        }
+
+        if (schema.AdditionalProperties != null && !visited.Contains(schema.AdditionalProperties))
+        {
+            foreach (var reference in GetSchemaReferences(schema.AdditionalProperties, visited))
+            {
+                yield return reference;
+            }
+        }
+
+        foreach (var oneOff in schema.OneOf)
+        {
+            foreach (var reference in GetSchemaReferences(oneOff, visited))
+            {
+                yield return reference;
+            }
+        }
+
+        foreach (var anyOff in schema.AnyOf)
+        {
+            foreach (var reference in GetSchemaReferences(anyOff, visited))
+            {
+                yield return reference;
+            }
+        }
     }
 
     private string GetEndpointName(KeyValuePair<OperationType, OpenApiOperation> operation)
     {
-        var operationId = GetOperationId(operation);
+        var operationId = _model.GetOperationId(operation);
         var operationsWithId = _model!.Paths.OrderBy(p => p.Key).SelectMany(p => p.Value.Operations.OrderBy(o => o.Key))
-            .Where(o => GetOperationId(o) == operationId)
+            .Where(o => _model.GetOperationId(o) == operationId)
             .ToList();
 
         if (operationsWithId.Count == 1)
@@ -451,114 +478,9 @@ public class OpenApiTmdGenerator : ModelGenerator
         }
     }
 
-    private string GetOperationId(KeyValuePair<OperationType, OpenApiOperation> operation)
-    {
-        if (operation.Value.OperationId != null)
-        {
-            return operation.Value.OperationId;
-        }
-
-        var path = GetOperationPath(operation.Value).Replace("api/", string.Empty).Trim('/');
-
-        if (!path.Contains('/'))
-        {
-            return path.ToPascalCase();
-        }
-
-        var id = operation.Key.ToString().ToPascalCase();
-
-        if (operation.Key == OperationType.Get || operation.Key == OperationType.Head)
-        {
-            var responseSchema = GetResponseSchema(operation.Value);
-            if (responseSchema.Key != null)
-            {
-                id += responseSchema.Key;
-            }
-        }
-        else
-        {
-            var bodySchema = operation.Value.GetRequestBodySchema();
-            if (bodySchema != null)
-            {
-                var body = GetComposition(bodySchema);
-                id += body.Name;
-
-                if (body.Kind != null && body.Kind != "object")
-                {
-                    id += body.Kind.ToPascalCase();
-                }
-            }
-        }
-
-        return id;
-    }
-
-    private string GetOperationPath(OpenApiOperation operation)
-    {
-        return _model.Paths.Single(p => p.Value.Operations.Any(o => o.Value == operation)).Key[1..];
-    }
-
-    private KeyValuePair<string, OpenApiSchema> GetResponseSchema(OpenApiOperation operation)
-    {
-        var response = operation.Responses.FirstOrDefault(r => r.Key == "200" || r.Key == "201").Value;
-        if (response != null && response.Content.Any())
-        {
-            return new(_model.Components.Schemas.FirstOrDefault(s => s.Value == response.Content.First().Value.Schema).Key, response.Content.First().Value.Schema);
-        }
-
-        return default;
-    }
-
-    private IEnumerable<OpenApiReference> GetSchemaReferences(OpenApiSchema schema, HashSet<OpenApiSchema> visited)
-    {
-        visited.Add(schema);
-
-        if (schema.Reference != null)
-        {
-            yield return schema.Reference;
-        }
-
-        if (schema.Items != null && !visited.Contains(schema.Items))
-        {
-            foreach (var reference in GetSchemaReferences(schema.Items, visited))
-            {
-                yield return reference;
-            }
-        }
-
-        foreach (var reference in schema.GetProperties().Values.Where(p => !visited.Contains(p)).SelectMany(p => GetSchemaReferences(p, visited)))
-        {
-            yield return reference;
-        }
-
-        if (schema.AdditionalProperties != null && !visited.Contains(schema.AdditionalProperties))
-        {
-            foreach (var reference in GetSchemaReferences(schema.AdditionalProperties, visited))
-            {
-                yield return reference;
-            }
-        }
-
-        foreach (var oneOff in schema.OneOf)
-        {
-            foreach (var reference in GetSchemaReferences(oneOff, visited))
-            {
-                yield return reference;
-            }
-        }
-
-        foreach (var anyOff in schema.AnyOf)
-        {
-            foreach (var reference in GetSchemaReferences(anyOff, visited))
-            {
-                yield return reference;
-            }
-        }
-    }
-
     private TmdProperty WriteProperty(OpenApiConfig config, KeyValuePair<string, OpenApiSchema> property, TmdFile tmdFile)
     {
-        var (kind, name) = GetComposition(property.Value);
+        var (kind, name) = _model.GetComposition(property.Value);
         if (property.Value.Type == "array" && property.Value.Items.Enum.Any() && property.Value.Items.Type == "string" && property.Value.Items.Reference != null)
         {
             var aliasClass = tmdFile.Classes.Where(c => c.Name == property.Value.Items.Reference.Id.ToPascalCase()).SingleOrDefault();
