@@ -40,5 +40,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+      - run: cd samples/generators/angular
       - run: npm ci
       - run: npm test

@@ -97,7 +97,7 @@ public class ModelStore
         }
         else
         {
-            _logger.LogWarning($"Aucun watchers enregistré pour cette configuration");
+            _logger.LogWarning($"Aucun watcher enregistré pour cette configuration");
         }
 
         FileSystemWatcher? fsWatcher = null;
