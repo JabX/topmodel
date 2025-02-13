@@ -34,12 +34,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
       - name: Build with Maven
-        run: mvn test -f ./samples/generators/jpa/
+        run: mvn test
+        working-directory: ./samples/generators/jpa
       
       - name: Set up node 22
         uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: cd samples/generators/angular
       - run: npm ci
+        working-directory: ./samples/generators/angular
       - run: npm test
+        working-directory: ./samples/generators/angular
