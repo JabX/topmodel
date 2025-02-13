@@ -91,7 +91,14 @@ public class ModelStore
         using var scope = _logger.BeginScope(_storeConfig!);
 
         var watchers = _modelWatchers.Select(mw => mw.FullName.Split("@")).GroupBy(split => split[0]).Select(grp => $"{grp.Key}@{{{string.Join(",", grp.Select(split => split[1]))}}}");
-        _logger.LogInformation($"Watchers enregistrés : \n                          - {string.Join("\n                          - ", watchers.OrderBy(x => x))}");
+        if (watchers.Count() > 0)
+        {
+            _logger.LogInformation($"Watchers enregistrés : \n                          - {string.Join("\n                          - ", watchers.OrderBy(x => x))}");
+        }
+        else
+        {
+            _logger.LogWarning($"Aucun watchers enregistré pour cette configuration");
+        }
 
         FileSystemWatcher? fsWatcher = null;
         if (watch)
