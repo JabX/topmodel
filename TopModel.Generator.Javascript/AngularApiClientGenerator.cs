@@ -26,6 +26,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
 
         imports.AddRange([
             (Import: "Injectable", Path: "@angular/core"),
+            (Import: "inject", Path: "@angular/core"),
             (Import: "HttpClient", Path: "@angular/common/http"),
         ]);
 
@@ -61,7 +62,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
 
         fw.WriteLine(@$"export class {fileName.ToPascalCase()}Service {{");
         fw.WriteLine();
-        fw.WriteLine(1, "constructor(private readonly http: HttpClient) {}");
+        fw.WriteLine(1, "private readonly http = inject(HttpClient);");
         foreach (var endpoint in endpoints)
         {
             WriteEndpoint(endpoint, fw);

@@ -2,25 +2,27 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_BOOLEEN, DO_CODE, DO_DATE, DO_DATE_HEURE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2} from "ngx-focus-entities";
+import {DO_BOOLEEN, DO_CODE, DO_DATE, DO_DATE_HEURE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@/domains";
 
 import {TypeUtilisateurCode} from "./references";
 
-export interface UtilisateurRead {
-    id?: number;
-    nom?: string;
-    prenom?: string;
-    email?: string;
-    dateNaissance?: string;
-    adresse?: string;
-    actif?: boolean;
-    profilId?: number;
-    typeUtilisateurCode?: TypeUtilisateurCode;
-    dateCreation?: string;
-    dateModification?: string;
+export type UtilisateurRead = EntityToType<UtilisateurReadEntityType>;
+export interface UtilisateurReadEntityType {
+    id: FieldEntry2<typeof DO_ID, number>;
+    nom: FieldEntry2<typeof DO_LIBELLE, string>;
+    prenom: FieldEntry2<typeof DO_LIBELLE, string>;
+    email: FieldEntry2<typeof DO_EMAIL, string>;
+    dateNaissance: FieldEntry2<typeof DO_DATE, string>;
+    adresse: FieldEntry2<typeof DO_LIBELLE, string>;
+    actif: FieldEntry2<typeof DO_BOOLEEN, boolean>;
+    profilId: FieldEntry2<typeof DO_ID, number>;
+    typeUtilisateurCode: FieldEntry2<typeof DO_CODE, TypeUtilisateurCode>;
+    dateCreation: FieldEntry2<typeof DO_DATE_HEURE, string>;
+    dateModification: FieldEntry2<typeof DO_DATE_HEURE, string>;
 }
 
-export const UtilisateurReadEntity = {
+export const UtilisateurReadEntity: UtilisateurReadEntityType = {
     id: {
         type: "field",
         name: "id",
@@ -100,4 +102,4 @@ export const UtilisateurReadEntity = {
         isRequired: false,
         label: "common.entityListeners.dateModification"
     }
-} as const;
+};

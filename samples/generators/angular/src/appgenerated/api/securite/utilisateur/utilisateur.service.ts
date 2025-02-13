@@ -4,7 +4,7 @@
 
 
 import { HttpClient, HttpParams } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { TypeUtilisateurCode } from "../../../model/securite/utilisateur/references";
 import { UtilisateurItem } from "../../../model/securite/utilisateur/utilisateur-item";
@@ -15,7 +15,7 @@ import { UtilisateurWrite } from "../../../model/securite/utilisateur/utilisateu
 })
 export class UtilisateurService {
 
-    constructor(private readonly http: HttpClient) {}
+    private readonly http = inject(HttpClient);
 
     /**
      * @description Ajoute un utilisateur

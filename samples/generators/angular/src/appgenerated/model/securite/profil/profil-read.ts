@@ -2,21 +2,23 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_CODE_LISTE, DO_DATE_HEURE, DO_ID, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2, ListEntry} from "ngx-focus-entities";
+import {DO_CODE_LISTE, DO_DATE_HEURE, DO_ID, DO_LIBELLE} from "@/domains";
 
-import {UtilisateurItemEntity, UtilisateurItem} from "../utilisateur/utilisateur-item";
+import {UtilisateurItemEntity, UtilisateurItemEntityType} from "../utilisateur/utilisateur-item";
 import {DroitCode} from "./references";
 
-export interface ProfilRead {
-    id?: number;
-    libelle?: string;
-    droits?: DroitCode[];
-    dateCreation?: string;
-    dateModification?: string;
-    utilisateurs?: UtilisateurItem[];
+export type ProfilRead = EntityToType<ProfilReadEntityType>;
+export interface ProfilReadEntityType {
+    id: FieldEntry2<typeof DO_ID, number>;
+    libelle: FieldEntry2<typeof DO_LIBELLE, string>;
+    droits: FieldEntry2<typeof DO_CODE_LISTE, DroitCode[]>;
+    dateCreation: FieldEntry2<typeof DO_DATE_HEURE, string>;
+    dateModification: FieldEntry2<typeof DO_DATE_HEURE, string>;
+    utilisateurs: ListEntry<UtilisateurItemEntityType>;
 }
 
-export const ProfilReadEntity = {
+export const ProfilReadEntity: ProfilReadEntityType = {
     id: {
         type: "field",
         name: "id",
@@ -56,4 +58,4 @@ export const ProfilReadEntity = {
         type: "list",
         entity: UtilisateurItemEntity
     }
-} as const;
+};

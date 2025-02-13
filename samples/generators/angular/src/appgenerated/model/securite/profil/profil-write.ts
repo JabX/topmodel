@@ -2,16 +2,18 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_CODE_LISTE, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2} from "ngx-focus-entities";
+import {DO_CODE_LISTE, DO_LIBELLE} from "@/domains";
 
 import {DroitCode} from "./references";
 
-export interface ProfilWrite {
-    libelle?: string;
-    droits?: DroitCode[];
+export type ProfilWrite = EntityToType<ProfilWriteEntityType>;
+export interface ProfilWriteEntityType {
+    libelle: FieldEntry2<typeof DO_LIBELLE, string>;
+    droits: FieldEntry2<typeof DO_CODE_LISTE, DroitCode[]>;
 }
 
-export const ProfilWriteEntity = {
+export const ProfilWriteEntity: ProfilWriteEntityType = {
     libelle: {
         type: "field",
         name: "libelle",
@@ -26,4 +28,4 @@ export const ProfilWriteEntity = {
         isRequired: false,
         label: "securite.profil.profil.droits"
     }
-} as const;
+};

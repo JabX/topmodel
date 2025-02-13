@@ -4,7 +4,7 @@
 
 
 import { HttpClient } from "@angular/common/http";
-import { Injectable } from "@angular/core";
+import { inject, Injectable } from "@angular/core";
 import { Observable } from "rxjs";
 import { ProfilItem } from "../../../model/securite/profil/profil-item";
 import { ProfilRead } from "../../../model/securite/profil/profil-read";
@@ -14,7 +14,7 @@ import { ProfilWrite } from "../../../model/securite/profil/profil-write";
 })
 export class ProfilService {
 
-    constructor(private readonly http: HttpClient) {}
+    private readonly http = inject(HttpClient);
 
     /**
      * @description Ajoute un Profil

@@ -2,15 +2,17 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_ENTIER, DO_ID, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2} from "ngx-focus-entities";
+import {DO_ENTIER, DO_ID, DO_LIBELLE} from "@/domains";
 
-export interface ProfilItem {
-    id?: number;
-    libelle?: string;
-    nombreUtilisateurs?: number;
+export type ProfilItem = EntityToType<ProfilItemEntityType>;
+export interface ProfilItemEntityType {
+    id: FieldEntry2<typeof DO_ID, number>;
+    libelle: FieldEntry2<typeof DO_LIBELLE, string>;
+    nombreUtilisateurs: FieldEntry2<typeof DO_ENTIER, number>;
 }
 
-export const ProfilItemEntity = {
+export const ProfilItemEntity: ProfilItemEntityType = {
     id: {
         type: "field",
         name: "id",
@@ -32,4 +34,4 @@ export const ProfilItemEntity = {
         isRequired: true,
         label: "securite.profil.profilItem.nombreUtilisateurs"
     }
-} as const;
+};

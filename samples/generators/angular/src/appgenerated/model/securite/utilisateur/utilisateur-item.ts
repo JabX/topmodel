@@ -2,19 +2,21 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_CODE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2} from "ngx-focus-entities";
+import {DO_CODE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@/domains";
 
 import {TypeUtilisateurCode} from "./references";
 
-export interface UtilisateurItem {
-    id?: number;
-    nom?: string;
-    prenom?: string;
-    email?: string;
-    typeUtilisateurCode?: TypeUtilisateurCode;
+export type UtilisateurItem = EntityToType<UtilisateurItemEntityType>;
+export interface UtilisateurItemEntityType {
+    id: FieldEntry2<typeof DO_ID, number>;
+    nom: FieldEntry2<typeof DO_LIBELLE, string>;
+    prenom: FieldEntry2<typeof DO_LIBELLE, string>;
+    email: FieldEntry2<typeof DO_EMAIL, string>;
+    typeUtilisateurCode: FieldEntry2<typeof DO_CODE, TypeUtilisateurCode>;
 }
 
-export const UtilisateurItemEntity = {
+export const UtilisateurItemEntity: UtilisateurItemEntityType = {
     id: {
         type: "field",
         name: "id",
@@ -51,4 +53,4 @@ export const UtilisateurItemEntity = {
         isRequired: true,
         label: "securite.utilisateur.utilisateur.typeUtilisateurCode"
     }
-} as const;
+};

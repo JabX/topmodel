@@ -35,3 +35,10 @@ jobs:
           cache: maven
       - name: Build with Maven
         run: mvn test -f ./samples/generators/jpa/
+      
+      - name: Set up node 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm test

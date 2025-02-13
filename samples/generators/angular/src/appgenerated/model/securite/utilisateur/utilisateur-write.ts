@@ -2,22 +2,24 @@
 //// ATTENTION CE FICHIER EST GENERE AUTOMATIQUEMENT !
 ////
 
-import {DO_BOOLEEN, DO_CODE, DO_DATE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@domains";
+import {EntityToType, FieldEntry2} from "ngx-focus-entities";
+import {DO_BOOLEEN, DO_CODE, DO_DATE, DO_EMAIL, DO_ID, DO_LIBELLE} from "@/domains";
 
 import {TypeUtilisateurCode} from "./references";
 
-export interface UtilisateurWrite {
-    nom?: string;
-    prenom?: string;
-    email?: string;
-    dateNaissance?: string;
-    adresse?: string;
-    actif?: boolean;
-    profilId?: number;
-    typeUtilisateurCode?: TypeUtilisateurCode;
+export type UtilisateurWrite = EntityToType<UtilisateurWriteEntityType>;
+export interface UtilisateurWriteEntityType {
+    nom: FieldEntry2<typeof DO_LIBELLE, string>;
+    prenom: FieldEntry2<typeof DO_LIBELLE, string>;
+    email: FieldEntry2<typeof DO_EMAIL, string>;
+    dateNaissance: FieldEntry2<typeof DO_DATE, string>;
+    adresse: FieldEntry2<typeof DO_LIBELLE, string>;
+    actif: FieldEntry2<typeof DO_BOOLEEN, boolean>;
+    profilId: FieldEntry2<typeof DO_ID, number>;
+    typeUtilisateurCode: FieldEntry2<typeof DO_CODE, TypeUtilisateurCode>;
 }
 
-export const UtilisateurWriteEntity = {
+export const UtilisateurWriteEntity: UtilisateurWriteEntityType = {
     nom: {
         type: "field",
         name: "nom",
@@ -76,4 +78,4 @@ export const UtilisateurWriteEntity = {
         isRequired: true,
         label: "securite.utilisateur.utilisateur.typeUtilisateurCode"
     }
-} as const;
+};
