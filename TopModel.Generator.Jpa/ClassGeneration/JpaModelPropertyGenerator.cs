@@ -71,7 +71,7 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
             yield return new JavaAnnotation(name: annotation, imports: imports.ToArray());
         }
 
-        if (!property.Class.IsPersistent && !(property is AssociationProperty ap && ap.Type.IsToMany()))
+        if (!property.Class.IsPersistent && !(property is AssociationProperty ap && ap.Type.IsToMany()) && property.Domain != null)
         {
             var propertyType = GetPropertyType(property);
             List<string> sizePropertyValidateTypes = [
