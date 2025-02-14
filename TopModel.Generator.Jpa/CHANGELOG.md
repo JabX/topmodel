@@ -1,3 +1,7 @@
+## 1.5.1
+
+- [f54d39](https://github.com/klee-contrib/topmodel/commit/f54d3932d6cf316ed6d49b0f006fd4572bf826a8) [JPA] Fix annotation digits && size
+
 ## 1.5.0
 
 - [e48e5a](https://github.com/klee-contrib/topmodel/commit/e48e5a0e1ec3ab5634cb0ac4d5af78c55c8bfae7) [JPA] Ajouter les annotations de validations @Size ou @Digits aux Dtos des propriétés dont les domains définissent Length ou Scale 
