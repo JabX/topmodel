@@ -1,3 +1,10 @@
+## 1.5.0
+
+- [e48e5a](https://github.com/klee-contrib/topmodel/commit/e48e5a0e1ec3ab5634cb0ac4d5af78c55c8bfae7) [JPA] Ajouter les annotations de validations @Size ou @Digits aux Dtos des propriétés dont les domains définissent Length ou Scale 
+  Fix #437
+
+> BREAKING CHANGE : Certaines api risquent de renvoyer des erreurs `400`
+
 ## 1.4.0
 
 Compatibilité avec `ignoredFiles` de TopModel 2.4

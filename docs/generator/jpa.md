@@ -291,6 +291,15 @@ Par ailleurs, elles implémentent toutes l'interface `java.io.Serializable`. Est
 ```
 
 De plus, toutes les propriétés `required: true` reçoivent l'annotation `javax.validation.constraints.NotNull` (ou `jakarata.validation.constraints.NotNull` selon la configuration choisie).
+Par ailleurs, si le domain a :
+- Le type java est `String`, `CharSequence`, `Set`,`Map`,`List`, ou `Collection`
+- `length` est défini
+Alors la propriété portera l'annotation `@Size(max = [length défini dans le domain])`
+
+Egalement, si le domain a :
+- Le type java est `BigDecimal`, `BigInteger`, `byte`, `short`, `int`, `long`, `Byte`, `Short`, `Integer`, `Long`, `double` ou `Double`
+- `length` est défini ou `scale` est défini
+Alors la propriété portera l'annotation `@Digits(integer = [length défini dans le domain], fraction = [scale défini dans le domain])`
 
 Précautions d'emploi :
 
