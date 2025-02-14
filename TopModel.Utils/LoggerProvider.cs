@@ -87,13 +87,13 @@ public class LoggerProvider : ILoggerProvider
                 var name = ((_generatorName ?? _categoryName) + " ").PadRight(22, '-');
                 var split = name.Split(" ");
                 var fColor = _generatorName != null ? "fuchsia" : "grey";
-                AnsiConsole.Markup($"[{fColor}]{split[0]}[/]");
+                AnsiConsole.Markup($"[{fColor}]{split[0].EscapeMarkup()}[/]");
                 AnsiConsole.Markup($" {split[1]} ");
 
+                message = message.EscapeMarkup();
                 message = WriteAction(message, "Supprimé", "maroon");
                 message = WriteAction(message, "Créé", "green");
                 message = WriteAction(message, "Modifié", "teal");
-
                 if (logLevel != LogLevel.Error && logLevel != LogLevel.Warning)
                 {
                     var split2 = message.Split('/');
