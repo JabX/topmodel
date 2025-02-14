@@ -10,6 +10,7 @@ import java.util.List;
 
 import jakarta.annotation.Generated;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import jakarta.validation.Valid;
 
 import topmodel.jpa.sample.demo.dtos.securite.utilisateur.UtilisateurItem;
@@ -36,6 +37,7 @@ public class ProfilRead implements Serializable {
 	 * Libellé du profil.
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#getLibelle() Profil#getLibelle()} 
 	 */
+	@Size(max = 100)
 	@NotNull
 	private String libelle;
 
@@ -43,6 +45,7 @@ public class ProfilRead implements Serializable {
 	 * Liste des droits du profil.
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.profil.Profil#getDroits() Profil#getDroits()} 
 	 */
+	@Size(max = 10)
 	private List<DroitCode> droits;
 
 	/**

@@ -70,6 +70,58 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
         {
             yield return new JavaAnnotation(name: annotation, imports: imports.ToArray());
         }
+
+        if (!property.Class.IsPersistent && !(property is AssociationProperty ap && ap.Type.IsToMany()))
+        {
+            var propertyType = GetPropertyType(property);
+            List<string> sizePropertyValidateTypes = [
+                "String",
+                "CharSequence",
+                "Set",
+                "Map",
+                "List",
+                "Collection"
+            ];
+            var shouldAddSizeAnnotation = property.Domain.Length != null && (sizePropertyValidateTypes.Contains(propertyType.Split("<").First()) || propertyType.EndsWith("[]"));
+
+            if (shouldAddSizeAnnotation)
+            {
+                yield return new JavaAnnotation(name: "Size", imports: [$"{JavaxOrJakarta}.validation.constraints.Size"])
+                    .AddAttribute("max", value: property.Domain.Length.ToString());
+            }
+
+            // Techniquement Digit peut aussi être mis sur des chaînes de caractères, mais ce n'est pas forcément l'intention de l'utilisateurs
+            List<string> digitPropertyValidateTypes = [
+                "BigDecimal",
+                "BigInteger",
+                "byte",
+                "short",
+                "int",
+                "long",
+                "Byte",
+                "Short",
+                "Integer",
+                "Long",
+                "double",
+                "Double"
+            ];
+            var shouldAddDigitsAnnotation = (property.Domain.Length != null || property.Domain.Scale != null) && digitPropertyValidateTypes.Contains(propertyType);
+            if (shouldAddDigitsAnnotation)
+            {
+                var digitsAnnotation = new JavaAnnotation(name: "Digits", imports: [$"{JavaxOrJakarta}.validation.constraints.Digits"]);
+                if (property.Domain.Length != null)
+                {
+                    digitsAnnotation.AddAttribute("integer", value: property.Domain.Length.ToString());
+                }
+
+                if (property.Domain.Scale != null)
+                {
+                    digitsAnnotation.AddAttribute("fraction", value: property.Domain.Scale.ToString());
+                }
+
+                yield return digitsAnnotation;
+            }
+        }
     }
 
     public virtual string GetGetterName(IProperty property)

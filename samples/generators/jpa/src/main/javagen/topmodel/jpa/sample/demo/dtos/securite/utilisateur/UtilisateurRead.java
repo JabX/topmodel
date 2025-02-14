@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import jakarta.annotation.Generated;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import topmodel.jpa.sample.demo.entities.securite.utilisateur.SecuriteUtilisateurMappers;
 import topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur;
@@ -35,6 +36,7 @@ public class UtilisateurRead implements Serializable {
 	 * Nom de l'utilisateur.
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur#getNom() Utilisateur#getNom()} 
 	 */
+	@Size(max = 100)
 	@NotNull
 	private String nom;
 
@@ -42,6 +44,7 @@ public class UtilisateurRead implements Serializable {
 	 * Nom de l'utilisateur.
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur#getPrenom() Utilisateur#getPrenom()} 
 	 */
+	@Size(max = 100)
 	@NotNull
 	private String prenom;
 
@@ -50,6 +53,7 @@ public class UtilisateurRead implements Serializable {
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur#getEmail() Utilisateur#getEmail()} 
 	 */
 	@Email
+	@Size(max = 50)
 	@NotNull
 	private String email;
 
@@ -63,6 +67,7 @@ public class UtilisateurRead implements Serializable {
 	 * Adresse de l'utilisateur.
 	 * Alias of {@link topmodel.jpa.sample.demo.entities.securite.utilisateur.Utilisateur#getAdresse() Utilisateur#getAdresse()} 
 	 */
+	@Size(max = 100)
 	private String adresse;
 
 	/**
