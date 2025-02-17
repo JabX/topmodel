@@ -34,6 +34,12 @@ public class JavaAnnotation
         return this;
     }
 
+    public JavaAnnotation AddAttribute(string name, string[] value)
+    {
+        Attributes[name] = $@"{{{string.Join(", ", value)}}}";
+        return this;
+    }
+
     public JavaAnnotation AddAttribute(string value)
     {
         Attributes["value"] = value;
@@ -44,6 +50,13 @@ public class JavaAnnotation
     {
         Attributes[name] = value;
         Imports.AddRange(value.Imports);
+        return this;
+    }
+
+    public JavaAnnotation AddAttribute(string name, IEnumerable<JavaAnnotation> value)
+    {
+        Attributes[name] = $@"{{{string.Join(", ", value.Select(a => a.ToString()))}}}";
+        Imports.AddRange(value.SelectMany(a => a.Imports));
         return this;
     }
 

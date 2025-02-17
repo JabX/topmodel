@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System.Linq;
+using Microsoft.Extensions.Logging;
 using TopModel.Core;
 using TopModel.Generator.Core;
 using TopModel.Utils;
@@ -45,15 +46,22 @@ public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> log
     {
         fw.WriteDocStart(0, classe.Comment);
         fw.WriteDocEnd(0);
-        if (Config.GeneratedHint)
-        {
-            fw.WriteLine(0, Config.GeneratedAnnotation);
-        }
 
         fw.AddImports(Config.GetDecoratorImports(classe, tag).ToList());
-        foreach (var a in Config.GetDecoratorAnnotations(classe, tag))
+        fw.WriteAnnotations(0, GetAnnotations(classe, tag));
+    }
+
+    protected virtual IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
+    {
+        if (Config.GeneratedHint)
         {
-            fw.WriteLine($"{(a.StartsWith('@') ? string.Empty : "@")}{a}");
+            yield return Config.GeneratedAnnotation;
+        }
+
+        var annotationsAndImports = Config.GetAnnotationsAndImports(classe, tag).Select(a => new JavaAnnotation(a.Annotation, imports: a.Imports.ToArray()));
+        foreach (var a in annotationsAndImports)
+        {
+            yield return a;
         }
     }
 

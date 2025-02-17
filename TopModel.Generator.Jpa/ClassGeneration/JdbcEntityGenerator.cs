@@ -120,12 +120,13 @@ public class JdbcEntityGenerator(ILogger<JdbcEntityGenerator> logger, IFileWrite
         fw.WriteLine("}");
     }
 
-    protected override void WriteAnnotations(JavaWriter fw, Class classe, string tag)
+    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
     {
-        base.WriteAnnotations(fw, classe, tag);
-        var table = @$"@Table(name = ""{classe.SqlName.ToLower()}"")";
-        fw.AddImport($"org.springframework.data.relational.core.mapping.Table");
-        fw.WriteLine(table);
+        var annotations = base.GetAnnotations(classe, tag).ToList();
+        var tableAnnotation = new JavaAnnotation("Table", imports: "org.springframework.data.relational.core.mapping.Table")
+            .AddAttribute("name", classe.SqlName.ToLower());
+        annotations.Add(tableAnnotation);
+        return annotations;
     }
 
     protected override void WriteGetters(JavaWriter fw, Class classe, string tag)

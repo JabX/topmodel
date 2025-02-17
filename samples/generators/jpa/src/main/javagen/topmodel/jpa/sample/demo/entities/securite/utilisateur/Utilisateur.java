@@ -33,8 +33,7 @@ import topmodel.jpa.sample.demo.enums.securite.utilisateur.TypeUtilisateurCode;
 @Generated("TopModel : https://github.com/klee-contrib/topmodel")
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-@Table(name = "UTILISATEUR", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"UTI_EMAIL"})})
+@Table(name = "UTILISATEUR", uniqueConstraints = {@UniqueConstraint(columnNames = {"UTI_EMAIL"})})
 public class Utilisateur {
 
 	/**

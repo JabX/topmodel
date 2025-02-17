@@ -114,77 +114,53 @@ public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, IFileWriterP
         }
     }
 
-    protected override void WriteAnnotations(JavaWriter fw, Class classe, string tag)
+    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
     {
-        base.WriteAnnotations(fw, classe, tag);
+        foreach (var a in base.GetAnnotations(classe, tag))
+        {
+            yield return a;
+        }
+
+        yield return new JavaAnnotation("Entity", imports: $"{JavaxOrJakarta}.persistence.Entity");
         if (Classes.Any(c => c.Extends == classe))
         {
-            fw.WriteLine("@Inheritance(strategy = InheritanceType.JOINED)");
-            fw.AddImport($"{JavaxOrJakarta}.persistence.Inheritance");
-            fw.AddImport($"{JavaxOrJakarta}.persistence.InheritanceType");
+            yield return new JavaAnnotation("Inheritance", imports: $"{JavaxOrJakarta}.persistence.Inheritance")
+                .AddAttribute("strategy", "InheritanceType.JOINED", $"{JavaxOrJakarta}.persistence.InheritanceType");
         }
 
-        var table = @$"@Table(name = ""{classe.SqlName}""";
-        fw.AddImport($"{JavaxOrJakarta}.persistence.Table");
+        var tableAnnotation = new JavaAnnotation("Table", imports: $"{JavaxOrJakarta}.persistence.Table")
+            .AddAttribute("name", $@"""{classe.SqlName}""");
         if (classe.UniqueKeys.Count > 0)
         {
-            fw.AddImport($"{JavaxOrJakarta}.persistence.UniqueConstraint");
-            table += ", uniqueConstraints = {";
-            var isFirstConstraint = true;
-            foreach (var unique in classe.UniqueKeys)
-            {
-                if (!isFirstConstraint)
-                {
-                    table += ",";
-                }
+            var uks = classe.UniqueKeys.Select(uk => new JavaAnnotation(
+                "UniqueConstraint",
+                imports: $"{JavaxOrJakarta}.persistence.UniqueConstraint")
+                .AddAttribute("columnNames", uk.Select(u => $@"""{u.SqlName}""").ToArray()));
 
-                table += "\n    ";
-                isFirstConstraint = false;
-                table += "@UniqueConstraint(columnNames = {";
-                var isFirstColumn = true;
-                foreach (var u in unique)
-                {
-                    if (!isFirstColumn)
-                    {
-                        table += ",";
-                    }
-
-                    isFirstColumn = false;
-                    table += $"\"{u.SqlName}\"";
-                }
-
-                table += "})";
-            }
-
-            table += "}";
+            tableAnnotation.AddAttribute("uniqueConstraints", uks);
         }
 
-        table += ")";
-        fw.AddImport($"{JavaxOrJakarta}.persistence.Entity");
-        fw.WriteLine("@Entity");
-        fw.WriteLine(table);
+        yield return tableAnnotation;
         if (classe.PrimaryKey.Count() > 1)
         {
-            fw.WriteLine($"@IdClass({classe.NamePascal}.{classe.NamePascal}Id.class)");
-            fw.AddImport($"{JavaxOrJakarta}.persistence.IdClass");
+            yield return new JavaAnnotation("IdClass", imports: $"{JavaxOrJakarta}.persistence.IdClass")
+                .AddAttribute("value", $"{classe.NamePascal}.{classe.NamePascal}Id.class");
         }
 
         if (classe.Reference)
         {
-            fw.AddImports([
-                "org.hibernate.annotations.Cache",
-                "org.hibernate.annotations.CacheConcurrencyStrategy"
-            ]);
+            var cacheAnnotation = new JavaAnnotation("Cache", imports: "org.hibernate.annotations.Cache");
             if (Config.CanClassUseEnums(classe))
             {
-                fw.AddImport("org.hibernate.annotations.Immutable");
-                fw.WriteLine("@Immutable");
-                fw.WriteLine("@Cache(usage = CacheConcurrencyStrategy.READ_ONLY)");
+                yield return new JavaAnnotation("Immutable", imports: "org.hibernate.annotations.Immutable");
+                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_ONLY", "org.hibernate.annotations.CacheConcurrencyStrategy");
             }
             else
             {
-                fw.WriteLine("@Cache(usage = CacheConcurrencyStrategy.READ_WRITE)");
+                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_WRITE", "org.hibernate.annotations.CacheConcurrencyStrategy");
             }
+
+            yield return cacheAnnotation;
         }
     }
 

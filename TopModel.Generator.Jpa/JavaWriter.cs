@@ -84,6 +84,42 @@ public class JavaWriter(IFileWriter writer, string packageName) : IDisposable
     }
 
     /// <summary>
+    /// Ecrit la classe Java avec le niveau indenté.
+    /// </summary>
+    /// <param name="indentationLevel">Niveau d'indentation.</param>
+    /// <param name="javaClass">Classe à écrire dans le flux.</param>
+    public void WriteClass(int indentationLevel, JavaClass javaClass)
+    {
+        AddImports(javaClass.Imports);
+        WriteAnnotations(indentationLevel, javaClass.Annotations);
+
+        if (!string.IsNullOrEmpty(javaClass.Comment))
+        {
+            WriteDocStart(indentationLevel, javaClass.Comment);
+            WriteDocEnd(indentationLevel);
+        }
+
+        WriteClassDeclaration(javaClass.Name, "public", null, null);
+
+        foreach (var field in javaClass.Fields)
+        {
+            WriteField(indentationLevel + 1, field);
+        }
+
+        foreach (var constructor in javaClass.Constructors)
+        {
+            WriteConstructor(indentationLevel + 1, constructor);
+        }
+
+        foreach (var method in javaClass.Methods)
+        {
+            Write(indentationLevel + 1, method);
+        }
+
+        WriteLine(indentationLevel, "}");
+    }
+
+    /// <summary>
     /// Retourne le code associé à la déclaration.
     /// </summary>
     /// <param name="name">Nom de la classe.</param>
@@ -123,13 +159,46 @@ public class JavaWriter(IFileWriter writer, string packageName) : IDisposable
         WriteLine(0, sb.ToString());
     }
 
+    /// <summary>
+    /// Ecrit la déclaration d'un constructeur.
+    /// </summary>
+    /// <param name="indentationLevel">Niveau d'indentation.</param>
+    /// <param name="constructor">Constructeur à écrire.</param>
+    public void WriteConstructor(int indentationLevel, JavaConstructor constructor)
+    {
+        AddImports(constructor.Imports);
+        WriteAnnotations(indentationLevel, constructor.Annotations);
+        if (!string.IsNullOrEmpty(constructor.Comment))
+        {
+            WriteDocStart(indentationLevel, constructor.Comment);
+            foreach (var param in constructor.Parameters)
+            {
+                WriteParam(param.Name, param.Comment);
+            }
+
+            WriteDocEnd(indentationLevel);
+        }
+
+        var hasBody = constructor.Body.Count > 0;
+        _toWrite.Add(new WriterLine() { Line = @$"{constructor.Signature}{(hasBody ? " {" : ";")}", Indent = indentationLevel });
+        foreach (var bodyLine in constructor.Body)
+        {
+            _toWrite.Add(new WriterLine() { Line = bodyLine.Line, Indent = bodyLine.Indent + indentationLevel + 1 });
+        }
+
+        if (hasBody)
+        {
+            _toWrite.Add(new WriterLine() { Line = "}", Indent = indentationLevel });
+        }
+    }
+
     public void WriteDocEnd(int indentationLevel)
     {
         WriteLine(indentationLevel, " */");
     }
 
     /// <summary>
-    /// Ecrit la valeur du résumé du commentaire..
+    /// Ecrit la valeur du résumé du commentaire.
     /// </summary>
     /// <param name="indentationLevel">Niveau d'indentation.</param>
     /// <param name="value">Valeur à écrire.</param>
@@ -139,6 +208,24 @@ public class JavaWriter(IFileWriter writer, string packageName) : IDisposable
         {
             WriteLine(indentationLevel, LoadDocStart(value));
         }
+    }
+
+    /// <summary>
+    /// Ecrit la déclaration d'un champ.
+    /// </summary>
+    /// <param name="indentationLevel">Niveau d'indentation.</param>
+    /// <param name="field">Champ à écrire.</param>
+    public void WriteField(int indentationLevel, JavaField field)
+    {
+        AddImports(field.Imports);
+        WriteAnnotations(indentationLevel, field.Annotations);
+        if (!string.IsNullOrEmpty(field.Comment))
+        {
+            WriteDocStart(indentationLevel, field.Comment);
+            WriteDocEnd(indentationLevel);
+        }
+
+        _toWrite.Add(new WriterLine() { Line = field.ToString(), Indent = indentationLevel });
     }
 
     /// <summary>
