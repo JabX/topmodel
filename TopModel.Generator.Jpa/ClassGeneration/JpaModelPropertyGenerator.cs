@@ -105,19 +105,12 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
                 "double",
                 "Double"
             ];
-            var shouldAddDigitsAnnotation = (property.Domain.Length != null || property.Domain.Scale != null) && digitPropertyValidateTypes.Contains(propertyType);
+            var shouldAddDigitsAnnotation = property.Domain.Length != null && property.Domain.Scale != null && digitPropertyValidateTypes.Contains(propertyType);
             if (shouldAddDigitsAnnotation)
             {
-                var digitsAnnotation = new JavaAnnotation(name: "Digits", imports: [$"{JavaxOrJakarta}.validation.constraints.Digits"]);
-                if (property.Domain.Length != null)
-                {
-                    digitsAnnotation.AddAttribute("integer", value: property.Domain.Length.ToString());
-                }
-
-                if (property.Domain.Scale != null)
-                {
-                    digitsAnnotation.AddAttribute("fraction", value: property.Domain.Scale.ToString());
-                }
+                var digitsAnnotation = new JavaAnnotation(name: "Digits", imports: [$"{JavaxOrJakarta}.validation.constraints.Digits"])
+                    .AddAttribute("integer", value: property.Domain.Length!.ToString())
+                    .AddAttribute("fraction", value: property.Domain.Scale!.ToString());
 
                 yield return digitsAnnotation;
             }
