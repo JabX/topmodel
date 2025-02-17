@@ -1,3 +1,7 @@
+## 1.5.2
+
+- [af781](https://github.com/klee-contrib/topmodel/commit/af7812819384051ca347c2c207fdc4f26ea7fb5a) [JPA] annotation @Digits incomplète. Fix [#440](https://github.com/klee-contrib/topmodel/issues/440)
+
 ## 1.5.1
 
 - [f54d39](https://github.com/klee-contrib/topmodel/commit/f54d3932d6cf316ed6d49b0f006fd4572bf826a8) [JPA] Fix annotation digits && size
