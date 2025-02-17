@@ -8,6 +8,10 @@ Changelogs des modules :
 - [`sql`](./TopModel.Generator.Sql/CHANGELOG.md)
 - [`translation`](./TopModel.Generator.Translation/CHANGELOG.md)
 
+## 2.4.3
+
+- [`c2d41a4`](https://github.com/klee-contrib/topmodel/commit/c2d41a4a9c816244a5177ec4bb8fec895663b202) - [Core] Fix génération annotations non parsées Fix #443
+
 ## 2.4.2
 
 - [`1522a6`](https://github.com/klee-contrib/topmodel/commit/df49cc8ff4ec6d5a3588664c3bb8048e8e7f16e5) - [Core] Fonctionnalité de debrayage ne fonctionne pas Fix [#442](https://github.com/klee-contrib/topmodel/issues/442)
