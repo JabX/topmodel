@@ -117,6 +117,15 @@ public abstract class GeneratorConfigBase
         return classe.Enum && CheckProperty(prop!);
     }
 
+    public IEnumerable<(string Annotation, IList<string> Imports)> GetAnnotationsAndImports(Class classe, string tag)
+    {
+        return classe.Decorators
+             .Select(d => d.Decorator)
+             .Select(GetImplementation)
+             .Where(d => d != null)
+             .SelectMany(d => d!.Annotations.Select(a => (Annotation: a, d.Imports)));
+    }
+
     public string? GetClassExtends(Class item)
     {
         var extendsDecorator = item.Decorators.SingleOrDefault(d => GetImplementation(d.Decorator)?.Extends != null);
@@ -202,15 +211,6 @@ public abstract class GeneratorConfigBase
         return endpoint.Decorators.SelectMany(d => (GetImplementation(d.Decorator)?.Imports ?? [])
             .Select(i => i.ParseTemplate(endpoint, d.Parameters, this, tag)))
             .Distinct();
-    }
-
-    public IEnumerable<(string Annotation, IList<string> Imports)> GetAnnotationsAndImports(Class classe, string tag)
-    {
-        return classe.Decorators
-             .Select(d => d.Decorator)
-             .Select(GetImplementation)
-             .Where(d => d != null)
-             .SelectMany(d => d!.Annotations.Select(a => (Annotation: a, d.Imports)));
     }
 
     public IEnumerable<string> GetDomainAnnotations(IProperty property, string tag)

@@ -86,7 +86,7 @@ public class TopModelLock : TopModelLockFile
 
         if (!_config.NoWarn.Contains(ModelErrorType.TMD8001))
         {
-            foreach (var ignoredFile in _config.IgnoredFiles.Select(i => Path.Combine(_config.ConfigRoot, i.Path).Replace("\\", "/")).Except(generatedFiles))
+            foreach (var ignoredFile in _config.IgnoredFiles.Select(i => Path.GetFullPath(Path.Combine(_config.ConfigRoot, i.Path)).Replace("\\", "/")).Except(generatedFiles))
             {
                 _logger.LogWarning($"{{TMD8001}} - Le fichier '{ignoredFile.ToRelative(_config.ConfigRoot)}' dans `ignoredFiles` est introuvable.");
             }

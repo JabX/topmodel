@@ -72,7 +72,7 @@ public class GeneratedFileWriter : IFileWriter
 
             currentContent = reader.ReadToEnd();
 
-            var ignoredFile = _config.IgnoredFiles.FirstOrDefault(i => Path.Combine(_config.ConfigRoot, i.Path).Replace("\\", "/") == FileName.Replace("\\", "/"));
+            var ignoredFile = _config.IgnoredFiles.FirstOrDefault(i => Path.GetFullPath(Path.Combine(_config.ConfigRoot, i.Path)).Replace("\\", "/") == FileName.Replace("\\", "/"));
             if (ignoredFile != null)
             {
                 if (!_config.NoWarn.Contains(ModelErrorType.TMD8000))
