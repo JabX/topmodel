@@ -42,15 +42,6 @@ public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> log
         }
     }
 
-    protected virtual void WriteAnnotations(JavaWriter fw, Class classe, string tag)
-    {
-        fw.WriteDocStart(0, classe.Comment);
-        fw.WriteDocEnd(0);
-
-        fw.AddImports(Config.GetDecoratorImports(classe, tag).ToList());
-        fw.WriteAnnotations(0, GetAnnotations(classe, tag));
-    }
-
     protected virtual IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
     {
         if (Config.GeneratedHint)
@@ -63,6 +54,15 @@ public abstract class JavaClassGeneratorBase(ILogger<JavaClassGeneratorBase> log
         {
             yield return a;
         }
+    }
+
+    protected virtual void WriteAnnotations(JavaWriter fw, Class classe, string tag)
+    {
+        fw.WriteDocStart(0, classe.Comment);
+        fw.WriteDocEnd(0);
+
+        fw.AddImports(Config.GetDecoratorImports(classe, tag).ToList());
+        fw.WriteAnnotations(0, GetAnnotations(classe, tag));
     }
 
     protected virtual void WriteFieldsEnum(JavaWriter fw, Class classe, string tag)

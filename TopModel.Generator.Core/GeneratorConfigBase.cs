@@ -117,7 +117,7 @@ public abstract class GeneratorConfigBase
         return classe.Enum && CheckProperty(prop!);
     }
 
-    public IEnumerable<(string Annotation, IList<string> Imports)> GetAnnotationsAndImports(Class classe, string tag)
+    public IEnumerable<(string Annotation, List<string> Imports)> GetAnnotationsAndImports(Class classe, string tag)
     {
         return classe.Decorators
             .Where(d => GetImplementation(d.Decorator) != null)
@@ -125,7 +125,8 @@ public abstract class GeneratorConfigBase
              {
                  var decorator = d.Decorator;
                  var imple = GetImplementation(decorator)!;
-                 return imple.Annotations.Select(a => (Annotation: a.ParseTemplate(classe, d.Parameters, this, tag), imple.Imports));
+                 return imple.Annotations.Select(a => (Annotation: a.ParseTemplate(classe, d.Parameters, this, tag),
+                 Imports: imple.Imports.Select(i => i.ParseTemplate(classe, d.Parameters, this, tag)).ToList()));
              });
     }
 
