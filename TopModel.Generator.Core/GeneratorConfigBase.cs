@@ -120,10 +120,13 @@ public abstract class GeneratorConfigBase
     public IEnumerable<(string Annotation, IList<string> Imports)> GetAnnotationsAndImports(Class classe, string tag)
     {
         return classe.Decorators
-             .Select(d => d.Decorator)
-             .Select(GetImplementation)
-             .Where(d => d != null)
-             .SelectMany(d => d!.Annotations.Select(a => (Annotation: a, d.Imports)));
+            .Where(d => GetImplementation(d.Decorator) != null)
+             .SelectMany(d =>
+             {
+                 var decorator = d.Decorator;
+                 var imple = GetImplementation(decorator)!;
+                 return imple.Annotations.Select(a => (Annotation: a.ParseTemplate(classe, d.Parameters, this, tag), imple.Imports));
+             });
     }
 
     public string? GetClassExtends(Class item)
