@@ -1,3 +1,9 @@
+## 1.5.3
+
+- [4add3](https://github.com/klee-contrib/topmodel/commit/4add3156138fae8612ff1f511a4c460d929c00ea) [JPA] Incompatibilité entre décorator et référence Fix [#441](https://github.com/klee-contrib/topmodel/issues/441)
+
+> **Attention** : Nécessite modgen v2.4.2
+
 ## 1.5.2
 
 - [af781](https://github.com/klee-contrib/topmodel/commit/af7812819384051ca347c2c207fdc4f26ea7fb5a) [JPA] annotation @Digits incomplète. Fix [#440](https://github.com/klee-contrib/topmodel/issues/440)

@@ -8,6 +8,14 @@ Changelogs des modules :
 - [`sql`](./TopModel.Generator.Sql/CHANGELOG.md)
 - [`translation`](./TopModel.Generator.Translation/CHANGELOG.md)
 
+## 2.4.2
+
+- [`1522a6`](https://github.com/klee-contrib/topmodel/commit/df49cc8ff4ec6d5a3588664c3bb8048e8e7f16e5) - [Core] Fonctionnalité de debrayage ne fonctionne pas Fix [#442](https://github.com/klee-contrib/topmodel/issues/442)
+
+## 2.4.1
+
+- [`d762e5`](https://github.com/klee-contrib/topmodel/commit/df49cc8ff4ec6d5a3588664c3bb8048e8e7f16e5) - [Core] Correction logs en erreur à cause du markup
+
 ## 2.4.0
 
 - [`#435`](https://github.com/klee-contrib/topmodel/pull/435) / [`#436`](https://github.com/klee-contrib/topmodel/pull/436) - `ignoredFiles`
