@@ -53,7 +53,10 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
                 column.AddAttribute("scale", $"{property.Domain.Scale}");
             }
 
-            column.AddAttribute("columnDefinition", @$"""{property.Domain.Implementations["sql"].Type}""");
+            if (property.Domain.Implementations.ContainsKey("sql"))
+            {
+                column.AddAttribute("columnDefinition", @$"""{property.Domain.Implementations["sql"].Type}""");
+            }
         }
 
         if (property is CompositionProperty && property.Domain is null)
