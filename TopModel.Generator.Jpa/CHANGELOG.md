@@ -1,3 +1,12 @@
+## 1.5.5
+
+- [06a1a](https://github.com/klee-contrib/topmodel/commit/06a1a02dbfb8361e918744f588d82de084805b13) [JPA] Erreur lorsqu'on génère une entité persistée alors que le type sql n'est pas défini
+Fix [#446](https://github.com/klee-contrib/topmodel/issues/446)
+
+## 1.5.4
+
+Release technique
+
 ## 1.5.3
 
 - [4add3](https://github.com/klee-contrib/topmodel/commit/4add3156138fae8612ff1f511a4c460d929c00ea) [JPA] Incompatibilité entre décorator et référence Fix [#441](https://github.com/klee-contrib/topmodel/issues/441)
