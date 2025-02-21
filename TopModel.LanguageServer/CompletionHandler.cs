@@ -65,6 +65,11 @@ public class CompletionHandler : CompletionHandlerBase
 
         var reqChar = Math.Min(request.Position.Character, currentLine.Length);
         var rootObject = GetRootObject(request).Object;
+        if (rootObject.StartsWith("--"))
+        {
+            return Task.FromResult(new CompletionList());
+        }
+
         var currentKey = GetCurrentKey(request).Key;
         var parentKey = GetParentKey(request).Key;
         var useIndex = GetUseIndex(file, text);
