@@ -69,7 +69,7 @@ public interface UtilisateurController {
 	 */
 	@PreAuthorize("hasRole('READ')")
 	@GetMapping(path = "/")
-	List<UtilisateurItem> searchUtilisateur(@RequestParam(value = "nom", required = true) String nom, @RequestParam(value = "prenom", required = true) String prenom, @RequestParam(value = "email", required = true) String email, @RequestParam(value = "dateNaissance", required = false) LocalDate dateNaissance, @RequestParam(value = "adresse", required = false) String adresse, @RequestParam(value = "actif", required = true) Boolean actif, @RequestParam(value = "profilId", required = true) Integer profilId, @RequestParam(value = "typeUtilisateurCode", required = true) TypeUtilisateurCode typeUtilisateurCode);
+	List<UtilisateurItem> searchUtilisateur(@RequestParam(value = "nom", required = false) String nom, @RequestParam(value = "prenom", required = false) String prenom, @RequestParam(value = "email", required = false) String email, @RequestParam(value = "dateNaissance", required = false) LocalDate dateNaissance, @RequestParam(value = "adresse", required = false) String adresse, @RequestParam(value = "actif", required = false) Boolean actif, @RequestParam(value = "profilId", required = false) Integer profilId, @RequestParam(value = "typeUtilisateurCode", required = false) TypeUtilisateurCode typeUtilisateurCode);
 
 	/**
 	 * Sauvegarde un utilisateur.

@@ -74,6 +74,7 @@ endpoint:
           - DateCreation
           - DateModification
       defaultValue: null
+      required: false
   returns:
     composition: UtilisateurItem
     name: utilisateurList

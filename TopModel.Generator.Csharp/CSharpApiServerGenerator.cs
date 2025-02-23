@@ -32,24 +32,42 @@ public class CSharpApiServerGenerator(ILogger<CSharpApiServerGenerator> logger, 
 
         string defaultValue = Config.GetValue(param, Classes);
 
-        var type = Config.GetType(param, nonNullable: param is CompositionProperty || (param.Domain?.BodyParam ?? false) || param.IsRouteParam() || defaultValue != "null");
+        var isFormParam = param.Endpoint.IsMultipart && !param.IsQueryParam() && !param.IsRouteParam();
 
-        if (param.Endpoint.IsMultipart && !param.IsQueryParam() && !param.IsRouteParam() && !type.StartsWith("IFormFile"))
+        var type = Config.GetType(param, nonNullable: param.Required && !isFormParam && !param.IsQueryParam() || param.IsRouteParam() || defaultValue != "null");
+
+        var hasAnnotation = false;
+
+        if (isFormParam && !type.StartsWith("IFormFile"))
         {
-            sb.Append("[FromForm] ");
+            sb.Append("[FromForm]");
+            hasAnnotation = true;
         }
         else if (param.IsJsonBodyParam())
         {
-            sb.Append("[FromBody] ");
+            sb.Append("[FromBody]");
+            hasAnnotation = true;
         }
         else if (type.EndsWith("[]"))
         {
-            sb.Append("[FromQuery] ");
+            sb.Append("[FromQuery]");
+            hasAnnotation = true;
+        }
+
+        if (param.Required && defaultValue == "null" && (param.IsQueryParam() || isFormParam))
+        {
+            sb.Append("[Required]");
+            hasAnnotation = true;
+        }
+
+        if (hasAnnotation)
+        {
+            sb.Append(' ');
         }
 
         sb.Append($@"{type} {param.GetParamName().Verbatim()}");
 
-        if (param is not CompositionProperty && !param.IsRouteParam() && !(param.Domain?.BodyParam ?? false))
+        if (param.IsQueryParam() || isFormParam)
         {
             sb.Append($" = {defaultValue}");
         }
