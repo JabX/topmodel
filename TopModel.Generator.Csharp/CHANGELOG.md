@@ -1,3 +1,10 @@
+## 1.3.0
+
+- [`cf05c8c`](https://github.com/klee-contrib/topmodel/commit/cf05c8c31d8f80179741b2c5d6a07888528207f7) - [C# ApiServer] Annotations [Required] sur les paramètres required
+- [`865020e`](https://github.com/klee-contrib/topmodel/commit/865020e969ec65535f0aeaca9c7da09b61321710) - [C#] Fix détermination valueType pour enums avec genericType
+
+**breaking change** : Le `required` est désormais correctement pris en compte sur les paramètres d'endpoint, ce qui va en particulier ajouter des annotations `[Required]` sur vos query params obligatoires. Vous devriez donc vérifier que la valeur de `required` dans le modèle correspond bien à la réalité de votre endpoint, ou alors vous pouvez simplement ajouter des `required: false` jusqu'à ce que le code généré ne change pas (mais ce n'est évidemment pas la meilleure solution 😉)
+
 ## 1.2.0
 
 Compatibilité avec `ignoredFiles` de TopModel 2.4
