@@ -529,9 +529,9 @@ public class CsharpConfig : GeneratorConfigBase
         return prop switch
         {
             AssociationProperty ap when CanClassUseEnums(ap.Association, availableClasses, ap.Property) => true,
-            AliasProperty { Property: AssociationProperty ap } when CanClassUseEnums(ap.Association, availableClasses) => true,
+            AliasProperty { Property: AssociationProperty ap } alp when CanClassUseEnums(ap.Association, availableClasses) && string.IsNullOrEmpty(GetImplementation(alp.Domain)?.GenericType) => true,
             RegularProperty { Class: not null } rp when CanClassUseEnums(rp.Class, availableClasses, rp) => true,
-            AliasProperty { Property: RegularProperty { Class: not null } rp } when CanClassUseEnums(rp.Class, availableClasses, rp) => true,
+            AliasProperty { Property: RegularProperty { Class: not null } rp } alp when CanClassUseEnums(rp.Class, availableClasses, rp) && string.IsNullOrEmpty(GetImplementation(alp.Domain)?.GenericType) => true,
             CompositionProperty => false,
             _ => AllValueTypes.Contains(GetType(prop, availableClasses, nonNullable: true))
         };
