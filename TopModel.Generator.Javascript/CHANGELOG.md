@@ -1,3 +1,7 @@
+## 1.3.1
+
+- [`da591`](https://github.com/klee-contrib/topmodel/commit/8f9b2535d25ca7918176e7f0c3b62c441612a877) -[JS] Manque `reportProgress`
+
 ## 1.3.0
 
 - [`9ad2e0`](https://github.com/klee-contrib/topmodel/commit/8f9b2535d25ca7918176e7f0c3b62c441612a877) - [Angular] : Permettre l'ajout d'un `HttpOptions` lors de la génération d'un service d'upload de fichier
