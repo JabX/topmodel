@@ -12,6 +12,11 @@ Il est possible de générer l'API cliente selon deux modes (`apiMode`) : `vanil
 
 Le mode `angular` permet de générer un service injectable au sens `Angular`, contenant les méthodes d'appels à l'API.
 
+##### Observe
+
+Lorsque l'objet retourné par l'API est `HttpEvent<>` ou bien `HttpResponse<>`, alors le service créé  ajoutera automatiquement l'option `observe: 'events'` ou `observe: 'response'` à la requête.
+Sinon, l'option `observe: 'body'` sera ajoutée.
+
 #### Vanilla
 
 Le mode `vanilla` permet de générer un fichier ts, contenant les méthodes d'appels à l'API exportées sous forme de fonctions. Ce mode nécessite la définission d'une méthode `fetch`. Par défaut, cette méthode est importée de `focus4/core`, mais il est possible de la surcharger avec le paramètre `fetchPath`.
