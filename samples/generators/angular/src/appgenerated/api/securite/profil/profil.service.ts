@@ -21,7 +21,7 @@ export class ProfilService {
      * @param profil Profil à sauvegarder
      * @returns Profil sauvegardé
      */
-    addProfil(profil: ProfilWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
+    addProfil(profil: ProfilWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
         return this.http.post<ProfilRead>(`/api/profils`, profil, {observe: 'body', ...options});
     }
 
@@ -30,7 +30,7 @@ export class ProfilService {
      * @param proId Id technique
      * @returns Le détail de l'Profil
      */
-    getProfil(proId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
+    getProfil(proId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
         return this.http.get<ProfilRead>(`/api/profils/${proId}`, {observe: 'body', ...options});
     }
 
@@ -38,7 +38,7 @@ export class ProfilService {
      * @description Liste tous les Profils
      * @returns Profils matchant les critères
      */
-    getProfils(options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilItem[]> {
+    getProfils(options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilItem[]> {
         return this.http.get<ProfilItem[]>(`/api/profils`, {observe: 'body', ...options});
     }
 
@@ -48,7 +48,7 @@ export class ProfilService {
      * @param profil Profil à sauvegarder
      * @returns Profil sauvegardé
      */
-    updateProfil(proId: number, profil: ProfilWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
+    updateProfil(proId: number, profil: ProfilWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<ProfilRead> {
         return this.http.put<ProfilRead>(`/api/profils/${proId}`, profil, {observe: 'body', ...options});
     }
 }

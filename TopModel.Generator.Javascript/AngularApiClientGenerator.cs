@@ -271,6 +271,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
             "context?: HttpContext",
             "params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}",
             "withCredentials?: boolean",
+            "reportProgress?: boolean",
             "transferCache?: {includeHeaders?: string[]} | boolean"
         };
         return @$"{{{string.Join("; ", options)}}}";

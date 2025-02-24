@@ -22,7 +22,7 @@ export class UtilisateurService {
      * @param utilisateur Utilisateur à sauvegarder
      * @returns Utilisateur sauvegardé
      */
-    addUtilisateur(utilisateur: UtilisateurWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
+    addUtilisateur(utilisateur: UtilisateurWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
         return this.http.post<UtilisateurRead>(`/api/utilisateurs`, utilisateur, {observe: 'body', ...options});
     }
 
@@ -30,7 +30,7 @@ export class UtilisateurService {
      * @description Supprime un utilisateur
      * @param utiId Id de l'utilisateur
      */
-    deleteUtilisateur(utiId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<void> {
+    deleteUtilisateur(utiId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<void> {
         return this.http.delete<void>(`/api/utilisateurs/${utiId}`, {observe: 'body', ...options});
     }
 
@@ -39,7 +39,7 @@ export class UtilisateurService {
      * @param utiId Id de l'utilisateur
      * @returns Le détail de l'utilisateur
      */
-    getUtilisateur(utiId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
+    getUtilisateur(utiId: number, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
         return this.http.get<UtilisateurRead>(`/api/utilisateurs/${utiId}`, {observe: 'body', ...options});
     }
 
@@ -55,7 +55,7 @@ export class UtilisateurService {
      * @param typeUtilisateurCode Type d'utilisateur
      * @returns Utilisateurs matchant les critères
      */
-    searchUtilisateur(nom?: string, prenom?: string, email?: string, dateNaissance?: string, adresse?: string, actif?: boolean, profilId?: number, typeUtilisateurCode?: TypeUtilisateurCode, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurItem[]> {
+    searchUtilisateur(nom?: string, prenom?: string, email?: string, dateNaissance?: string, adresse?: string, actif?: boolean, profilId?: number, typeUtilisateurCode?: TypeUtilisateurCode, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurItem[]> {
         const addParam = (key: string, value: any) => {
           if (value !== null && value !== undefined) {
             if (options.params instanceof HttpParams) {
@@ -86,7 +86,7 @@ export class UtilisateurService {
      * @param utilisateur Utilisateur à sauvegarder
      * @returns Utilisateur sauvegardé
      */
-    updateUtilisateur(utiId: number, utilisateur: UtilisateurWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
+    updateUtilisateur(utiId: number, utilisateur: UtilisateurWrite, options: {headers?: HttpHeaders | {[header: string]: string | string[]}; context?: HttpContext; params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}; withCredentials?: boolean; reportProgress?: boolean; transferCache?: {includeHeaders?: string[]} | boolean} = {}): Observable<UtilisateurRead> {
         return this.http.put<UtilisateurRead>(`/api/utilisateurs/${utiId}`, utilisateur, {observe: 'body', ...options});
     }
 }
