@@ -70,9 +70,8 @@ describe('UtilisateurService', () => {
 
   it('should search utilisateurs', () => {
     const dummyUtilisateurs: UtilisateurItem[] = [ /* mock data */ ];
-    const queryParams = { nom: 'Doe', prenom: 'John' };
 
-    service.searchUtilisateur('Doe', 'John', undefined, undefined, undefined, undefined, undefined, undefined, queryParams).subscribe(response => {
+    service.searchUtilisateur('Doe', 'John', undefined, undefined, undefined, undefined, undefined, undefined).subscribe(response => {
       expect(response).toEqual(dummyUtilisateurs);
     });
 
