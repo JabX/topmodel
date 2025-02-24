@@ -1,3 +1,9 @@
+## 1.5.6
+
+- [32c1e](https://github.com/klee-contrib/topmodel/commit/32c1e21f1a20940a25670fda12ab1c080f7366db) [JPA] : Erreur lors de l'ajout d'un prefix sur une interface FeignClient
+
+Fix [#447](https://github.com/klee-contrib/topmodel/issues/447)
+
 ## 1.5.5
 
 - [06a1a](https://github.com/klee-contrib/topmodel/commit/06a1a02dbfb8361e918744f588d82de084805b13) [JPA] Erreur lorsqu'on génère une entité persistée alors que le type sql n'est pas défini
