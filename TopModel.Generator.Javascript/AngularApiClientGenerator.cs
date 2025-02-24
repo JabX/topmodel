@@ -44,6 +44,12 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
             imports.Add((Import: "HttpParams", Path: "@angular/common/http"));
         }
 
+        imports.AddRange([
+            (Import: "HttpHeaders", Path: "@angular/common/http"),
+            (Import: "HttpParams", Path: "@angular/common/http"),
+            (Import: "HttpContext", Path: "@angular/common/http"),
+        ]);
+
         imports = imports.GroupAndSort();
 
         if (imports.Count > 0)
@@ -119,15 +125,24 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
             fw.Write($"{param.GetParamName()}{(param.IsQueryParam() && !endpoint.IsMultipart && defaultValue == "undefined" ? "?" : string.Empty)}: {Config.GetType(param, Classes)}{(defaultValue != "undefined" ? $" = {defaultValue}" : string.Empty)}");
         }
 
-        if (endpoint.GetQueryParams().Any())
+        string returnType;
+        if (endpoint.Returns == null)
         {
-            if (hasProperty)
-            {
-                fw.Write(", ");
-            }
-
-            fw.Write("queryParams: any = {}");
+            returnType = "void";
         }
+        else
+        {
+            returnType = Config.GetType(endpoint.Returns, Classes);
+        }
+
+        var optionsType = GetOptionsType();
+
+        if (hasProperty)
+        {
+            fw.Write(", ");
+        }
+
+        fw.Write($@"options: {optionsType} = {{}}");
 
         if (Config.ApiMode == TargetFramework.ANGULAR)
         {
@@ -138,14 +153,15 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
             fw.Write("): Promise<");
         }
 
-        string returnType;
-        if (endpoint.Returns == null)
+        string observe = "body";
+        var genericType = returnType.Split('<').First();
+        if (genericType == "HttpEvent")
         {
-            returnType = "void";
+            observe = "events";
         }
-        else
+        else if (genericType == "HttpResponse")
         {
-            returnType = Config.GetType(endpoint.Returns, Classes);
+            observe = "response";
         }
 
         fw.Write(returnType);
@@ -185,22 +201,35 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
 
         if (endpoint.GetQueryParams().Any())
         {
+            fw.WriteLine(2, @"const addParam = (key: string, value: any) => {
+  if (value !== null && value !== undefined) {
+    if (options.params instanceof HttpParams) {
+      options.params = options.params.append(key, value);
+    } else {
+      if (!options.params) {
+        options.params = {};
+      }
+      options.params[key] = value;
+    }
+  }
+};");
+
             foreach (var qParam in endpoint.GetQueryParams())
             {
-                fw.WriteLine(2, @$"if ({qParam.GetParamName()} !== null && {qParam.GetParamName()} !== undefined) {{");
-                fw.WriteLine(3, $"queryParams['{qParam.GetParamName()}'] = {qParam.GetParamName()}");
-                fw.WriteLine(2, @$"}}");
-                fw.WriteLine();
+                fw.WriteLine(2, $"addParam('{qParam.GetParamName()}', {qParam.GetParamName()});");
             }
-
-            fw.WriteLine(2, "const httpParams = new HttpParams({fromObject: queryParams});");
-            fw.WriteLine(2, "const httpOptions = {params: httpParams}");
 
             fw.WriteLine();
         }
 
         var needResponseType = returnType == "string" || returnType == "Blob" || returnType == "ArrayBuffer";
         var getter = $"{endpoint.Method.ToLower()}<{returnType}>";
+
+        if (observe != "body")
+        {
+            getter = $"{endpoint.Method.ToLower()}<{returnType.Split('<')[1].Split('>').First()}>";
+        }
+
         if (needResponseType)
         {
             getter = $"{endpoint.Method.ToLower()}";
@@ -223,15 +252,27 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
         if (needResponseType)
         {
             var responseType = returnType == "string" ? "text" : returnType.ToLower();
-            fw.Write($", {{responseType: '{responseType}'}}");
+            fw.Write(@$", {{responseType: ""{responseType}"", observe: '{observe}', ...options}}");
         }
-
-        if (endpoint.GetQueryParams().Any())
+        else
         {
-            fw.Write(", httpOptions");
+            fw.Write(@$", {{observe: '{observe}', ...options}}");
         }
 
         fw.WriteLine($"{(Config.ApiMode == TargetFramework.ANGULAR_PROMISE ? ")" : string.Empty)});");
         fw.WriteLine(1, "}");
+    }
+
+    private string GetOptionsType()
+    {
+        var options = new List<string>
+        {
+            "headers?: HttpHeaders | {[header: string]: string | string[]}",
+            "context?: HttpContext",
+            "params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}",
+            "withCredentials?: boolean",
+            "transferCache?: {includeHeaders?: string[]} | boolean"
+        };
+        return @$"{{{string.Join("; ", options)}}}";
     }
 }
