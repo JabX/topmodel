@@ -21,14 +21,21 @@ public class FeignClientApiGenerator(ILogger<FeignClientApiGenerator> logger, IF
     protected override IEnumerable<JavaAnnotation> GetClassAnnotations(ModelFile file)
     {
         var fileName = file.Options.Endpoints.FileName;
-        foreach (var a in base.GetClassAnnotations(file))
+        foreach (var a in base.GetClassAnnotations(file).Where(a => a.Name != "RequestMapping"))
         {
             yield return a;
         }
 
-        yield return new JavaAnnotation("FeignClient", imports: "org.springframework.cloud.openfeign.FeignClient")
-                        .AddAttribute("name", $@"""{file.Namespace.RootModule}""")
-                        .AddAttribute("contextId", $@"""{GetClassName(fileName)}""");
+        var feignClientAnnotation = new JavaAnnotation("FeignClient", imports: "org.springframework.cloud.openfeign.FeignClient")
+                         .AddAttribute("name", $@"""{file.Namespace.RootModule}""")
+                         .AddAttribute("contextId", $@"""{GetClassName(fileName)}""");
+
+        if (!string.IsNullOrEmpty(file.Options.Endpoints.Prefix))
+        {
+            feignClientAnnotation.AddAttribute("path", $@"""{file.Options.Endpoints.Prefix}""");
+        }
+
+        yield return feignClientAnnotation;
     }
 
     protected override string GetClassName(string fileName)
