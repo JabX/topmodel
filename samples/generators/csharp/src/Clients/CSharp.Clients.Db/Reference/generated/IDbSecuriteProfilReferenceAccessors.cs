@@ -8,22 +8,22 @@ using Models.CSharp.Securite.Profil.Models;
 namespace CSharp.Clients.Db.Reference;
 
 /// <summary>
-/// This interface was automatically generated. It contains all the operations to load the reference lists declared in module Securite.Profil.
+/// Accesseurs de listes de référence persistées.
 /// </summary>
 [RegisterContract]
-public partial interface ISecuriteProfilReferenceAccessors
+public partial interface IDbSecuriteProfilReferenceAccessors
 {
     /// <summary>
-    /// Reference accessor for type Droit.
+    /// Accesseur de référence pour le type Droit.
     /// </summary>
-    /// <returns>List of Droit.</returns>
+    /// <returns>Liste de Droit.</returns>
     [ReferenceAccessor]
     ICollection<Droit> LoadDroits();
 
     /// <summary>
-    /// Reference accessor for type TypeDroit.
+    /// Accesseur de référence pour le type TypeDroit.
     /// </summary>
-    /// <returns>List of TypeDroit.</returns>
+    /// <returns>Liste de TypeDroit.</returns>
     [ReferenceAccessor]
     ICollection<TypeDroit> LoadTypeDroits();
 }

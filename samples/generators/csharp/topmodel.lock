@@ -4,7 +4,7 @@
 
 version: 2.4.5
 custom:
-  ../../../TopModel.Generator.Csharp: a2102fe56f26ddf201234dca9feb22ee
+  ../../../TopModel.Generator.Csharp: 4ef6b5129b9fa60587e5ae6ef1932b8d
 generatedFiles:
   - ./src/Clients/CSharp.Clients.Db/generated/CSharpDbContext.comments.cs
   - ./src/Clients/CSharp.Clients.Db/generated/CSharpDbContext.cs
@@ -12,10 +12,10 @@ generatedFiles:
   - ./src/Clients/CSharp.Clients.Db/Models/Securite/Profil/generated/SecuriteProfilMappers.cs
   - ./src/Clients/CSharp.Clients.Db/Models/Securite/Utilisateur/generated/SecuriteUtilisateurMappers.cs
   - ./src/Clients/CSharp.Clients.Db/Models/Securite/Utilisateur/generated/Utilisateur.cs
-  - ./src/Clients/CSharp.Clients.Db/Reference/generated/ISecuriteProfilReferenceAccessors.cs
-  - ./src/Clients/CSharp.Clients.Db/Reference/generated/ISecuriteUtilisateurReferenceAccessors.cs
-  - ./src/Clients/CSharp.Clients.Db/Reference/generated/SecuriteProfilReferenceAccessors.cs
-  - ./src/Clients/CSharp.Clients.Db/Reference/generated/SecuriteUtilisateurReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/DbSecuriteProfilReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/DbSecuriteUtilisateurReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/IDbSecuriteProfilReferenceAccessors.cs
+  - ./src/Clients/CSharp.Clients.Db/Reference/generated/IDbSecuriteUtilisateurReferenceAccessors.cs
   - ./src/Clients/CSharp.Clients.External/Securite/Profil/generated/ProfilClient.cs
   - ./src/Clients/CSharp.Clients.External/Securite/Utilisateur/generated/UtilisateurClient.cs
   - ./src/CSharp.Api/Controllers/Securite/Profil/ProfilController.cs

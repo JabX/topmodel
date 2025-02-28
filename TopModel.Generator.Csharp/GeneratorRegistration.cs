@@ -22,7 +22,6 @@ public class GeneratorRegistration : IGeneratorRegistration<CsharpConfig>
         config.Language ??= "csharp";
 
         config.ReferenceAccessorsImplementationPath ??= Path.Combine(config.DbContextPath ?? string.Empty, "Reference");
-        config.ReferenceAccessorsInterfacePath ??= Path.Combine(config.DbContextPath ?? string.Empty, "Reference");
 
         services.AddGenerator<CSharpClassGenerator, CsharpConfig>(config, number);
         services.AddGenerator<MapperGenerator, CsharpConfig>(config, number);
@@ -32,7 +31,7 @@ public class GeneratorRegistration : IGeneratorRegistration<CsharpConfig>
             services.AddGenerator<DbContextGenerator, CsharpConfig>(config, number);
         }
 
-        if (config.Kinetix)
+        if (config.Kinetix && config.ReferenceAccessorsInterfacePath != null)
         {
             services.AddGenerator<ReferenceAccessorGenerator, CsharpConfig>(config, number);
         }

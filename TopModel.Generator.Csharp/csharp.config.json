@@ -144,7 +144,7 @@
     },
     "referenceAccessorsInterfacePath": {
       "type": "string",
-      "description": "Chemin vers lequel générer les interfaces d'accesseurs de référence. Par défaut : {DbContextPath}/Reference."
+      "description": "Chemin vers lequel générer les interfaces d'accesseurs de référence."
     },
     "referenceAccessorsImplementationPath": {
       "type": "string",
@@ -152,7 +152,7 @@
     },
     "referenceAccessorsName": {
       "type": "string",
-      "description": "Nom des accesseurs de référence (préfixé par 'I' pour l'interface). Par défaut : {module}ReferenceAccessors."
+      "description": "Nom des accesseurs de référence (préfixé par 'I' pour l'interface, puis 'Db' pour les accesseurs persistés). Par défaut : {module}ReferenceAccessors."
     },
     "noAsyncControllers": {
       "type": "boolean",

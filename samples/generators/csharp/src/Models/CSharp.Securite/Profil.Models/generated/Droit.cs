@@ -16,7 +16,7 @@ namespace Models.CSharp.Securite.Profil.Models;
 [Reference(true)]
 [DefaultProperty(nameof(Libelle))]
 [Table("droit")]
-public partial class Droit
+public partial record Droit
 {
     /// <summary>
     /// Valeurs possibles de la liste de référence Droit.

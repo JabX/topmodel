@@ -14,7 +14,7 @@ namespace CSharp.Clients.Db.Models.Securite.Profil;
 /// Profil des utilisateurs.
 /// </summary>
 [Table("profil")]
-public partial class Profil
+public partial record Profil
 {
     /// <summary>
     /// Id technique.

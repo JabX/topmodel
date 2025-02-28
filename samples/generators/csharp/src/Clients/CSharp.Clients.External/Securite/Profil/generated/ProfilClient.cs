@@ -12,19 +12,10 @@ namespace CSharp.Clients.External.Securite.Profil;
 /// <summary>
 /// Client Profil.
 /// </summary>
-public partial class ProfilClient
+/// <param name="client">HttpClient injecté.</param>
+public partial class ProfilClient(HttpClient client)
 {
-    private readonly HttpClient _client;
     private readonly JsonSerializerOptions _jsOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-
-    /// <summary>
-    /// Constructeur.
-    /// </summary>
-    /// <param name="client">HttpClient injecté.</param>
-    public ProfilClient(HttpClient client)
-    {
-        _client = client;
-    }
 
     /// <summary>
     /// Ajoute un Profil.
@@ -34,7 +25,7 @@ public partial class ProfilClient
     public async Task<ProfilRead> AddProfil(ProfilWrite profil)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Post, $"api/profils") { Content = JsonContent.Create(profil, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Post, $"api/profils") { Content = JsonContent.Create(profil, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<ProfilRead>(_jsOptions);
@@ -48,7 +39,7 @@ public partial class ProfilClient
     public async Task<ProfilRead> GetProfil(int proId)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Get, $"api/profils/{proId}"), HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Get, $"api/profils/{proId}"), HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<ProfilRead>(_jsOptions);
@@ -61,7 +52,7 @@ public partial class ProfilClient
     public async Task<ICollection<ProfilItem>> GetProfils()
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Get, $"api/profils"), HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Get, $"api/profils"), HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<ICollection<ProfilItem>>(_jsOptions);
@@ -76,7 +67,7 @@ public partial class ProfilClient
     public async Task<ProfilRead> UpdateProfil(int proId, ProfilWrite profil)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Put, $"api/profils/{proId}") { Content = JsonContent.Create(profil, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Put, $"api/profils/{proId}") { Content = JsonContent.Create(profil, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<ProfilRead>(_jsOptions);

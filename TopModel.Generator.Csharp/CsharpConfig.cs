@@ -65,12 +65,12 @@ public class CsharpConfig : GeneratorConfigBase
     /// </summary>
     public string? DataFlowsPath { get; set; }
 
-#nullable disable
-
     /// <summary>
-    /// Chemin vers lequel générer les interfaces d'accesseurs de référence. Par défaut : {DbContextPath}/Reference.
+    /// Chemin vers lequel générer les interfaces d'accesseurs de référence.
     /// </summary>
-    public string ReferenceAccessorsInterfacePath { get; set; }
+    public string? ReferenceAccessorsInterfacePath { get; set; }
+
+#nullable disable
 
     /// <summary>
     /// Chemin vers lequel générer les implémentation d'accesseurs de référence. Par défaut : {DbContextPath}/Reference.
@@ -79,7 +79,7 @@ public class CsharpConfig : GeneratorConfigBase
 #nullable enable
 
     /// <summary>
-    /// Nom des accesseurs de référence (préfixé par 'I' pour l'interface). Par défaut : {module}ReferenceAccessors.
+    /// Nom des accesseurs de référence (préfixé par 'I' pour l'interface, puis 'Db' pour les accesseurs persistés). Par défaut : {module}ReferenceAccessors.
     /// </summary>
     public string ReferenceAccessorsName { get; set; } = "{module}ReferenceAccessors";
 
@@ -463,7 +463,7 @@ public class CsharpConfig : GeneratorConfigBase
                 tag: tag,
                 module: ns.ModulePath).ToFilePath(),
             "generated",
-            $"{GetReferenceAccessorName(ns, tag)}.cs");
+            $"Db{GetReferenceAccessorName(ns, tag)}.cs");
     }
 
     public virtual string GetReferenceImplementationNamespace(Namespace ns, string tag)
@@ -474,22 +474,22 @@ public class CsharpConfig : GeneratorConfigBase
             module: ns.Module).ToNamespace();
     }
 
-    public virtual string GetReferenceInterfaceFilePath(Namespace ns, string tag)
+    public virtual string GetReferenceInterfaceFilePath(Namespace ns, string tag, string prefix = "")
     {
         return Path.Combine(
             OutputDirectory,
             ResolveVariables(
-                ReferenceAccessorsInterfacePath,
+                ReferenceAccessorsInterfacePath!,
                 tag: tag,
                 module: ns.ModulePath).ToFilePath(),
             "generated",
-            $"I{GetReferenceAccessorName(ns, tag)}.cs");
+            $"I{prefix}{GetReferenceAccessorName(ns, tag)}.cs");
     }
 
     public virtual string GetReferenceInterfaceNamespace(Namespace ns, string tag)
     {
         return ResolveVariables(
-            ReferenceAccessorsInterfacePath,
+            ReferenceAccessorsInterfacePath!,
             tag: tag,
             module: ns.Module).ToNamespace();
     }

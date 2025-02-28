@@ -14,7 +14,7 @@ namespace CSharp.Clients.Db.Models.Securite.Utilisateur;
 /// Utilisateur de l'application.
 /// </summary>
 [Table("utilisateur")]
-public partial class Utilisateur
+public partial record Utilisateur
 {
     /// <summary>
     /// Id de l'utilisateur.

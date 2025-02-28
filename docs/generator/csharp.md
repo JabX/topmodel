@@ -84,7 +84,13 @@ Les clients d'API sont générés comme des classes partielles avec 2 méthodes 
 
 ### Génération des accesseurs de références
 
-Les implémentations d'accesseurs de listes de références pour Kinetix utilisent EF Core si un DbContext est configuré et l'ORM Kinetix (`Kinetix.DataAccess.Sql`) dans le cas contraire. Ils sont générés pour les classes marquées comme `reference`.
+Cette fonctionnalité n'est disponible qu'en utilisant Kinetix.
+
+Le générateur va générer jusqu'à 2 interfaces par module, en séparant les listes de références persistées des non persistées, pour les classes marquées comme `reference`. Les noms d'interfaces et d'implémentations seront préfixés par `"Db"` pour les premières.
+
+Seule l'implémentation pour les listes de référence persistées sera générée, en utilisent EF Core si un DbContext est configuré et l'ORM Kinetix (`Kinetix.DataAccess.Sql`) dans le cas contraire.
+
+Il est nécessaire de spécifier le chemin de génération des interfaces (`referenceAccessorsInterfacePath`) pour que l'ensemble soit généré (le chemin des implémentations à une valeur par défaut).
 
 ### Génération des flux de données
 
@@ -185,8 +191,6 @@ _(en preview, documentation à venir)_
   Les accesseurs de référence ne seront générés que si `kinetix: true`.
 
   _Templating_: `{module}`
-
-  _Valeur par défaut_: `"{DbContextPath}/Reference"`
 
   _Variables par tag_: **oui** (plusieurs accesseurs pourraient être générés si un fichier à plusieurs tags)
 

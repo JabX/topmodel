@@ -20,7 +20,7 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
     {
         var ns = classList.First().Namespace;
 
-        var implementationName = Config.GetReferenceAccessorName(ns, tag);
+        var implementationName = $"Db{Config.GetReferenceAccessorName(ns, tag)}";
         var implementationNamespace = Config.GetReferenceImplementationNamespace(ns, tag);
 
         var interfaceName = $"I{implementationName}";
@@ -80,7 +80,7 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
         w.WriteLine();
         w.WriteNamespace(implementationNamespace);
 
-        w.WriteSummary("This interface was automatically generated. It contains all the operations to load the reference lists declared in module " + ns.Module + ".");
+        w.WriteSummary($"Implémentation de {interfaceName}.");
 
         if (Config.UsePrimaryConstructors)
         {
@@ -154,15 +154,16 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
     /// <summary>
     /// Génère l'interface déclarant les ReferenceAccessors d'un namespace.
     /// </summary>
+    /// <param name="fileType">Type d'interface (persistée ou pas).</param>
     /// <param name="fileName">Nom du fichier cible.</param>
     /// <param name="tag">Tag du fichier cible.</param>
     /// <param name="classList">Liste de classes à générer.</param>
-    protected virtual void GenerateReferenceAccessorsInterface(string fileName, string tag, IEnumerable<Class> classList)
+    protected virtual void GenerateReferenceAccessorsInterface(string fileType, string fileName, string tag, IEnumerable<Class> classList)
     {
         var ns = classList.First().Namespace;
 
         var interfaceNamespace = Config.GetReferenceInterfaceNamespace(ns, tag);
-        var interfaceName = $"I{Config.GetReferenceAccessorName(ns, tag)}";
+        var interfaceName = $"I{(fileType.StartsWith("db") ? "Db" : string.Empty)}{Config.GetReferenceAccessorName(ns, tag)}";
 
         using var w = this.OpenCSharpWriter(fileName);
 
@@ -183,7 +184,7 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
 
         w.WriteLine();
         w.WriteNamespace(interfaceNamespace);
-        w.WriteSummary("This interface was automatically generated. It contains all the operations to load the reference lists declared in module " + ns.Module + ".");
+        w.WriteSummary($"Accesseurs de listes de référence {(fileType.StartsWith("db") ? "persistées" : "non persistées")}");
         w.WriteLine("[RegisterContract]");
         w.WriteLine("public partial interface " + interfaceName + "\r\n{");
 
@@ -191,8 +192,8 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
         foreach (var classe in classList)
         {
             count++;
-            w.WriteSummary(1, "Reference accessor for type " + classe.NamePascal);
-            w.WriteReturns(1, "List of " + classe.NamePascal);
+            w.WriteSummary(1, $"Accesseur de référence pour le type {classe.NamePascal}");
+            w.WriteReturns(1, $"Liste de {classe.NamePascal}");
             w.WriteLine(1, "[ReferenceAccessor]");
             w.WriteLine(1, "ICollection<" + classe.NamePascal + "> Load" + (Config.DbContextPath == null ? $"{classe.NamePascal}List" : classe.PluralNamePascal) + "();");
 
@@ -209,10 +210,14 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
     {
         if (classe.Reference)
         {
-            yield return ("interface", Config.GetReferenceInterfaceFilePath(classe.Namespace, tag));
             if (!Config.NoPersistence(tag) && (classe.IsPersistent || classe.Values.Count > 0))
             {
-                yield return ("implementation", Config.GetReferenceImplementationFilePath(classe.Namespace, tag));
+                yield return ("db-interface", Config.GetReferenceInterfaceFilePath(classe.Namespace, tag, "Db"));
+                yield return ("db-implementation", Config.GetReferenceImplementationFilePath(classe.Namespace, tag));
+            }
+            else
+            {
+                yield return ("interface", Config.GetReferenceInterfaceFilePath(classe.Namespace, tag));
             }
         }
     }
@@ -223,13 +228,13 @@ public class ReferenceAccessorGenerator(ILogger<ReferenceAccessorGenerator> logg
             .OrderBy(x => Config.DbContextPath == null ? $"{x.NamePascal}List" : x.PluralNamePascal, StringComparer.Ordinal)
             .ToList();
 
-        if (fileType == "interface")
+        if (fileType == "db-implementation")
         {
-            GenerateReferenceAccessorsInterface(fileName, tag, classList);
+            GenerateReferenceAccessorsImplementation(fileName, tag, classList);
         }
         else
         {
-            GenerateReferenceAccessorsImplementation(fileName, tag, classList);
+            GenerateReferenceAccessorsInterface(fileType, fileName, tag, classList);
         }
     }
 

@@ -16,7 +16,7 @@ namespace Models.CSharp.Securite.Utilisateur.Models;
 [Reference(true)]
 [DefaultProperty(nameof(Libelle))]
 [Table("type_utilisateur")]
-public partial class TypeUtilisateur
+public partial record TypeUtilisateur
 {
     /// <summary>
     /// Valeurs possibles de la liste de référence TypeUtilisateur.

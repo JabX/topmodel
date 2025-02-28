@@ -11,7 +11,7 @@ namespace Models.CSharp.Securite.Utilisateur.Models;
 /// <summary>
 /// Détail d'un utilisateur en écriture.
 /// </summary>
-public partial class UtilisateurWrite
+public partial record UtilisateurWrite
 {
     /// <summary>
     /// Nom de l'utilisateur.

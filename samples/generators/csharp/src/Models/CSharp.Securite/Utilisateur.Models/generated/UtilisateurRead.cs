@@ -11,7 +11,7 @@ namespace Models.CSharp.Securite.Utilisateur.Models;
 /// <summary>
 /// Détail d'un utilisateur en lecture.
 /// </summary>
-public partial class UtilisateurRead
+public partial record UtilisateurRead
 {
     /// <summary>
     /// Id de l'utilisateur.

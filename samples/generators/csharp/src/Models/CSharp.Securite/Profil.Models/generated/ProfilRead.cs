@@ -12,7 +12,7 @@ namespace Models.CSharp.Securite.Profil.Models;
 /// <summary>
 /// Détail d'un profil en lecture.
 /// </summary>
-public partial class ProfilRead
+public partial record ProfilRead
 {
     /// <summary>
     /// Id technique.

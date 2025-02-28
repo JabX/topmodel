@@ -8,15 +8,15 @@ using Models.CSharp.Securite.Utilisateur.Models;
 namespace CSharp.Clients.Db.Reference;
 
 /// <summary>
-/// This interface was automatically generated. It contains all the operations to load the reference lists declared in module Securite.Utilisateur.
+/// Accesseurs de listes de référence persistées.
 /// </summary>
 [RegisterContract]
-public partial interface ISecuriteUtilisateurReferenceAccessors
+public partial interface IDbSecuriteUtilisateurReferenceAccessors
 {
     /// <summary>
-    /// Reference accessor for type TypeUtilisateur.
+    /// Accesseur de référence pour le type TypeUtilisateur.
     /// </summary>
-    /// <returns>List of TypeUtilisateur.</returns>
+    /// <returns>Liste de TypeUtilisateur.</returns>
     [ReferenceAccessor]
     ICollection<TypeUtilisateur> LoadTypeUtilisateurs();
 }

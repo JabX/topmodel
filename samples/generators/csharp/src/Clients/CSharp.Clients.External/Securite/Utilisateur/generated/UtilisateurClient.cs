@@ -13,19 +13,10 @@ namespace CSharp.Clients.External.Securite.Utilisateur;
 /// <summary>
 /// Client Utilisateur.
 /// </summary>
-public partial class UtilisateurClient
+/// <param name="client">HttpClient injecté.</param>
+public partial class UtilisateurClient(HttpClient client)
 {
-    private readonly HttpClient _client;
     private readonly JsonSerializerOptions _jsOptions = new() { DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, PropertyNamingPolicy = JsonNamingPolicy.CamelCase };
-
-    /// <summary>
-    /// Constructeur.
-    /// </summary>
-    /// <param name="client">HttpClient injecté.</param>
-    public UtilisateurClient(HttpClient client)
-    {
-        _client = client;
-    }
 
     /// <summary>
     /// Ajoute un utilisateur.
@@ -35,7 +26,7 @@ public partial class UtilisateurClient
     public async Task<UtilisateurRead> AddUtilisateur(UtilisateurWrite utilisateur)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Post, $"api/utilisateurs") { Content = JsonContent.Create(utilisateur, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Post, $"api/utilisateurs") { Content = JsonContent.Create(utilisateur, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<UtilisateurRead>(_jsOptions);
@@ -49,7 +40,7 @@ public partial class UtilisateurClient
     public async Task DeleteUtilisateur(int utiId)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Delete, $"api/utilisateurs/{utiId}"));
+        using var res = await client.SendAsync(new(HttpMethod.Delete, $"api/utilisateurs/{utiId}"));
         await EnsureSuccess(res);
     }
 
@@ -61,7 +52,7 @@ public partial class UtilisateurClient
     public async Task<UtilisateurRead> GetUtilisateur(int utiId)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Get, $"api/utilisateurs/{utiId}"), HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Get, $"api/utilisateurs/{utiId}"), HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<UtilisateurRead>(_jsOptions);
@@ -93,7 +84,7 @@ public partial class UtilisateurClient
             ["profilId"] = profilId?.ToString(CultureInfo.InvariantCulture),
             ["typeUtilisateurCode"] = typeUtilisateurCode?.ToString(CultureInfo.InvariantCulture),
         }.Where(kv => kv.Value != null)).ReadAsStringAsync();
-        using var res = await _client.SendAsync(new(HttpMethod.Get, $"api/utilisateurs?{query}"), HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Get, $"api/utilisateurs?{query}"), HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<ICollection<UtilisateurItem>>(_jsOptions);
@@ -108,7 +99,7 @@ public partial class UtilisateurClient
     public async Task<UtilisateurRead> UpdateUtilisateur(int utiId, UtilisateurWrite utilisateur)
     {
         await EnsureAuthentication();
-        using var res = await _client.SendAsync(new(HttpMethod.Put, $"api/utilisateurs/{utiId}") { Content = JsonContent.Create(utilisateur, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
+        using var res = await client.SendAsync(new(HttpMethod.Put, $"api/utilisateurs/{utiId}") { Content = JsonContent.Create(utilisateur, options: _jsOptions) }, HttpCompletionOption.ResponseHeadersRead);
         await EnsureSuccess(res);
 
         return await res.Content.ReadFromJsonAsync<UtilisateurRead>(_jsOptions);

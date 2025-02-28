@@ -11,7 +11,7 @@ namespace Models.CSharp.Securite.Profil.Models;
 /// <summary>
 /// Détail d'un profil en écriture.
 /// </summary>
-public partial class ProfilWrite
+public partial record ProfilWrite
 {
     /// <summary>
     /// Libellé du profil.
