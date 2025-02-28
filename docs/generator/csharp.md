@@ -313,13 +313,19 @@ _(en preview, documentation à venir)_
 
   Utilise des enums C# à la place du type original pour les listes de références statiques (= clé primaire non-autogénérée).
 
+  _Valeur par défaut_: `true`
+
 - `useRecords`
 
   Utilise des records (mutables) au lieu de classes pour la génération de classes. Valeurs possibles : `true`, `false` et `dtos-only`.
 
+  _Valeur par défaut_: `true`
+
 - `usePrimaryConstructors`
 
   Utilise les constructeurs principaux pour la génération des classes avec dépendances (clients d'API, accesseurs de références).
+
+  _Valeur par défaut_: `true`
 
 - `useEFComments`
 

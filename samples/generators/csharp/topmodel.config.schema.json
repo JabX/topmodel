@@ -349,7 +349,7 @@
           },
           "enumsForStaticReferences": {
             "type": "boolean",
-            "description": "Utilise des enums au lieu de strings pour les PKs de listes de référence statiques."
+            "description": "Utilise des enums au lieu de strings pour les PKs de listes de référence statiques. Par défaut : 'true'."
           },
           "useEFComments": {
             "type": "boolean",
@@ -360,7 +360,7 @@
               "string",
               "boolean"
             ],
-            "description": "Utilise des records (mutables) au lieu de classes pour la génération de classes.",
+            "description": "Utilise des records (mutables) au lieu de classes pour la génération de classes. Par défaut : 'true'.",
             "enum": [
               true,
               false,
@@ -369,7 +369,7 @@
           },
           "usePrimaryConstructors": {
             "type": "boolean",
-            "description": "Utilise les constructeurs principaux pour la génération des classes avec dépendances (clients d'API, accesseurs de références)."
+            "description": "Utilise les constructeurs principaux pour la génération des classes avec dépendances (clients d'API, accesseurs de références). Par défaut : 'true'."
           }
         }
       }

@@ -156,17 +156,17 @@ public class CsharpConfig : GeneratorConfigBase
     };
 
     /// <summary>
-    /// Utilise des enums au lieu de strings pour les PKs de listes de référence statiques.
+    /// Utilise des enums au lieu de strings pour les PKs de listes de référence statiques. Par défaut : 'true'.
     /// </summary>
-    public bool EnumsForStaticReferences { get; set; }
+    public bool EnumsForStaticReferences { get; set; } = true;
 
     /// <summary>
-    /// Annote les tables et les colonnes générées par EF avec les commentaires du modèle (nécessite `UseEFMigrations`).
+    /// Annote les tables et les colonnes générées par EF avec les commentaires du modèle (nécessite `UseEFMigrations`). Par défaut : 'true'.
     /// </summary>
     public bool UseEFComments { get; set; }
 
     [YamlMember(Alias = "useRecords")]
-    public object? UseRecordsParam { get; set; }
+    public object? UseRecordsParam { get; set; } = true;
 
     /// <summary>
     /// Utilise des records (mutables) au lieu de classes pour la génération de classes.
@@ -179,9 +179,9 @@ public class CsharpConfig : GeneratorConfigBase
     };
 
     /// <summary>
-    /// Utilise les constructeurs principaux pour la génération des classes avec dépendances (clients d'API, accesseurs de références).
+    /// Utilise les constructeurs principaux pour la génération des classes avec dépendances (clients d'API, accesseurs de références). Par défaut : 'true'.
     /// </summary>
-    public bool UsePrimaryConstructors { get; set; }
+    public bool UsePrimaryConstructors { get; set; } = true;
 
     public override string[] PropertiesWithModuleVariableSupport =>
     [
