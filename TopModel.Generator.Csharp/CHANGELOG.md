@@ -1,3 +1,18 @@
+## 1.4.0
+
+- [`50c3f6b`](https://github.com/klee-contrib/topmodel/commit/50c3f6b86a71da1e76ca1a63d4372120c788732e) - [C#] Mise au propre de la génération des accesseurs de liste de références
+
+  **breaking changes** :
+
+  - Les interfaces d'accesseurs de liste de références sont désormais séparés en 2, entre ceux qui sont sur des classes persistés et ceux sur des classes non-persistés. Cela permet d'arrêter d'avoir à implémenter un `partial` sur l'implémentation générée (qui n'a elle pas changé) avec les autres listes de références, vous pouvez donc simplement implémenter la deuxième interface directement, ou vous voulez.
+  - Les interfaces et implémentations persistées sont générées avec un nom préfixé par `Db` (en plus du `referenceAccessorName`).
+  - `referenceAccessorsInterfacePath` n'a plus de valeur par défaut et doit être renseigné pour que les accesseurs soit générés (puisqu'on ne veut plus du tout la générer à côté de l'implémentation 😉)
+  - (Les commentaires générés dans les accesseurs sont désormais en français, comme le reste).
+
+- [`b8595e4`](https://github.com/klee-contrib/topmodel/commit/b8595e4bc945c6668374985cdb4f4ace16a16623) - [C#] Plus d'options à "true" par défaut
+
+  **breaking changes** : `enumForStaticReferences`, `usePrimaryConstructors` et `useRecords` sont désormais à `true` par défaut.
+
 ## 1.3.0
 
 - [`cf05c8c`](https://github.com/klee-contrib/topmodel/commit/cf05c8c31d8f80179741b2c5d6a07888528207f7) - [C# ApiServer] Annotations [Required] sur les paramètres required
