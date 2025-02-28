@@ -1,23 +1,14 @@
-using System.Collections.Generic;
-using System.Linq;
+﻿namespace TopModel.Generator.Jpa;
 
-namespace TopModel.Generator.Jpa;
-
-public class JavaField
+public class JavaField(string type, string name)
 {
-    public JavaField(string type, string name)
-    {
-        Type = type;
-        Name = name;
-    }
+    public string Type { get; set; } = type;
 
-    public string Type { get; set; }
+    public string Name { get; set; } = name;
 
-    public string Name { get; set; }
+    public List<JavaAnnotation> Annotations { get; } = [];
 
-    public List<JavaAnnotation> Annotations { get; } = new();
-
-    public List<string> Imports { get; } = new();
+    public List<string> Imports { get; } = [];
 
     public string Comment { get; set; } = string.Empty;
 

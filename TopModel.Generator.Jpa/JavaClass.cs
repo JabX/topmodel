@@ -1,26 +1,18 @@
-using System.Collections.Generic;
-using System.Linq;
+﻿namespace TopModel.Generator.Jpa;
 
-namespace TopModel.Generator.Jpa;
-
-public class JavaClass
+public class JavaClass(string name)
 {
-    public JavaClass(string name)
-    {
-        Name = name;
-    }
+    public string Name { get; set; } = name;
 
-    public string Name { get; set; }
+    public List<JavaAnnotation> Annotations { get; } = [];
 
-    public List<JavaAnnotation> Annotations { get; } = new();
+    public List<string> Imports { get; } = [];
 
-    public List<string> Imports { get; } = new();
+    public List<JavaField> Fields { get; } = [];
 
-    public List<JavaField> Fields { get; } = new();
+    public List<JavaConstructor> Constructors { get; } = [];
 
-    public List<JavaConstructor> Constructors { get; } = new();
-
-    public List<JavaMethod> Methods { get; } = new();
+    public List<JavaMethod> Methods { get; } = [];
 
     public string Comment { get; set; } = string.Empty;
 

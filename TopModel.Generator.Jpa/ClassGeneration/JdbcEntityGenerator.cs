@@ -29,6 +29,15 @@ public class JdbcEntityGenerator(ILogger<JdbcEntityGenerator> logger, IFileWrite
         return !classe.Abstract && classe.IsPersistent;
     }
 
+    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
+    {
+        var annotations = base.GetAnnotations(classe, tag).ToList();
+        var tableAnnotation = new JavaAnnotation("Table", imports: "org.springframework.data.relational.core.mapping.Table")
+            .AddAttribute("name", classe.SqlName.ToLower());
+        annotations.Add(tableAnnotation);
+        return annotations;
+    }
+
     protected override string GetFileName(Class classe, string tag)
     {
         return Config.GetClassFileName(classe, tag);
@@ -118,15 +127,6 @@ public class JdbcEntityGenerator(ILogger<JdbcEntityGenerator> logger, IFileWrite
         }
 
         fw.WriteLine("}");
-    }
-
-    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
-    {
-        var annotations = base.GetAnnotations(classe, tag).ToList();
-        var tableAnnotation = new JavaAnnotation("Table", imports: "org.springframework.data.relational.core.mapping.Table")
-            .AddAttribute("name", classe.SqlName.ToLower());
-        annotations.Add(tableAnnotation);
-        return annotations;
     }
 
     protected override void WriteGetters(JavaWriter fw, Class classe, string tag)

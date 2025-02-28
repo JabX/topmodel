@@ -93,6 +93,20 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
         fw.WriteLine("}");
     }
 
+    private string GetOptionsType()
+    {
+        var options = new List<string>
+        {
+            "headers?: HttpHeaders | {[header: string]: string | string[]}",
+            "context?: HttpContext",
+            "params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}",
+            "withCredentials?: boolean",
+            "reportProgress?: boolean",
+            "transferCache?: {includeHeaders?: string[]} | boolean"
+        };
+        return @$"{{{string.Join("; ", options)}}}";
+    }
+
     private void WriteEndpoint(Endpoint endpoint, IFileWriter fw)
     {
         fw.WriteLine();
@@ -201,6 +215,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
 
         if (endpoint.GetQueryParams().Any())
         {
+#pragma warning disable SA1118 // Parameter should not span multiple lines
             fw.WriteLine(2, @"const addParam = (key: string, value: any) => {
   if (value !== null && value !== undefined) {
     if (options.params instanceof HttpParams) {
@@ -213,6 +228,7 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
     }
   }
 };");
+#pragma warning restore SA1118 // Parameter should not span multiple lines
 
             foreach (var qParam in endpoint.GetQueryParams())
             {
@@ -261,19 +277,5 @@ public class AngularApiClientGenerator(ILogger<AngularApiClientGenerator> logger
 
         fw.WriteLine($"{(Config.ApiMode == TargetFramework.ANGULAR_PROMISE ? ")" : string.Empty)});");
         fw.WriteLine(1, "}");
-    }
-
-    private string GetOptionsType()
-    {
-        var options = new List<string>
-        {
-            "headers?: HttpHeaders | {[header: string]: string | string[]}",
-            "context?: HttpContext",
-            "params?: HttpParams | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>}",
-            "withCredentials?: boolean",
-            "reportProgress?: boolean",
-            "transferCache?: {includeHeaders?: string[]} | boolean"
-        };
-        return @$"{{{string.Join("; ", options)}}}";
     }
 }

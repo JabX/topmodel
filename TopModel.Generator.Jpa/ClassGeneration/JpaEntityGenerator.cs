@@ -19,6 +19,56 @@ public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, IFileWriterP
         return !classe.Abstract && classe.IsPersistent && !Config.CanClassUseEnums(classe, Classes);
     }
 
+    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
+    {
+        foreach (var a in base.GetAnnotations(classe, tag))
+        {
+            yield return a;
+        }
+
+        yield return new JavaAnnotation("Entity", imports: $"{JavaxOrJakarta}.persistence.Entity");
+        if (Classes.Any(c => c.Extends == classe))
+        {
+            yield return new JavaAnnotation("Inheritance", imports: $"{JavaxOrJakarta}.persistence.Inheritance")
+                .AddAttribute("strategy", "InheritanceType.JOINED", $"{JavaxOrJakarta}.persistence.InheritanceType");
+        }
+
+        var tableAnnotation = new JavaAnnotation("Table", imports: $"{JavaxOrJakarta}.persistence.Table")
+            .AddAttribute("name", $@"""{classe.SqlName}""");
+        if (classe.UniqueKeys.Count > 0)
+        {
+            var uks = classe.UniqueKeys.Select(uk => new JavaAnnotation(
+                "UniqueConstraint",
+                imports: $"{JavaxOrJakarta}.persistence.UniqueConstraint")
+                .AddAttribute("columnNames", uk.Select(u => $@"""{u.SqlName}""").ToArray()));
+
+            tableAnnotation.AddAttribute("uniqueConstraints", uks);
+        }
+
+        yield return tableAnnotation;
+        if (classe.PrimaryKey.Count() > 1)
+        {
+            yield return new JavaAnnotation("IdClass", imports: $"{JavaxOrJakarta}.persistence.IdClass")
+                .AddAttribute("value", $"{classe.NamePascal}.{classe.NamePascal}Id.class");
+        }
+
+        if (classe.Reference)
+        {
+            var cacheAnnotation = new JavaAnnotation("Cache", imports: "org.hibernate.annotations.Cache");
+            if (Config.CanClassUseEnums(classe))
+            {
+                yield return new JavaAnnotation("Immutable", imports: "org.hibernate.annotations.Immutable");
+                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_ONLY", "org.hibernate.annotations.CacheConcurrencyStrategy");
+            }
+            else
+            {
+                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_WRITE", "org.hibernate.annotations.CacheConcurrencyStrategy");
+            }
+
+            yield return cacheAnnotation;
+        }
+    }
+
     protected override string GetFileName(Class classe, string tag)
     {
         return Path.Combine(
@@ -111,56 +161,6 @@ public class JpaEntityGenerator(ILogger<JpaEntityGenerator> logger, IFileWriterP
                     fw.WriteLine(1, "}");
                 }
             }
-        }
-    }
-
-    protected override IEnumerable<JavaAnnotation> GetAnnotations(Class classe, string tag)
-    {
-        foreach (var a in base.GetAnnotations(classe, tag))
-        {
-            yield return a;
-        }
-
-        yield return new JavaAnnotation("Entity", imports: $"{JavaxOrJakarta}.persistence.Entity");
-        if (Classes.Any(c => c.Extends == classe))
-        {
-            yield return new JavaAnnotation("Inheritance", imports: $"{JavaxOrJakarta}.persistence.Inheritance")
-                .AddAttribute("strategy", "InheritanceType.JOINED", $"{JavaxOrJakarta}.persistence.InheritanceType");
-        }
-
-        var tableAnnotation = new JavaAnnotation("Table", imports: $"{JavaxOrJakarta}.persistence.Table")
-            .AddAttribute("name", $@"""{classe.SqlName}""");
-        if (classe.UniqueKeys.Count > 0)
-        {
-            var uks = classe.UniqueKeys.Select(uk => new JavaAnnotation(
-                "UniqueConstraint",
-                imports: $"{JavaxOrJakarta}.persistence.UniqueConstraint")
-                .AddAttribute("columnNames", uk.Select(u => $@"""{u.SqlName}""").ToArray()));
-
-            tableAnnotation.AddAttribute("uniqueConstraints", uks);
-        }
-
-        yield return tableAnnotation;
-        if (classe.PrimaryKey.Count() > 1)
-        {
-            yield return new JavaAnnotation("IdClass", imports: $"{JavaxOrJakarta}.persistence.IdClass")
-                .AddAttribute("value", $"{classe.NamePascal}.{classe.NamePascal}Id.class");
-        }
-
-        if (classe.Reference)
-        {
-            var cacheAnnotation = new JavaAnnotation("Cache", imports: "org.hibernate.annotations.Cache");
-            if (Config.CanClassUseEnums(classe))
-            {
-                yield return new JavaAnnotation("Immutable", imports: "org.hibernate.annotations.Immutable");
-                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_ONLY", "org.hibernate.annotations.CacheConcurrencyStrategy");
-            }
-            else
-            {
-                cacheAnnotation.AddAttribute("usage", "CacheConcurrencyStrategy.READ_WRITE", "org.hibernate.annotations.CacheConcurrencyStrategy");
-            }
-
-            yield return cacheAnnotation;
         }
     }
 

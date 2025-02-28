@@ -90,7 +90,7 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
             if (shouldAddSizeAnnotation)
             {
                 yield return new JavaAnnotation(name: "Size", imports: [$"{JavaxOrJakarta}.validation.constraints.Size"])
-                    .AddAttribute("max", value: property.Domain.Length.ToString());
+                    .AddAttribute("max", value: property.Domain.Length.ToString()!);
             }
 
             // Techniquement Digit peut aussi être mis sur des chaînes de caractères, mais ce n'est pas forcément l'intention de l'utilisateurs
@@ -112,8 +112,8 @@ public class JpaModelPropertyGenerator(JpaConfig config, IEnumerable<Class> clas
             if (shouldAddDigitsAnnotation)
             {
                 var digitsAnnotation = new JavaAnnotation(name: "Digits", imports: [$"{JavaxOrJakarta}.validation.constraints.Digits"])
-                    .AddAttribute("integer", value: property.Domain.Length!.ToString())
-                    .AddAttribute("fraction", value: property.Domain.Scale!.ToString());
+                    .AddAttribute("integer", value: property.Domain.Length.ToString()!)
+                    .AddAttribute("fraction", value: property.Domain.Scale.ToString()!);
 
                 yield return digitsAnnotation;
             }
